@@ -1,0 +1,744 @@
+
+;###################################################################################
+; Field establishment loop
+;###################################################################################
+
+to run-field-establishment-loop
+  
+  let warning1 0
+  
+  ask turtles with [household-reached-final-size != 1]
+  [
+    set household-search-strat item 0 strategies-pattern
+    let counter 0
+    
+    
+    while [household-reached-final-size != 1]
+    [
+      let successful-establishment 0
+      ;; Establish one field:
+      let fieldsize draw-field-size-from-distribution ;size of the intended field in [cells]
+      let expected-hh-size household-area-realized + fieldsize
+
+      ;; Check if the difference to the predifened housholdsize is smaller before or after establishment of another field
+      ifelse (abs(household-size - expected-hh-size)) <= (abs(household-size - household-area-realized))
+      [
+        set successful-establishment make-new-field fieldsize household-search-strat
+      ]
+      [
+        ifelse (household-area-realized > 0)
+        [
+          set household-reached-final-size 1
+          set counter 0
+        ]
+        [
+          set counter counter + 1
+          if counter > counter-nr / 10
+          [
+            if print-messages?
+            [
+              print "WARNING: field size might be biased as it had to be redrawn several times"
+            ]
+            set warning1 1
+          ]
+          if counter > counter-nr
+          [
+            if print-messages?
+            [
+              print "WARNING: might be stuck in endless loop. Think about changing the field size parameters."
+            ]
+            if warning1 = 1
+            [
+              set log-list-fields lput "Field size might be biased as it had to be redrawn several times." log-list-fields
+            ]
+            set log-list-fields lput "Model was stuck in endless loop and stopped. Think about changing the field size parameters." log-list-fields
+           stop
+          ]
+        ]
+      ]
+
+      
+      ;; If the field establishment was not successful, increase the counter and eventually change the strategy:
+      ifelse successful-establishment = 1
+      [
+        set number-unsuccessful-loops 0
+      ]
+      [
+        set number-unsuccessful-loops number-unsuccessful-loops + 1
+        ;if (number-unsuccessful-loops mod 5 = 0) [print word "number-of-unsuccessful-loops: " number-unsuccessful-loops]
+        
+        if (number-unsuccessful-loops = change-strategy)
+        [
+          let household-search-strat-position position household-search-strat strategies-pattern
+          
+          if (household-search-strat-position < (length strategies-pattern - 1))
+          [
+            set household-search-strat item (household-search-strat-position + 1) strategies-pattern
+            set number-unsuccessful-loops 0
+            print word "switch to strategy " household-search-strat
+          ]
+        ]
+      ]
+      
+      if successful-establishment = -99
+      [
+        if print-messages?
+        [
+          print "WARNING: There are no cells left to establish fields. Think about changing the model parameters."
+        ]
+        set log-list-fields lput "There were no cells left to establish fields. Think about changing the model parameters." log-list-fields
+        stop
+      ]
+    ]
+  ]   
+  
+  ; if there was a warning, write it to problem-report
+  if warning1 = 1
+  [
+    set log-list-fields lput "Field size might be biased as it had to be redrawn several times." log-list-fields
+  ]
+  
+end
+
+
+
+;###################################################################################
+; Create a new field - Turtle procedure
+;###################################################################################
+
+To-report make-new-field [field-size search-strategy]
+  ;trys to establish a new field of the size field-size
+  ;if necessary tries establishment in up to 5 different locations
+  ;reports 1 if field was established, 0 otherwise
+    
+  let success 0
+  let counter 0
+  
+  while [counter < 5 and success = 0] ;if necessary try in up to 5 different locations to establish a field
+  [
+    let startpatch select-field-starting-point search-strategy ;turtle moves to a forest patch  ;input strategy  
+    let direction1-list [0 1 2 3] ;from this patch it can start in 4 directions 0 up; 1 right, 2 down, 3 left
+    let successful-establishment 0 ;turns only 1 if the field is successfully established
+    let direction-counter 0
+   
+    ;; CHeck if the startpatch exists, if not choose an exit strategy on any free forest cell - if that does not exists, stop the model and report warning:
+    if (startpatch = nobody)
+    [
+      set startpatch select-field-starting-point "exit"
+      ;; Check if still nobody:
+      if (startpatch = nobody)
+      [
+        if print-messages?
+        [
+          print "Warning - There are no cells left to establish any fields!"
+        ]
+        set log-list-fields lput "There were no cells left to establish any fields." log-list-fields
+        set successful-establishment -99
+      ]
+    ]
+ 
+    
+   
+    while [successful-establishment = 0 and direction-counter < 4]
+    [
+      move-to startpatch
+      let direction1 one-of direction1-list ;select one direction
+      set direction-counter direction-counter + 1  ;counter for the number of already tried directions
+      set direction1-list remove direction1 direction1-list ;remove this direction from the list
+          
+      turn-turtles-head direction1 ;turtle faces towards direction1
+       
+      let field-patches establish-first-row field-size ;try to establish first field row in this direction
+        
+      if field-patches != [] ;only continue, if the first row was established
+      [
+        let first-row-length count field-patches ;store length of first row for later extension to the other side
+        let last-row-length first-row-length ;length of this row needs to be known to determine how long the next row can be 
+        
+        let direction2-list [0 1] ;for field expansion either to the right or left of the turtles perspective (0 to the right, 1 to the left)
+        let direction2 one-of direction2-list ;select one direction
+        set direction2-list remove direction2 direction2-list ;remove this direction from the list
+        
+        let still-expanding 1
+        while [field-size > count field-patches and still-expanding = 1] ;as long as the field size is not reached and the field was still expanding in the last row
+        [
+          let try-move move-to-next-row direction1 direction2 ;if possible go to the next row and turn 180°
+           
+          ifelse try-move = 1
+          [
+            let new-patches expand-field-here last-row-length field-patches field-size ;expand field in this new row
+           
+            ifelse new-patches != []
+            [
+              set field-patches (patch-set field-patches new-patches) ;add new patches to the field
+              set last-row-length count new-patches ;store length of this row
+            ]
+            [;else try the different direction
+              set still-expanding 0
+            ]
+          ]
+          [
+            set still-expanding 0
+          ]      
+        
+        ] ;while [field-size > count field-patches and still-expanding = 1]
+    
+  
+        if field-size > count field-patches ;continue at the other side, if the field is not finished yet
+        [
+          set still-expanding 1
+          move-to startpatch ;go back to starting point of the field
+          set direction2 one-of direction2-list ;and try to expand in the other direction
+       
+          let try-move move-to-next-row direction1 direction2 ;if possible go to the next row and turn 180°
+        
+          ifelse try-move = 1
+          [
+            turn-turtles-head direction1 ;start in the same direction as the first row
+      
+            set last-row-length first-row-length
+            
+            set still-expanding 1
+            while [field-size > count field-patches and still-expanding = 1] ;as long as the field size is not reached and the field was still expanding in the last row
+            [
+              let new-patches expand-field-here last-row-length field-patches field-size ;expand field in this new row
+       
+              ifelse new-patches != []
+              [
+                set field-patches (patch-set field-patches new-patches) ;add new patches to the field
+                set last-row-length count new-patches ;store length of this row
+              ]
+              [
+                set still-expanding 0  
+              ]
+            
+              set try-move move-to-next-row direction1 direction2 ;if possible go to the next row and turn 180°
+              if try-move = 0
+              [set still-expanding  0]
+            
+            ] ;while [field-size > count field-patches and still-expanding = 1] 
+              
+          ]
+          [
+            set still-expanding 0 
+          ]      
+        ] ;if field-size > count field-patches             
+   
+    
+       ifelse count field-patches = field-size 
+       [
+         set successful-establishment 1
+         ;and establish this field finally
+         ask field-patches 
+         [
+           set p_landuse 3
+           set p_owner [who] of myself
+           set p_id current-patch-id 
+         ]  
+         
+         set household-patch-id-list lput (current-patch-id) household-patch-id-list
+         set household-number-of-patches household-number-of-patches + 1
+         set household-area-realized household-area-realized + count field-patches 
+         
+         set current-patch-id current-patch-id + 1
+         
+       ]
+       [  
+         move-to startpatch
+         ask field-patches 
+         [
+           set pcolor 5
+           ;ToDo remove all the coloring stuff
+         ]
+      
+         set field-patches [] ;if field did not reach the intended size, delete field-patches
+       ] 
+     ] ;if field-patches != []
+  
+  ]; while [successful-establishment = 0 and directionslist != []]
+  
+  if successful-establishment = 1 
+  [
+    set success 1
+  ]   
+  set counter counter + 1
+  ];while [counter < 5 and success = 0] ;if necessary try in up to 5 different locations to establish a field
+
+  report success
+  
+End   
+
+
+;###################################################################################
+; Field starting points --> defined by current household strategy
+;###################################################################################
+
+To-report select-field-starting-point [strategy]
+ ;This function can be used for different modes of finding a start patch for a field
+ ;e.g. random walk starting from homebase cell, random walk starting from one of the field cells, random walk within a certain radius
+ ;around the homebase cell, random patch within a certain radius around the homebase cell
+ ;reports the start patch for the next field
+  
+  let startpatch nobody
+   
+  if strategy = "s1" [set startpatch start.s1.homebase]
+  if strategy = "s2" [set startpatch start.s2.field]
+  if strategy = "s3" [set startpatch start.s3.nearby]
+  if strategy = "s4" [set startpatch start.s4.avoid]
+  if strategy = "exit" [set startpatch start.exit]
+  
+  report startpatch
+  
+End  
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To-report start.s1.homebase
+  ;starting from the turtles homebase cell
+  ;turtle moves to a random neigboring cell until it meets a forest cell which is not a home base
+  ;reports the patch location which is the staring patch for the potential field
+      
+  ;maybe one could change the movement to increase probability of finding patch, e.g. by not taking always the first forest patch
+  move-to patch homebase-xcor homebase-ycor
+
+  while [[p_landuse] of patch-here  != 1 or [item 0 p_homebase] of patch-here != 0] ;starting point can be any cell which is forest and not a home base cell  ; p_homebase is now list
+  [
+    move-to one-of neighbors
+  ]
+      
+  let startpatch patch-here ;now the turtle is located in a forest patch 
+ 
+  report startpatch
+End  
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To-report start.s2.field
+  ;start random walk one of the cells of the fields of this turtle
+  ;turtle moves as long until it meets a forest cell which is not a home base
+  ;reports the patch location which is the staring patch for the potential field 
+  
+  ifelse household-patch-id-list != []
+  [
+    move-to one-of patches with [p_owner = [who] of myself]
+  ]
+  [
+    move-to patch homebase-xcor homebase-ycor 
+  ]
+    
+  while [[p_landuse] of patch-here  != 1 or [item 0 p_homebase] of patch-here != 0] ;starting point can be any cell which is forest and not a home base cell  ;  p_homebase is now list
+  [
+    move-to one-of neighbors
+  ]
+      
+  let startpatch patch-here ;now the turtle is located in a forest patch 
+ 
+  report startpatch
+  
+End  
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To-report start.s3.nearby
+  ;for filling the last patches of forest, one needs to go to the very remote places, which are sparsly populated
+  ;no random walk anymore, instead turtle jumps to a nearby forest patch wich is not a homebase
+  ;reports the patch location which is the staring patch for the potential field 
+    
+  ;; Move turtle home:
+  move-to patch homebase-xcor homebase-ycor
+    
+  ; The x nearest forest patches are considered for searching. One of these "x" patches is then randomly chosen.
+  ; The vision (x) increases with a higher number of unsuccessful loops
+  ; It will be increased exponentially to grant success
+  ; The minimum (start vision) is defined here:
+  let nearby-forest-patches no-patches
+  let vision-min 2
+  let max-loops 100
+  let vision-counter 1
+  
+  while [not any? nearby-forest-patches]
+  [
+    let vision (vision-min * vision-counter)   
+    let my-visited-patches visited-patches
+    set nearby-forest-patches patches with [p_landuse = 1 and item 0 p_homebase = 0 and distance myself <= vision and not member? self my-visited-patches]  ;  p_homebase is now list
+
+    set vision-counter (vision-counter + 1)
+  ]
+   
+  ;; move to that patch and store it in the visited list
+  move-to one-of nearby-forest-patches  
+  set visited-patches (patch-set visited-patches patch-here)
+  let startpatch patch-here ;now the turtle is located in a forest patch 
+ 
+  report startpatch 
+
+End  
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+to-report start.s4.avoid
+  
+ ; let search-radius 20
+ ; let radius-patches patches in-radius search-radius
+  let forest-patches patches with [p_landuse = 1 and item 0 p_homebase = 0] ;  p_homebase is now list
+  
+  ;; Choose a forest patch with only forest neighbours
+  let forest-core-patches forest-patches with [not any? neighbors with [p_landuse != 1] and not member? self [visited-patches] of myself]
+  
+  ;; Choose closest core patch:
+  let startpatch min-one-of forest-core-patches [distance myself]
+  
+  set visited-patches (patch-set visited-patches startpatch)
+  
+  report startpatch
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+to-report start.exit
+  
+  let forest-patches patches with [p_landuse = 1 and item 0 p_homebase = 0] ;  p_homebase is now list
+  let startpatch one-of forest-patches
+  
+  report startpatch
+end
+ 
+
+
+;###################################################################################
+; Field establishment
+;###################################################################################
+
+
+To-report establish-first-row [field-size]
+  ;try to establish the first row of a field
+  ;reports 1 if successful, 0 if unsuccessful
+  
+  let counter 1; the first field patch is the starting patch, therefore we start with 1
+  let success 1
+  
+  let min-length floor sqrt field-size ;minimum length of the first field row should be the smallest square that fits into field-size
+  let max-length ceiling sqrt field-size ;maximum length of the first field row should be the next larger square 
+  ;this rule can be changed, e.g. if one wants to allow also very narrow fields
+  ;!!!!!!!!!!!!!!!! TEST: ALLOW NARROW FIELDS:
+  set max-length max-length * field.shape.factor
+  if (max-length > field-size) [set max-length ceiling sqrt field-size]
+  
+  
+  let field-patches patch-set patch-here ;this is the first patch of the field
+  
+  while [counter < max-length and success = 1 and can-move? 1] ;and turtle can move in this direction
+  [  
+    forward 1
+    ifelse [p_landuse] of patch-here = 1 and [item 0 p_homebase] of patch-here = 0 ;forest patch and not a home base  ;  p_homebase is now list
+    [
+      set field-patches (patch-set field-patches patch-here) ;add this patch to the patch-set
+    ]
+    [;else  
+      set success 0
+      back 1 ;turtle should be placed in the last patch that belongs to the field
+    ]  
+    set counter counter + 1
+  ]  
+    
+  if count field-patches < min-length ; in this case, establishment of the firs row failed
+  [
+    set field-patches [] 
+  ]
+  
+  if field-patches != []
+  [
+   ask field-patches
+   [
+     set pcolor red 
+     if p_landuse != 1
+     [
+        if print-messages?
+        [
+          print "error" 
+        ]
+     ]
+   ]  
+  ]
+  
+  report field-patches
+  
+End  
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To-report move-to-next-row [dir1 dir2]
+  ;turtle turns around 180° and moves to the next row (left or right depending on dir2)
+  ;reports 1 if this move is possible 0 if turtle would cross the edge of the world
+  
+  let turtle-ident who
+  let success 1
+  let location patch-here
+  
+  
+  ask turtle turtle-ident
+  [
+    left 180
+    if dir1 = 0 ;first row goes north
+    [
+      ifelse dir2 = 0
+      [
+        ifelse is-patch? patch-at 1 0 
+        [
+          move-to patch-at 1 0 ;move one cell east
+        ]
+        [ set success 0]
+      ]
+      [
+        ifelse is-patch? patch-at -1 0
+        [
+          move-to patch-at -1 0 ;move one cell west
+        ]
+        [ set success 0]
+      ]
+    ]
+    
+    if dir1 = 1 ;first row goes east
+    [
+     ifelse dir2 = 0
+     [
+       ifelse is-patch? patch-at 0 1 
+       [
+         move-to patch-at 0 1 ;move one cell north
+       ]
+       [ set success 0]
+     ]
+     [
+       ifelse is-patch? patch-at 0 -1  
+       [
+         move-to patch-at 0 -1 ;move one cell south
+       ]     
+       [ set success 0] 
+     ] 
+    ]
+  
+    if dir1 = 2 ;first row goes south
+    [
+     ifelse dir2 = 0
+     [
+       ifelse is-patch? patch-at 1 0
+       [
+         move-to patch-at 1 0 ;move one cell east
+       ]
+       [ set success 0]
+     ]
+     [
+      ifelse is-patch? patch-at -1 0
+      [ 
+         move-to patch-at -1 0 ;move one cell west
+      ]
+      [ set success 0]
+     ] 
+    ]
+    
+    if dir1 = 3
+    [
+     ifelse dir2 = 0
+     [
+       ifelse is-patch? patch-at 0 1
+       [
+         move-to patch-at 0 1 ;move one cell north
+       ]
+       [ set success 0]
+     ]
+     [
+       ifelse is-patch? patch-at 0 -1
+       [
+         move-to patch-at 0 -1 ;move one cell south
+       ]     
+       [ set success 0]
+     ] 
+    ]   
+  ]
+ 
+ report success
+ 
+End     
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To-report expand-field-here [length-last-row patches-so-far fieldsize]
+  ;trys adding more cells to the field in a new row
+  ;goes through all patches in the next row and if they are forest, but not homebases, add them to the temp list
+  ;as a condition, only the first and/or the last patch in the new row can be left out, i.e. are allowed to have different uses (not forest or a home base)
+  ;whenever one of the other patches in the new row is not forest or a homebase, this destroys the field shape condition (i.e. another patch apart from the first and the last one),
+  ;and temp list is set empty
+  ;reports the a patch-set with the new field patches
+  
+  let success 1
+  let temp-set []
+  let patches-needed fieldsize - count patches-so-far ;number of patches still needed to reach intended field size
+  let last-field-patch []; store the last field patch of this row to be able to go back to it
+    
+  let counter 0
+  while [counter < patches-needed and counter < length-last-row] ;this row can maximal have the length of the last row
+  [
+    ifelse [p_landuse] of patch-here = 1 and [item 0 p_homebase] of patch-here = 0  ;  p_homebase is now list
+    [ 
+      set temp-set (patch-set temp-set  patch-here) ;add patch to the field
+      set last-field-patch patch-here
+    ]
+    [ ;else 
+      
+      if counter >= 1 and counter <= (length-last-row - 2) ;if any patch apart from the first and the last of this row cannot be added, this row fails
+      ; if e.g. length of last row is 5, counter goes from 0-4, it should fail, if counter >=1 or <= 3
+      [ 
+        set success 0 
+      ] 
+    
+    ]
+    forward 1
+    set counter counter + 1
+  ]
+  
+ 
+  ifelse last-field-patch != [] ;make sure that turtle stands on the last patch that belongs to the field
+  [
+    move-to last-field-patch
+  ]
+  [
+    set success 0 
+  ]  
+    
+  if success = 0 ;delete all added fields
+  [
+    set temp-set [] 
+  ]
+  
+  if temp-set != [] ;ToDo this can be removed
+  [
+    ask temp-set
+    [
+      set pcolor blue 
+    ]
+  ]
+
+  report temp-set
+  
+End  
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 
+To turn-turtles-head [dir]
+  ;makes turtle face in a given direction
+  ;0 up, 1 right, 2 down, 3 left  
+  
+  let location patch-here ;patch were the turtle is right now
+    
+  let location-x [pxcor] of location
+  let location-y [pycor] of location
+   
+  if dir = 0 ;turtle should face up north
+  [
+    facexy location-x (location-y + 0.1)
+  ]
+      
+  if dir = 1 ;turtle should face right
+  [
+    facexy (location-x + 0.1)  location-y
+  ]
+    
+  if dir = 2 ;turtle should face down south
+  [ 
+    facexy location-x (location-y - 0.1)    
+  ]
+   
+  if dir = 3 ;turtle should face left
+  [ 
+    facexy (location-x - 0.1) location-y
+  ]
+ 
+End    
+  
+
+;###################################################################################
+; Field size distributions
+;###################################################################################
+
+To-report draw-field-size-from-distribution
+  ;draws the size of one field from the field size distribtution
+  ;input from interface comes in hectare, output is in cells
+  ;reports the field size [cells]
+  
+  let field-size 0
+  
+  if field-size-distribution = "constant" [set field-size (round(field-size-mean-ha * conversion-ha-cell))] 
+  if field-size-distribution = "uniform" [set field-size (random round(field-size-mean-ha * conversion-ha-cell) + 1)] ; + 1 because 0 should not occur, but the maximum field size should occur 
+
+  if field-size-distribution = "normal"
+  [
+  set field-size 0
+  while[field-size < 1]
+  [
+    set field-size round((random-normal field-size-mean-ha field-size-sd-ha) * conversion-ha-cell) ; as input is in ha, to get to cells, multiply by 4 and round
+  ]
+  ] 
+   
+  if field-size-distribution = "log-normal"; [set field-size round(exp(random-normal field-size-mean field-size-sd) * conversion-ha-cell)  ] ;thats hh size in ha; to get the cell number, multiply by 4 and round
+  [
+    set field-size 0
+    while[field-size < 1]
+    [  
+      set field-size round(exp(random-normal field-size-mean-ha field-size-sd-ha) * conversion-ha-cell)  
+    ]
+  ]
+  
+  report field-size 
+  
+End  
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To calculate-actual_freq-of-field-sizes
+ ;calculates the frequency distribution of field sizes
+ ;writes frequencies into actual-freq-of-field-sizes
+ ;paints the frequency distribution into the plot Field size distribution
+ 
+  ;first make an array where in each item the size of the field with this id is stored
+  ;how many field are there?
+  
+  let max_patch_id max [p_id] of patches ;each field has an identity number p_id
+  
+  let list-of-field-sizes n-values (max_patch_id + 1) [0]
+   
+  ;go through all patches and count size of each field, i.e. how often do i find one patch_id?
+  ask patches
+  [
+    if p_id >= 0 
+    [
+      set list-of-field-sizes replace-item p_id list-of-field-sizes (item p_id list-of-field-sizes + 1) 
+    ]
+  ]  
+    
+  ;print "list-of-field-sizes"
+  ;print list-of-field-sizes
+  
+  ;what is the actual maximum field size?
+  let max-field-size max list-of-field-sizes
+  
+  ;print "max-field-size"
+  ;print max-field-size
+
+  let actual-freq-of-field-sizes n-values max-field-size [0]
+ 
+  ;now fill the list with frequencies
+  let counter 1
+  while [counter <= max-field-size]
+  [
+    let number-of-fields length (filter [i -> i = counter] list-of-field-sizes) 
+    set actual-freq-of-field-sizes replace-item (counter - 1) actual-freq-of-field-sizes number-of-fields   
+    set counter counter + 1
+  ]  
+  ;print "actual-freq-of-field-sizes" 
+  ;print actual-freq-of-field-sizes
+  
+  plot-field-size-distribution actual-freq-of-field-sizes ; 
+  
+End  
+
+

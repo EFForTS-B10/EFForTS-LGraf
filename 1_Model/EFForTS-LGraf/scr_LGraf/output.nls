@@ -1,0 +1,462 @@
+;###################################################################################
+; OUTPUT FUNCTIONS
+;###################################################################################
+
+To write-road-file
+  ;produces a raster file with 0 for non-road cells and 1 for road cells 
+  
+  let new-raster gis:create-raster (max-pxcor + 1) (max-pycor + 1) gis:world-envelope
+   
+  let xcount 0
+  let ycount max-pycor
+  let ycount-raster 0
+  while [ycount >= 0]
+  [
+    while[xcount <= max-pxcor]
+    [ 
+      ;print xcount
+      ;print ycount
+      
+      gis:set-raster-value new-raster xcount ycount-raster [p_road] of patch xcount ycount
+      set xcount xcount + 1
+    ]
+    set xcount 0
+    set ycount ycount - 1
+    set ycount-raster ycount-raster + 1
+  ]
+
+;  gis:store-dataset new-raster (word "model-output/" foldername "/road-raster.asc")
+  gis:store-dataset new-raster (word foldername "/road-raster.asc")
+
+End 
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  
+To write-household-id-file
+  ;produces a raster file with -1 for non-homebase cells and the household id for the homebase cell of the household
+  
+  let new-raster gis:create-raster (max-pxcor + 1) (max-pycor + 1) gis:world-envelope
+  let xcount 0
+  let ycount max-pycor
+  let ycount-raster 0
+  while [ycount >= 0]
+  [
+    while[xcount <= max-pxcor]
+    [
+      gis:set-raster-value new-raster xcount ycount-raster [item 0 p_homebase_id] of patch xcount ycount
+      set xcount xcount + 1
+    ]
+    set xcount 0
+    set ycount ycount - 1
+    set ycount-raster ycount-raster + 1
+  ]
+
+  gis:store-dataset new-raster (word foldername "/homebase-raster.asc")
+End  
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To write-village-file
+  ;produces a raster file with the village_id
+  
+  let new-raster gis:create-raster (max-pxcor + 1) (max-pycor + 1) gis:world-envelope
+   
+  let xcount 0
+  let ycount max-pycor
+  let ycount-raster 0
+  while [ycount >= 0]
+  [
+    while[xcount <= max-pxcor]
+    [ 
+      ;print xcount
+      ;print ycount
+      
+      gis:set-raster-value new-raster xcount ycount-raster [item 0 p_homebase] of patch xcount ycount
+      set xcount xcount + 1
+    ]
+    set xcount 0
+    set ycount ycount - 1
+    set ycount-raster ycount-raster + 1
+  ]
+
+;  gis:store-dataset new-raster (word "model-output/" foldername "/road-raster.asc")
+  gis:store-dataset new-raster (word foldername "/village-raster.asc")
+
+End 
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  
+To write-local-hh-file
+  ;produces a raster file with the number of local households 
+  
+  let new-raster gis:create-raster (max-pxcor + 1) (max-pycor + 1) gis:world-envelope
+   
+  let xcount 0
+  let ycount max-pycor
+  let ycount-raster 0
+  while [ycount >= 0]
+  [
+    while[xcount <= max-pxcor]
+    [ 
+      ;print xcount
+      ;print ycount
+      
+      gis:set-raster-value new-raster xcount ycount-raster [item 1 p_homebase] of patch xcount ycount
+      set xcount xcount + 1
+    ]
+    set xcount 0
+    set ycount ycount - 1
+    set ycount-raster ycount-raster + 1
+  ]
+
+;  gis:store-dataset new-raster (word "model-output/" foldername "/road-raster.asc")
+  gis:store-dataset new-raster (word foldername "/local-hh-raster.asc")
+
+End 
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  
+To write-transmigrant-hh-file
+  ;produces a raster file with the number of transmigrant households
+  
+  let new-raster gis:create-raster (max-pxcor + 1) (max-pycor + 1) gis:world-envelope
+   
+  let xcount 0
+  let ycount max-pycor
+  let ycount-raster 0
+  while [ycount >= 0]
+  [
+    while[xcount <= max-pxcor]
+    [ 
+      ;print xcount
+      ;print ycount
+      
+      gis:set-raster-value new-raster xcount ycount-raster [item 2 p_homebase] of patch xcount ycount
+      set xcount xcount + 1
+    ]
+    set xcount 0
+    set ycount ycount - 1
+    set ycount-raster ycount-raster + 1
+  ]
+
+;  gis:store-dataset new-raster (word "model-output/" foldername "/road-raster.asc")
+  gis:store-dataset new-raster (word foldername "/transmigrant-hh-raster.asc")
+
+End 
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  
+To write-ownership-file
+  ;produces a raster file with -1 for cells which are not owned by a household and the household id for cells that belong to the household and are used for agriculture
+  
+  let new-raster gis:create-raster (max-pxcor + 1) (max-pycor + 1) gis:world-envelope
+  let xcount 0
+  let ycount max-pycor
+  let ycount-raster 0
+  while [ycount >= 0]
+  [
+    while[xcount <= max-pxcor]
+    [
+      gis:set-raster-value new-raster xcount ycount-raster [p_owner] of patch xcount ycount
+      set xcount xcount + 1
+    ]
+    set xcount 0
+    set ycount ycount - 1
+    set ycount-raster ycount-raster + 1
+  ]
+
+  gis:store-dataset new-raster (word foldername "/ownership-raster.asc")
+  
+End  
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To write-land-use-type-file
+  ;writes raster file with entries for the different land uses
+    
+  let new-raster gis:create-raster (max-pxcor + 1) (max-pycor + 1) gis:world-envelope
+  let xcount 0
+  let ycount max-pycor
+  let ycount-raster 0
+  while [ycount >= 0]
+  [
+    while[xcount <= max-pxcor]
+    [
+      gis:set-raster-value new-raster xcount ycount-raster [p_landuse-type] of patch xcount ycount
+      set xcount xcount + 1
+    ]
+    set xcount 0
+    set ycount ycount - 1
+    set ycount-raster ycount-raster + 1
+  ]
+
+  gis:store-dataset new-raster (word foldername "/land-use-type-raster.asc")
+  
+End  
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To write-patch-id-file
+  ;writes raster file with patch-ids, -1 for cells that do not belong to a patch, otherwise patch-id
+ 
+  let new-raster gis:create-raster (max-pxcor + 1) (max-pycor + 1) gis:world-envelope
+  let xcount 0
+  let ycount max-pycor
+  let ycount-raster 0
+  while [ycount >= 0]
+  [
+    while[xcount <= max-pxcor]
+    [
+      gis:set-raster-value new-raster xcount ycount-raster [p_id] of patch xcount ycount
+      set xcount xcount + 1
+    ]
+    set xcount 0
+    set ycount ycount - 1
+    set ycount-raster ycount-raster + 1
+  ]
+
+  gis:store-dataset new-raster (word foldername "/patch-id-raster.asc")
+  
+End  
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To write-forest-patch-file
+  ;writes raster file with forest-patch-ids, -1 for cells that are not forest, otherwise forestcluster
+  calculate-forest-clusters
+  
+  let new-raster gis:create-raster (max-pxcor + 1) (max-pycor + 1) gis:world-envelope
+  let xcount 0
+  let ycount max-pycor
+  let ycount-raster 0
+  while [ycount >= 0]
+  [
+    while[xcount <= max-pxcor]
+    [
+      gis:set-raster-value new-raster xcount ycount-raster [p_forestcluster_id] of patch xcount ycount
+      set xcount xcount + 1
+    ]
+    set xcount 0
+    set ycount ycount - 1
+    set ycount-raster ycount-raster + 1
+  ]
+
+  gis:store-dataset new-raster (word foldername "/forest-patch-raster.asc")
+  
+End  
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To write-output
+  write-road-file
+  
+  if (write-household-ids = "only-first-households") [write-household-id-file]
+  if (write-household-ids = "layered-files") [write-household-id-file_layered]
+  
+  write-village-file
+  write-local-hh-file
+  write-transmigrant-hh-file
+  write-ownership-file
+  write-land-use-type-file
+  write-patch-id-file
+  write-forest-patch-file
+End  
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+to write-to-file
+  ;examplary other output file which gives a list of turtles, positions and realized household area
+  
+  carefully [ file-delete "output/test.txt" ] [ ]
+  file-open "output/test.txt"
+ 
+  file-print (word "Turtle_number " "pxcor " "pycor " "hh_area " " ")
+ 
+  foreach sort turtles 
+  [
+    i ->
+    ask i 
+    [
+      file-print (word who " " pxcor " " pycor " " household-area-realized) 
+    ]
+  ]
+  
+  file-print ""  ;; blank line
+  
+  file-close
+end
+ 
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+ 
+to write-household-id-file_layered
+  
+  ;; produces multiple ratser-files. the amount is defined by the "households-per-cell" option
+  ;; it produces raster files with -1 for non-homebase cells and the household id for the homebase cell of the household
+  let i 0
+  
+  while [i < households-per-cell]
+  [
+  
+    let new-raster gis:create-raster (max-pxcor + 1) (max-pycor + 1) gis:world-envelope
+    let xcount 0
+    let ycount max-pycor
+    let ycount-raster 0
+    while [ycount >= 0]
+    [
+      while[xcount <= max-pxcor]
+      [
+        gis:set-raster-value new-raster xcount ycount-raster [item i p_homebase_id] of patch xcount ycount
+        set xcount xcount + 1
+      ]
+      set xcount 0
+      set ycount ycount - 1
+      set ycount-raster ycount-raster + 1
+    ]
+    
+    let output-filename (word foldername "/homebase-raster_layer" word i ".asc")
+    
+    gis:store-dataset new-raster output-filename
+    
+    set i (i + 1) 
+  ]
+  
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To write-land-use-type-file-behaviorspace
+  ;writes raster file with entries for the different land uses
+    
+  let new-raster gis:create-raster (max-pxcor + 1) (max-pycor + 1) gis:world-envelope
+  let xcount 0
+  let ycount max-pycor
+  let ycount-raster 0
+  while [ycount >= 0]
+  [
+    while[xcount <= max-pxcor]
+    [
+      gis:set-raster-value new-raster xcount ycount-raster [p_landuse-type] of patch xcount ycount
+      set xcount xcount + 1
+    ]
+    set xcount 0
+    set ycount ycount - 1
+    set ycount-raster ycount-raster + 1
+  ]
+
+  gis:store-dataset new-raster (word foldername "/" behaviorspace-experiment-name "_" (but-first (word (behaviorspace-run-number + 10000))) "_lutmap.asc")
+  
+End  
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To write-road-shapefile
+  ; Kill all turtles:
+  ask turtles [die]
+  ; Create turtles on all road cells:
+  
+ ; List of road ids:
+ let roadids remove-duplicates [p_road_nr] of patches with [p_road = 1]
+ 
+ foreach roadids
+ [
+   i ->
+   ; Max and min coords:
+   let px0 min-one-of patches with [p_road_nr = i] [pxcor]
+   let px1 max-one-of patches with [p_road_nr = i] [pxcor]
+   let py0 min-one-of patches with [p_road_nr = i] [pycor]
+   let py1 max-one-of patches with [p_road_nr = i] [pycor]
+   
+   let ps (patch-set px0 px1 py0 py1)
+   
+   ask ps
+   [
+     sprout 1
+     [
+       set hidden? true
+     ]
+   ]
+ ]
+ 
+ ; Link each turtle with its neighbor:
+ ask turtles
+ [
+   create-links-with other turtles-on patches with [p_road_nr = [p_road_nr] of myself]
+ ]
+  
+ ; Create shapefile:
+ let roadlines gis:link-dataset links
+ let output-filename (word foldername "/roads_polyline_layer")
+  
+ gis:store-dataset roadlines output-filename
+  
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To write.param.file
+ 
+  let filename (word foldername "/param.file.txt")
+  let delim " "
+  
+  let selected.params (list "reproducable?" "rnd-seed" 
+                            "perlin-octaves" "perlin-persistence" "cone-angle" "dist-weight" "total-road-length" "min-dist-roads"
+                            "number-of-households" "setup-model" "proportion-agricultural-area" "households-per-cell" ;"clumping-prob" 
+                            "hh-area-distribution" "hh-area-mean-ha" "hh-area-sd-ha" 
+                            "vlg-area-distribution" "vlg-area-mean" "vlg-area-sd"
+                            "field-size-distribution" "field-size-mean-ha" "field-size-sd-ha" "use-field-size-percentage?" "field-size-percentage" "field.shape.factor" 
+                            "change-strategy" "set-field-strategies-by-id?" "field-strategies-id")
+  
+    ;; If file does not yet exists write the header: 
+  if (not file-exists? filename)
+  [
+    file-open filename
+    
+    foreach selected.params
+    [
+      ? ->
+      file-type ?
+      file-type delim
+    ]
+    ;; Carriage return:
+    file-print ""
+    
+    file-close 
+  ]
+  
+  ;; Now write the parameter values to the file:
+  file-open filename
+  foreach selected.params
+  [
+    ? ->
+    file-type runresult ?
+    file-type delim
+  ]
+  ;; Carriage return:
+  file-print ""
+  file-close 
+
+end
+
+
+To load.params [params]
+  
+  let selected.params (list "reproducable?" "rnd-seed" 
+                            "perlin-octaves" "perlin-persistence" "cone-angle" "dist-weight" "total-road-length" "min-dist-roads"
+                            "number-of-households" "setup-model" "proportion-agricultural-area" "households-per-cell" ;"clumping-prob" 
+                            "hh-area-distribution" "hh-area-mean-ha" "hh-area-sd-ha" 
+                            "vlg-area-distribution" "vlg-area-mean" "vlg-area-sd"
+                            "field-size-distribution" "field-size-mean-ha" "field-size-sd-ha" "use-field-size-percentage?" "field-size-percentage" "field.shape.factor" 
+                            "change-strategy" "set-field-strategies-by-id?" "field-strategies-id")  
+  let i 0
+
+  while [i < length params]
+  [
+    run (word "set " item i selected.params " " item i params)
+    set i (i + 1)
+  ]
+  
+  
+end
+  
+  
+  

@@ -1,0 +1,179 @@
+;###################################################################################
+; Draw plots
+;###################################################################################
+
+;; plot realised field sizes
+to plot-field-size-distribution [actual-freq-of-field-sizes]
+  set-current-plot "Field size distribution"
+  set-current-plot-pen "pen-1"
+  plot-pen-reset 
+  let interval cell-size
+  set-plot-pen-interval cell-size
+  plot 0
+  let counter 0
+  while[counter < length actual-freq-of-field-sizes]
+  [
+    plot item counter actual-freq-of-field-sizes / sum actual-freq-of-field-sizes 
+    set counter counter + interval
+    set-plot-x-range 0 (max actual-freq-of-field-sizes)
+  ]
+  end
+
+;; plot forest patches
+to plot-forest-patches [cluster-sizes]
+  set-current-plot "Forest patches"
+  clear-plot
+  ;set-plot-x-range 0 10 ;plot only forest clusters <= 10 ha
+  histogram cluster-sizes
+end
+
+;; plot village sizes
+to plot-village-size-distribution
+  set-current-plot "Village size distribution"
+  set-current-plot-pen "pen-1"
+  set-plot-x-range 0 (max vlg-sizes + 1)
+  set-plot-y-range 0 (precision (4 / length vlg-sizes) 2)
+  
+  let actual-freq-of-vlg-sizes n-values (max vlg-sizes + 1) [0]
+  foreach vlg-sizes
+  [
+    vlg-size ->
+    set actual-freq-of-vlg-sizes replace-item (vlg-size) actual-freq-of-vlg-sizes (item (vlg-size) actual-freq-of-vlg-sizes + 1)
+  ]
+  
+
+  let counter 0
+  while[counter < length actual-freq-of-vlg-sizes]
+  [
+    plot item counter actual-freq-of-vlg-sizes / length vlg-sizes
+    set counter counter + 1
+  ]
+
+end
+
+;; plot realised village areas
+to plot-village-areas
+  set-current-plot "Village area distribution"
+  set-current-plot-pen "pen-1"
+  
+  let actual-freq-of-vlg-areas n-values (max vlg-areas + 1) [0]
+  foreach vlg-areas
+  [
+    vlg-area ->
+    set actual-freq-of-vlg-areas replace-item (vlg-area) actual-freq-of-vlg-areas (item (vlg-area) actual-freq-of-vlg-areas + 1)
+  ]
+  
+
+  let counter 0
+  while[counter < length actual-freq-of-vlg-areas]
+  [
+    plot item counter actual-freq-of-vlg-areas / length vlg-areas
+    set counter counter + 1
+  ]
+  
+end
+
+;; plot realised household area distribution
+to plot-household-area-distribution
+  set-current-plot "Household area distribution"
+  ;set-plot-y-range 0 ((max actual-freq-of-household-sizes) / 100 );* conversion-ha-cell) 
+  set-current-plot-pen "pen-1"
+  plot-pen-reset 
+  set-plot-pen-interval cell-size
+  let counter 0
+  let calc []
+  while[counter < length actual-freq-of-household-sizes]
+  [
+    plot item counter actual-freq-of-household-sizes  / sum actual-freq-of-household-sizes 
+    set counter counter + 1
+  ]
+end
+
+;; plot inaccessible area distribution
+to plot-inaccessible-area-distribution [actual-freq-of-plantation-sizes]
+  set-current-plot "Inaccessible area distribution"
+  set-current-plot-pen "pen-0"
+  plot-pen-reset 
+  set-plot-pen-interval cell-size
+  set-plot-pen-mode 1
+  plot 0
+  let counter 0
+  while[counter < length actual-freq-of-plantation-sizes]
+  [
+    plot item counter actual-freq-of-plantation-sizes /( sum actual-freq-of-plantation-sizes) 
+    set counter counter + 1
+  ]
+end
+
+;; plot landuse fractions
+to plot-landuses
+ 
+  ;; Calc fractions:
+  let frac-forest (count patches with [p_landuse = 1] / count patches)
+  let frac-settlement (count patches with [p_landuse = 2] / count patches)
+  let frac-agriculture (count patches with [p_landuse = 3] / count patches)
+  let frac-inaccessible (count patches with [p_landuse = 1000] / count patches)
+ 
+  let col-matrix 3
+  let col-settlement 44
+  let col-agriculture sky
+  let col-inaccessible 24
+ 
+  let interval-list n-values 19 [i -> i / 20]
+  let interval 0.05
+  
+  set-current-plot "Landuse Fractions"
+  clear-plot
+  set-plot-x-range 0 4
+
+  set-current-plot-pen "agriculture"
+  set-plot-pen-interval interval
+  set-plot-pen-color col-agriculture
+  foreach interval-list
+  [
+    i ->
+    plotxy (2 + i) frac-agriculture
+  ]
+ 
+  set-current-plot-pen "settlement" 
+  set-plot-pen-interval interval
+  set-plot-pen-color col-settlement
+  foreach interval-list
+  [
+    i ->
+    plotxy (1 + i) frac-settlement
+  ]
+  
+  
+  set-current-plot-pen "matrix"
+  set-plot-pen-interval interval
+  set-plot-pen-color col-matrix
+  foreach interval-list
+  [
+    i ->
+    plotxy (0 + i) frac-forest
+  ]
+  
+  set-current-plot-pen "inaccessible"
+  set-plot-pen-interval interval
+  set-plot-pen-color col-inaccessible
+  foreach interval-list
+  [
+    i ->
+    plotxy (3 + i) frac-inaccessible
+  ]
+  
+  set-current-plot-pen "expected"
+  foreach interval-list
+  [
+    i ->
+    plotxy (0 + i) expected-forest-cover
+    plot-pen-up
+    plotxy 2 expected-total-household-area / total-number-of-cells
+    plot-pen-down
+    plotxy (2 + i) expected-total-household-area / total-number-of-cells
+    plot-pen-up
+    plotxy 0 expected-forest-cover
+    plot-pen-down
+  ]
+end

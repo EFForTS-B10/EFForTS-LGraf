@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<title>
+  NetLogo 6.0.4 User Manual: Shapes Editor Guide
+</title>
+<link rel="stylesheet" href="netlogo.css" type="text/css">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<h1><a href="#shapes-editor-guide" id="shapes-editor-guide" class="section-anchor">Shapes Editor Guide</a></h1>
+<div class="version">
+  NetLogo 6.0.4 User Manual
+</div>
+<p>The Turtle and Link Shape Editors allows you to create and save turtle and link
+designs.</p>
+<p>NetLogo uses fully scalable and rotatable vector shapes, which means you can
+create designs by combining basic geometric elements, which can appear on-screen
+in any size or orientation.</p>
+<ul>
+<li><a href="#getting-started">Getting started</a></li>
+<li><a href="#creating-and-editing-turtle-shapes">Creating and editing turtle shapes</a></li>
+<li><a href="#creating-and-editing-link-shapes">Creating and editing link shapes</a></li>
+<li><a href="#using-shapes-in-a-model">Using shapes in a model</a></li>
+</ul>
+<h2><a href="#getting-started" id="getting-started" class="section-anchor">Getting started</a></h2>
+<p>To begin making shapes, choose <strong>Turtle Shapes Editor</strong> or
+<strong>Link Shapes Editor</strong> in the Tools menu. A new window will open listing all the
+shapes currently in the model, beginning with <em>default</em>, the default shape. The
+Shapes Editor allows you to edit shapes, create new shapes, and borrow
+from another model. You can also import turtle shapes from a library of
+pre-existing shapes.</p>
+<h3><a href="#importing-shapes" id="importing-shapes" class="section-anchor">Importing shapes</a></h3>
+<p>Every new model in NetLogo starts off containing a small core set of frequently
+used shapes. Many more turtle shapes are available by using the
+<strong>Import from library&hellip;</strong> button. This brings up a dialog where you can select
+one or more shapes and bring them into your model. Select the shapes, then press
+the <strong>Import</strong> button.</p>
+<p>Similarly, you can use the <strong>Import from model&hellip;</strong> button to borrow shapes
+from another model.</p>
+<p><strong>Default shapes</strong></p>
+<p>Here are the turtle shapes that are included by default in every new NetLogo
+model:
+<img src="images/shapes/shapes.gif" alt="Screenshot" class="screenshot" /></p>
+<p>First row: default, airplane, arrow, box, bug, butterfly, car<br />
+Second row: circle, circle 2, cow, cylinder, dot, face happy, face neutral<br />
+Third row: face sad, fish, flag, flower, house, leaf, line<br />
+Fourth row: line half, pentagon, person, plant, sheep, square, square 2<br />
+Fifth row: star, target, tree, triangle, triangle 2, truck, turtle<br />
+Sixth row: wheel, x</p>
+<p><strong>Shapes library</strong></p>
+<p>And here are the shapes in the shapes library (including all of the default
+shapes, too):
+<img src="images/shapes/library.gif" alt="Screenshot" class="screenshot" /></p>
+<p>By default there is only one Link shape in a model, that is &ldquo;default&rdquo;. This
+shape is simply a single straight line with a simple arrowhead (if the link
+happens to be directed).
+<img src="images/shapes/defaultlinkshape.gif" alt="Screenshot" class="screenshot" /></p>
+<h2><a href="#creating-and-editing-turtle-shapes" id="creating-and-editing-turtle-shapes" class="section-anchor">Creating and editing turtle shapes</a></h2>
+<p>Pressing the <strong>New</strong> button will make a new shape. Or, you may select an
+existing shape and press <strong>Edit</strong>.</p>
+<h3><a href="#tools" id="tools" class="section-anchor">Tools</a></h3>
+<p>In the upper left corner of the editing window is a group of drawing tools. The
+arrow is the selection tool, which selects an already drawn element.</p>
+<p>To draw a new element, use one of the other seven tools:</p>
+<ul>
+<li>The <strong>line</strong> tool draws line segments.</li>
+<li>The <strong>circle</strong>, <strong>square</strong>, and <strong>polygon</strong> tools come in two versions, solid
+and outline.</li>
+</ul>
+<p>When using the polygon tool, click the mouse to add a new segment to the
+polygon. When you&rsquo;re done adding segments, double click.</p>
+<p>After you draw a new element, it is selected, so you can move, delete, or
+reshape it if you want:</p>
+<ul>
+<li>To move it, drag it with the mouse</li>
+<li>To delete it, press the Delete button.</li>
+<li>To reshape it, drag the small &ldquo;handles&rdquo; that appear on the element only when
+it is selected.</li>
+<li>To change its color, click on the new color.</li>
+</ul>
+<h3><a href="#previews" id="previews" class="section-anchor">Previews</a></h3>
+<p>As you draw your shape, you will also see it in five smaller sizes in the five
+preview areas found near the bottom of the editing window. The previews show
+your shape as it might appear in your model, including how it looks as it
+rotates. The number below each preview is the size of the preview in pixels.
+When you edit the view, patch size is also measured in pixels. So for example,
+the preview with &ldquo;20&rdquo; below it shows you how your shape would look on a turtle
+(of size 1) on patches of size 20 pixels.</p>
+<p>The rotatable feature can be turned off if you want a shape that always faces
+the same way, regardless of the turtle&rsquo;s heading.</p>
+<h3><a href="#overlapping-shapes" id="overlapping-shapes" class="section-anchor">Overlapping shapes</a></h3>
+<p>New elements go on top of previous elements. You can change the layering order
+by selecting an element and then using the <strong>Bring to front</strong> and
+<strong>Send to back</strong> buttons.</p>
+<h3><a href="#undo" id="undo" class="section-anchor">Undo</a></h3>
+<p>At any point you can use the <strong>Undo</strong> button to undo the edit you just
+performed.</p>
+<h3><a href="#colors" id="colors" class="section-anchor">Colors</a></h3>
+<p>Elements whose color matches the <em>Color that changes</em> (selected from a drop-down
+menu &ndash; the default is gray) will change color according to the value of each
+turtle&rsquo;s <em>color</em> variable in your model. Elements of other colors don&rsquo;t change.
+For example, you could create cars that always have yellow headlights and black
+wheels, but different body colors.</p>
+<h3><a href="#other-buttons" id="other-buttons" class="section-anchor">Other buttons</a></h3>
+<p>The &ldquo;Rotate Left&rdquo; and &ldquo;Rotate Right&rdquo; buttons rotate elements by 90 degrees. The
+&ldquo;Flip Horizontal&rdquo; and &ldquo;Flip Vertical&rdquo; buttons reflect elements across the axes.</p>
+<p>These four buttons will rotate or flip the entire shape, unless an element is
+selected, in which case only that element is affected.</p>
+<p>These buttons are especially handy in conjunction with the &ldquo;Duplicate&rdquo; button if
+you want to make shapes that are symmetrical. For example, if you were making a
+butterfly, you could draw the butterfly&rsquo;s left wing with the polygon tool, then
+duplicate the wing with the &ldquo;Duplicate&rdquo; button, then turn the copy into a right
+wing with the &ldquo;Flip Horizontal&rdquo; button.</p>
+<h3><a href="#shape-design" id="shape-design" class="section-anchor">Shape design</a></h3>
+<p>It&rsquo;s tempting to draw complicated, interesting shapes, but remember that in most
+models, the patch size is so small that you won&rsquo;t be able to see very much
+detail. Simple, bold, iconic shapes are usually best.</p>
+<h3><a href="#keeping-a-shape" id="keeping-a-shape" class="section-anchor">Keeping a shape</a></h3>
+<p>When the shape is done, give it a name and press the <strong>Done</strong> button at the
+bottom of the editing window. The shape and its name will now be included in the
+list of shapes along with the &ldquo;default&rdquo; shape.</p>
+<h2><a href="#creating-and-editing-link-shapes" id="creating-and-editing-link-shapes" class="section-anchor">Creating and editing link shapes</a></h2>
+<p>Managing link shapes is very similar to managing turtle shapes. So, you can
+create a new shape by pressing the <strong>New</strong> button or you can edit existing
+shapes. When you are done editing a shape press <strong>Done</strong> if you want to keep it.</p>
+<h3><a href="#changing-link-shape-properties" id="changing-link-shape-properties" class="section-anchor">Changing link shape properties</a></h3>
+<p>There are several different properties for each link shape that you are allowed
+to change:</p>
+<ul>
+<li>Name - link shapes can have the same name as turtle shapes but must be unique
+among link shapes.</li>
+<li>Direction Indicator - the direction indicator (the little arrow on directed
+links) is just like the turtle vector shapes, you can edit it using the same
+editor by pressing the <strong>Edit</strong> button.</li>
+<li>Curviness - this is the amount of bend in a link expressed in patches (this is
+particularly useful if you have directed links going in both directions so you
+can discern both links)</li>
+<li>Number of lines: You can have 1, 2, or 3 lines in each link shape, you control
+this by selecting line patterns in the &ldquo;left line&rdquo;, &ldquo;middle line&rdquo;, and
+&ldquo;right line&rdquo; selection boxes.</li>
+<li>Dash pattern of lines: There are several dashed line patterns available in the
+selection boxes so not all lines need be solid.</li>
+</ul>
+<p>Here are some link shapes with various properties:
+<img src="images/shapes/linkshapes.gif" alt="Screenshot" class="screenshot" /></p>
+<h2><a href="#using-shapes-in-a-model" id="using-shapes-in-a-model" class="section-anchor">Using shapes in a model</a></h2>
+<p>In the model&rsquo;s code or in the command center, you can use any of the shapes that
+are in the model (though only turtles can have turtle shapes and only links can
+have link shapes). For example, suppose you want to create 50 turtles with the
+shape &ldquo;rabbit&rdquo;. Provided there is some turtle shape called <em>rabbit</em> in this
+model, give this command to the observer in the command center:</p>
+<pre><code>observer&gt; crt 50
+</code></pre>
+<p>And then give these commands to the turtles to spread them out, then change
+their shape:</p>
+<pre><code>turtles&gt; fd random 15
+turtles&gt; set shape &quot;rabbit&quot;
+</code></pre>
+<p>Voila! Rabbits! Note the use of double quotes around the shape name. Shape names
+are strings.</p>
+<p>Similarly, you can set the shape variable of links. Assuming there is a link
+shape called &ldquo;road&rdquo; in this model:</p>
+<pre><code>observer&gt; crt 5 [ create-links-with other turtles ]
+turtles&gt; fd 5
+links&gt; set shape &quot;road&quot;
+</code></pre>
+<p>The <code>set-default-shape</code> command is also useful for assigning shapes to turtles
+and links.</p>

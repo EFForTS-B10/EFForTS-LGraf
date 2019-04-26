@@ -1,0 +1,391 @@
+;###################################################################################
+; GENERAL PAINT FUNCTIONS
+;###################################################################################
+
+to paint.all
+  
+  p.cells.variable
+  p.cells.additions
+  p.cells.labels
+  p.agents
+    
+end
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+to p.cells.variable
+  
+  ;; Add p_ to variable:
+  let paint-cells-var (word "p_" paint-cells)
+  
+  ;; Get extremes
+  let var_max max [runresult paint-cells-var] of patches
+  let var_min min [runresult paint-cells-var] of patches
+  
+  ;; Only if there is a gradient, color:
+  if (var_max != var_min)
+  [
+    ask patches
+    [
+      set pcolor scale-color-viridis runresult paint-cells-var var_min var_max
+    ]
+  ]
+  
+end
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+to p.cells.additions
+  
+  ;; Overwrite some colors:
+  ask patches
+  [
+    ;; Paint matrix:
+    if (p_landuse = 1) [set pcolor 5]
+    ;; Paint inaccessible area
+    if (p_landuse = 1000) [set pcolor 35]
+    ;; Add roads:
+    if (p_road = 1 and paint-road-cells?) [set pcolor black]
+    ;; Add homebases
+    if (p_landuse = 2)
+    [
+      if (paint-homebase-cells?) [set pcolor orange]
+    ]
+  ]
+  
+end
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+to p.cells.labels
+     
+  ;; Reset all labels:
+  ask patches 
+  [
+    set plabel ""
+    set plabel-color white
+  ]
+  
+  ;; Check if no labels is chosen, otherwise continue:
+  if (label-cells != "")
+  [
+    ;; We don`t want to add a label to each cell, but only to one cell for each unique value of the variable
+    let label-cells-var (word "p_" label-cells)
+    let label-cells-var-list remove-duplicates [runresult label-cells-var] of patches
+    
+    foreach label-cells-var-list
+    [
+      i -> 
+      let label-patches patches with [runresult label-cells-var = i]
+      let label-patch max-one-of label-patches [count neighbors with [runresult label-cells-var = i]]
+      ask label-patch [set plabel i]
+    ]
+  ]
+
+end
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+to p.agents
+  
+  ask turtles
+  [
+    set hidden? ifelse-value (show-households?) [false][true]
+  ]
+  
+end
+
+
+;###################################################################################
+; DEFAULT PAINT SETTINGS
+;###################################################################################
+; Define default settings for different maps:
+
+to paint.default.map [maptype]
+  
+  if (maptype = "forest-non-forest")
+  [
+    set paint-cells "landuse"
+    set label-cells ""
+    set paint-homebase-cells? false
+    set show-households? false
+    set paint-road-cells? false
+  ]
+
+  if (maptype = "landuse")
+  [
+    set paint-cells "landuse"
+    set label-cells ""
+    set paint-homebase-cells? true
+    set show-households? false
+    set paint-road-cells? true
+  ]
+  
+  if (maptype = "landuse-type")
+  [
+    set paint-cells "landuse-type"
+    set label-cells ""
+    set paint-homebase-cells? false
+    set show-households? false
+    set paint-road-cells? false
+  ]
+  
+  if (maptype = "field-patches")
+  [
+    set paint-cells "id"
+    set label-cells ""
+    set paint-homebase-cells? false
+    set show-households? false
+    set paint-road-cells? false
+  ]
+
+  if (maptype = "household-patches")
+  [
+    set paint-cells "owner"
+    set label-cells "owner"
+    set paint-homebase-cells? true
+    set show-households? false
+    set paint-road-cells? false
+  ] 
+  
+  if (maptype = "forestcluster")
+  [
+    set paint-cells "forestcluster_id"
+    set label-cells "forestcluster_id"
+    set paint-homebase-cells? false
+    set show-households? false
+    set paint-road-cells? false
+  ] 
+  
+  paint.all
+
+end
+
+
+;###################################################################################
+; VIRIDIS CODE
+;###################################################################################
+;; viridis-palette
+;; Reports the complete viridis palette, currently maximum 300 colors
+to-report viridis-palette
+  report [[68 1 84][68 2 85][68 3 86][68 4 87][68 6 88][68 7 89][68 8 90][69 9 91][69 10 92][69 11 93][69 12 94][69 13 95][69 15 96][69 16 97][69 17 98][69 18 99][69 19 100][69 20 101][69 21 102][70 23 103][70 24 104][70 25 105][70 26 106][70 27 107][70 28 108][70 29 109][70 30 110][70 32 111][70 33 112][70 34 113][70 35 114][70 36 115][71 37 116][71 38 117][71 39 118][71 41 119][71 42 120][71 43 121][71 44 122][71 44 122][71 45 122][70 46 123][70 47 123][70 48 124][69 49 124][69 50 125][69 51 125][68 52 126][68 54 126][68 55 127][67 56 127][67 57 128][67 58 128][66 59 129][66 60 129][66 61 130][65 62 130][65 63 131][64 64 131][64 65 132][64 66 132][63 67 133][63 68 133][63 69 134][62 70 134][62 71 135][62 73 135][61 74 136][61 75 136][61 76 137][60 77 137][60 78 138][60 79 138][59 80 139][59 81 139][59 81 139][59 82 139][58 83 139][58 84 139][57 84 139][57 85 139][57 86 139][56 87 140][56 88 140][55 89 140][55 89 140][55 90 140][54 91 140][54 92 140][53 93 140][53 94 140][53 94 140][52 95 140][52 96 140][52 97 141][51 98 141][51 99 141][50 100 141][50 100 141][50 101 141][49 102 141][49 103 141][48 104 141][48 105 141][48 105 141][47 106 141][47 107 141][46 108 142][46 109 142][46 110 142][45 110 142][45 111 142][44 112 142][44 113 142][44 113 142][44 114 142][43 115 142][43 116 142][43 117 142][42 117 142][42 118 142][42 119 142][41 120 142][41 121 142][41 122 142][41 123 142][40 124 142][40 125 142][40 125 142][39 126 142][39 127 142][39 128 142][38 129 141][38 130 141][38 131 141][37 132 141][37 132 141][37 133 141][36 134 141][36 135 141][36 136 141][36 137 141][35 138 141][35 139 141][35 140 141][34 140 141][34 141 141][34 142 141][33 143 141][33 144 141][33 144 141][33 145 141][33 146 140][33 146 140][34 147 140][34 148 139][34 149 139][34 149 139][34 150 138][34 151 138][35 152 138][35 152 138][35 153 137][35 154 137][35 155 137][35 155 136][36 156 136][36 157 136][36 158 135][36 159 135][36 159 135][36 160 134][36 161 134][37 162 134][37 162 133][37 163 133][37 164 133][37 165 132][37 165 132][38 166 132][38 167 132][38 168 131][38 168 131][38 169 131][38 170 130][39 171 130][39 171 130][39 172 129][39 173 129][39 173 129][41 174 128][42 175 127][44 175 126][45 176 126][47 177 125][48 178 124][50 178 123][51 179 122][53 180 121][54 181 120][56 181 120][57 182 119][59 183 118][60 184 117][62 185 116][63 185 115][65 186 114][66 187 114][68 188 113][69 188 112][71 189 111][72 190 110][74 191 109][75 192 108][77 192 108][78 193 107][80 194 106][81 195 105][83 195 104][84 196 103][86 197 102][87 198 102][89 198 101][90 199 100][92 200 99][92 200 99][94 201 98][96 201 96][98 202 95][100 202 94][102 203 93][104 203 91][106 204 90][108 204 89][110 205 87][113 205 86][115 206 85][117 206 84][119 207 82][121 207 81][123 208 80][125 208 78][127 209 77][129 209 76][131 210 75][133 211 73][135 211 72][137 212 71][139 212 69][141 213 68][143 213 67][145 214 65][147 214 64][149 215 63][152 215 62][154 216 60][156 216 59][158 217 58][160 217 56][162 218 55][164 218 54][166 219 53][168 219 51][170 220 50][170 220 50][172 220 50][175 221 49][177 221 49][179 221 49][182 222 48][184 222 48][187 222 47][189 223 47][191 223 47][194 223 46][196 223 46][198 224 46][201 224 45][203 224 45][206 225 44][208 225 44][210 225 44][213 226 43][215 226 43][217 226 43][220 227 42][222 227 42][225 227 41][227 228 41][229 228 41][232 228 40][234 228 40][236 229 40][239 229 39][241 229 39][244 230 38][246 230 38][248 230 38][251 231 37][253 231 37]]
+end
+
+;; scale-color-viridis
+;; Works similar to the NetLogo primitive scale-color
+;; Can be called within a ask turtles/patches to get colors reported, depending on a specific variable
+;; Extreme values for these variable have to be provided!
+to-report scale-color-viridis [var minvar maxvar]
+  
+  ;; Scale a variable to the length of the palette:
+  let pal_viridis viridis-palette
+  let pal_viridis_n (length(pal_viridis) - 1)
+  
+  ;; Rescale the variable to 0..300
+  ;;The transformation works as follows:
+  ; NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
+  let var_new floor((((var - minvar) * (pal_viridis_n - 0)) / (maxvar - minvar)) + 0)
+  
+  report item var_new pal_viridis
+  
+end
+
+;; color-viridis
+;; Reports a specific item from the viridis color scale
+to-report color-viridis [vir_i]
+  ;; Scale a variable to the length of the palette:
+  let pal_viridis viridis-palette
+  
+  ;; Check vir_i:
+  ifelse (vir_i >= length(pal_viridis))
+  [
+    print (word "viridis color index invalid. Index maximum = " (length(pal_viridis) - 1))
+    report item 0 viridis-palette
+  ]
+  [
+    report item vir_i viridis-palette
+  ]
+end
+
+;###################################################################################
+; PSEUDO 3D MAP FUNCTIONS
+;###################################################################################
+
+to create-3D-map
+
+  no-display
+
+  ;;First hide the farmers:
+  ask turtles
+  [
+    set size 0
+  ]
+
+  ;; Paint the land use types
+  paint.default.map "landuse-type"
+
+ ;;Draw the roadlines:
+  if road.algorithm = "real.shapefile"
+  [
+    gis:set-drawing-color grey
+    gis:draw road-shapefile 1  ;draw the whole road-shapefile in one color
+  ]
+
+  ;p_landuse 1000 --> plantation
+  ;p_landuse 1 --> forest
+  ;p_landuse 3 --> agriculture
+  ;  --> p_land-use-type (1, 2, ..., n)
+  spawn-forests 25
+  spawn-plantations 25
+  spawn-luts 25
+
+  ;; Remove trees from streets:
+  ask patches with [p_road = 1][ask turtles-here [die]]
+
+
+  spawn-settlements 8
+
+  display
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+to spawn-forests [n]
+
+  ask patches with [p_landuse = 1]
+  [
+    ;;Set background color:
+    set pcolor 31
+
+    ;; Sprout trees
+    sprout n
+    [
+      set shape "lut_forest"
+      get-color-and-size
+      random-wiggle
+    ]
+  ]
+
+end
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+to spawn-plantations [n]
+
+  ask patches with [p_landuse = 1000]
+  [
+    ;;Set background color
+    set pcolor 33
+    ;;Sprout palms
+    sprout n
+    [
+      set shape "lut_op"
+      get-color-and-size
+    ]
+    ;;Distribute the trees systematically:
+    systematic-wiggle
+  ]
+end
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+to spawn-luts [n]
+
+  ask patches with [p_landuse = 3]
+  [
+    if (p_landuse-type = 2) ;;Rubber plantation
+    [
+      sprout n
+      [
+        set shape "lut_ru"
+        get-color-and-size
+        set color 44
+      ]
+      ;;Distribute the trees systematically:
+      systematic-wiggle
+    ]
+
+    if (p_landuse-type = 1) ;;OP Plantation
+    [
+      sprout n
+      [
+        set shape "lut_op"
+        get-color-and-size
+        set color 24
+      ]
+      ;;Distribute the trees systematically:
+      systematic-wiggle
+    ]
+
+    if (p_landuse-type = 3) ;; JUngle Rubber
+    [
+      sprout n
+      [
+        set shape one-of (list "lut_ru" "lut_forest")
+        get-color-and-size
+        if (shape != "lut_forest") [set color pcolor]
+        random-wiggle
+      ]
+    ]
+
+    set pcolor 33
+  ]
+
+end
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+to spawn-settlements [n]
+
+  ask patches with [p_landuse = 2]
+  [
+    ;;Set Background color
+    set pcolor 33
+
+    ;;Sprout settlement:
+    sprout n
+    [
+      set shape "lut_settlement"
+      get-color-and-size
+      random-wiggle
+    ]
+  ]
+
+end
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+to random-wiggle
+
+  let strength 0.5  ;;Patch has length 1, middle is 0.5.. strength 0.4 equals to the interval 0.1 -> 0.9
+
+  let new_xcor (xcor - strength) + (random-float (strength * 2))
+  let new_ycor (ycor - strength) + (random-float (strength * 2))
+
+  ;; Wiggle again if the new coordinates are outside th boundary:
+  if (new_xcor >= max-pxcor + 1 or new_xcor <= min-pxcor - 1 or new_ycor >= max-pycor + 1 or new_ycor <= min-pycor - 1)
+  [random-wiggle]
+
+  ;; Update the coordinates
+  set xcor new_xcor
+  set ycor new_ycor
+
+end
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+to systematic-wiggle
+
+  let start_x pxcor - 0.4
+  let start_y pycor - 0.4
+  let end_x pxcor + 0.6
+  let actual_x start_x
+  let actual_y start_y
+  let step 0.2
+
+  ask turtles-here
+  [
+    set xcor actual_x
+    set ycor actual_y
+
+
+    set actual_x (actual_x + step)
+    if (actual_x > end_x)
+    [
+      set actual_x start_x
+      set actual_y (actual_y + step)
+    ]
+  ]
+
+end
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+to get-color-and-size
+
+  if (shape = "lut_forest") [set color one-of (list 52 53 54) set size 0.3 + random-float 0.2]
+  if (shape = "lut_op") [set color 66 set size 0.4]
+  if (shape = "lut_ru") [set color 55 set size 0.4]
+  if (shape = "lut_settlement") [set color one-of (list 27 28) set size 0.4]
+
+end

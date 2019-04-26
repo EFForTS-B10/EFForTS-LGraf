@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<title>
+  NetLogo 6.0.4 User Manual: Sample Model: Party
+</title>
+<link rel="stylesheet" href="netlogo.css" type="text/css">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<h1><a href="#sample-model-party" id="sample-model-party" class="section-anchor">Sample Model: Party</a></h1>
+<div class="version">
+  NetLogo 6.0.4 User Manual
+</div>
+<p>This activity gets you thinking about computer modeling and how you can use it.
+It also gives you insight into NetLogo itself. We encourage beginning users to
+start here.</p>
+<ul>
+<li><a href="#at-a-party">At a Party</a></li>
+<li><a href="#challenge">Challenge</a></li>
+<li><a href="#thinking-with-models">Thinking with models</a></li>
+<li><a href="#whats-next">What&rsquo;s next?</a></li>
+</ul>
+<h2><a href="#at-a-party" id="at-a-party" class="section-anchor">At a Party</a></h2>
+<p>Have you ever been at a party and noticed how people cluster in groups? You may
+have also noticed that people don&rsquo;t just stay in a group. As they circulate, the
+groups change. If you watched these changes over time, you might notice
+patterns.</p>
+<p>For example, in social settings, people may exhibit different behavior than at
+work or home. Individuals who are confident within their work environment may
+become shy and timid at a social gathering. And others who are reserved at work
+may be the &ldquo;party starter&rdquo; with friends.</p>
+<p>These patterns can depend on the type of gathering. In some settings, people are
+trained to organize themselves into mixed groups; for example, party games or
+school-like activities. But in a non-structured atmosphere, people tend to group
+in a more random manner.</p>
+<p class="question">Is there any type of pattern to this kind of grouping?</p>
+<p>Let&rsquo;s take a closer look at this question by using the computer to model human
+behavior at a party. NetLogo&rsquo;s &ldquo;Party&rdquo; model looks specifically at the question
+of grouping by gender at parties: why do groups tend to form that are mostly
+men, or mostly women?</p>
+<p>Let&rsquo;s use NetLogo to explore this question.</p>
+<blockquote>
+<p><strong>What to do:</strong></p>
+<ol>
+<li>Start NetLogo.</li>
+<li>Choose &ldquo;Models Library&rdquo; from the File menu.
+<img src="images/file-menu.gif" alt="Screenshot" class="screenshot" /></li>
+<li>Open the &ldquo;Social Science&rdquo; folder.</li>
+<li>Click on the model called &ldquo;Party&rdquo;.</li>
+<li>Press the &ldquo;open&rdquo; button.</li>
+<li>Press the &ldquo;setup&rdquo; button.</li>
+</ol>
+</blockquote>
+<p>In the view of the model, you will see pink and blue groups with numbers:
+<img src="images/sample/party.png" alt="Party model" class="screenshot" /></p>
+<p>These lines represent mingling groups at a party. Men are shown as blue, women
+pink. The numbers are the sizes of the groups.</p>
+<p class="question">Do all the groups have about the same number of people?</p><p class="question">Do all the groups have about the same number of each sex?</p>
+<p>Let&rsquo;s say you are having a party and invited 150 people. You are wondering how
+people will gather together. Suppose 10 groups form at the party.</p>
+<p class="question">How do you think they will group?</p>
+<p>Instead of asking 150 of your closest friends to gather and randomly group,
+let&rsquo;s have the computer simulate this situation for us.</p>
+<blockquote>
+<p><strong>What to do:</strong></p>
+<ol>
+<li>Press the &ldquo;go&rdquo; button. (Pressing &ldquo;go&rdquo; again will stop the model manually.)</li>
+<li>Observe the movement of people until the model stops.</li>
+<li>Watch the plots to see what&rsquo;s happening in another way.</li>
+<li>Use the speed slider if you need to slow the model down.</li>
+</ol>
+</blockquote>
+<p class="question">Now how many people are in each group?</p>
+<p>Originally, you may have thought 150 people splitting into 10 groups, would
+result in about 15 people in each group. From the model, we see that people did
+not divide up evenly into the 10 groups. Instead, some groups became very small,
+whereas other groups became very large. Also, the party changed over time from
+all mixed groups of men and women to all single-sex groups.</p>
+<p class="question">
+What could explain this?
+<p>There are lots of possible answers to this question about what happens at real
+parties. The designer of this simulation thought that groups at parties don&rsquo;t
+just form randomly. The groups are determined by how the individuals at the
+party behave. The designer chose to focus on a particular variable, called
+&ldquo;tolerance&rdquo;:
+<img src="images/sample/tolerance.png" alt="The tolerance slider" class="screenshot" /></p>
+<p>Tolerance is defined here as the percentage of people of the opposite sex an
+individual is &ldquo;comfortable&rdquo; with. If the individual is in a group that has a
+higher percentage of people of the opposite sex than their tolerance allows,
+then they become &ldquo;uncomfortable&rdquo; and leave the group to find another group.</p>
+<p>For example, if the tolerance level is set at 25%, then males are only
+&ldquo;comfortable&rdquo; in groups that are less than 25% female, and females are only
+&ldquo;comfortable&rdquo; in groups that are less than 25% male.</p>
+<p>As individuals become &ldquo;uncomfortable&rdquo; and leave groups, they move into new
+groups, which may cause some people in that group to become &ldquo;uncomfortable&rdquo; in
+turn. This chain reaction continues until everyone at the party is &ldquo;comfortable&rdquo;
+in their group.</p>
+<p>Note that in the model, &ldquo;tolerance&rdquo; is not fixed. You, the user, can use the
+tolerance &ldquo;slider&rdquo; to try different tolerance percentages and see what the
+outcome is when you start the model over again.</p>
+<blockquote>
+<p><strong>How to start over:</strong></p>
+<ol>
+<li>If the &ldquo;go&rdquo; button is pressed (black), then the model is still running.
+Press the button again to stop it.</li>
+<li>Adjust the &ldquo;tolerance&rdquo; slider to a new value by dragging its red handle.</li>
+<li>Press the &ldquo;setup&rdquo; button to reset the model.</li>
+<li>Press the &ldquo;go&rdquo; button to start the model running again.</li>
+</ol>
+</blockquote>
+<h2><a href="#challenge" id="challenge" class="section-anchor">Challenge</a></h2>
+<p>As the host of the party, you would like to see both men and women mingling
+within the groups. Adjust the tolerance slider on the side of the view to get
+all groups to be mixed as an end result.</p>
+<p class="question">To make sure all groups of 10 have both sexes, at what level should we set the
+tolerance?</p>
+<p>Test your predictions on the model.</p>
+<p class="question">Can you see any other factors or variables that might affect the male
+to female ratio within each group?</p>
+<p>Make predictions and test your ideas within this model.</p>
+<p>As you are testing your hypotheses, you will notice that patterns are emerging
+from the data. For example, if you keep the number of people at the party
+constant but gradually increase the tolerance level, more mixed groups appear.</p>
+<p class="question">How high does the tolerance value have to be before you get mixed groups?</p><p class="question">What percent tolerance tends to produce what percentage of mixing?</p>
+<h2><a href="#thinking-with-models" id="thinking-with-models" class="section-anchor">Thinking with models</a></h2>
+<p>Using NetLogo to model a situation like a party allows you to experiment with a
+system in a rapid and flexible way that would be difficult to do in the real
+world. Modeling also gives you the opportunity to observe a situation or
+circumstance with less prejudice, as you can examine the underlying dynamics of
+a situation. You may find that as you model more and more, many of your
+preconceived ideas about various phenomena will be challenged. For example, a
+surprising result of the Party model is that even if tolerance is relatively
+high, a great deal of separation between the sexes occurs.</p>
+<p>This is a classic example of an &ldquo;emergent&rdquo; phenomenon, where a group pattern
+results from the interaction of many individuals. This idea of &ldquo;emergent&rdquo;
+phenomena can be applied to almost any subject.</p>
+<p class="question">What other emergent phenomena can you think of?</p>
+<p>To see more examples and gain a deeper understanding of this concept and how
+NetLogo helps learners explore it, you may wish to explore NetLogo&rsquo;s
+Models Library. It contains models that demonstrate these ideas in systems of
+all kinds.</p>
+<p>For a longer discussion of emergence and how NetLogo helps learners explore it,
+see
+<a href="http://ccl.northwestern.edu/papers/MEE/" target="_blank">&ldquo;Modeling Nature&rsquo;s Emergent Patterns with Multi-agent Languages&rdquo;</a>
+(Wilensky, 2001).</p>
+<h2><a href="#whats-next" id="whats-next" class="section-anchor">What&rsquo;s next?</a></h2>
+<p>The section of the User Manual called
+<a href="tutorial1.html">Tutorial #1: Running Models</a> goes into more detail about how to
+use the other models in the Models Library.</p>
+<p>If you want to learn how to explore the models at a deeper level,
+<a href="tutorial2.html">Tutorial #2: Commands</a> will introduce you to the NetLogo
+modeling language.</p>
+<p>Eventually, you&rsquo;ll be ready for <a href="tutorial3.html">Tutorial #3: Procedures</a>. There
+you can learn how to alter and extend existing models to give them new
+behaviors, and you can start to build your own models.</p>

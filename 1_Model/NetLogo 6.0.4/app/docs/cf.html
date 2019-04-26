@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<title>
+      NetLogo 6.0.4 User Manual: Cf Extension
+    </title>
+    <link rel="stylesheet" href="netlogo.css" type="text/css">
+    <style type="text/css">
+p { margin-left: 1.5em ; }
+    h3 { font-size: 115% ; }
+    h4 { font-size: 100% ; margin-left: 1.5em ; background: white ; }
+    </style>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<h1>NetLogo Cf Extension</h1>
+<h2>Primitives</h2>
+<div id="">
+  <a href="#cf:ifelse"><code>cf:ifelse</code></a>
+  <a href="#cf:ifelse-value"><code>cf:ifelse-value</code></a>
+</div>
+<div class="dict_entry" id="cf:ifelse">
+  <h3><a>cf:ifelse</a></h3>
+  <h4>
+    <span class="prim_example">cf:ifelse <i>condition</i> <i>consequent</i> <i>conditions/consequents</i> <i>optional-else</i></span>
+  </h4>
+<p>Runs the first command block following a true condition:</p>
+<pre><code class="language-NetLogo">let x 3
+(cf:ifelse
+  x &lt; 2 [ print &quot;x is less than 2!&quot; ]
+  x &lt; 4 [ print &quot;x is less than 4!&quot; ]
+  x &lt; 6 [ print &quot;x is less than 6!&quot; ]
+        [ print &quot;x is greater than or equal to 6!&quot; ])
+</code></pre>
+<p>The above code will print out <code>x is less than 4!</code> since that&rsquo;s the first case with a true condition.</p>
+<p>A final command block without a matching condition may be provided, in which case it will run if no other command blocks do. If no such command block is provided and no conditions are true, nothing will happen.</p>
+<p>The default number of arguments is 3, so that if you only have one condition, a consequent, and an else block (like a regular NetLogo <code>ifelse</code>), you do not need parentheses:</p>
+<pre><code class="language-NetLogo">cf:ifelse 0 &lt; 1 [ print &quot;hi&quot; ] [ print &quot;bye&quot; ]
+</code></pre>
+</div>
+<div class="dict_entry" id="cf:ifelse-value">
+  <h3><a>cf:ifelse-value</a></h3>
+  <h4>
+    <span class="prim_example">cf:ifelse-value <i>condition</i> <i>consequent</i> <i>conditions/consequents</i> <i>else-reporter</i></span>
+  </h4>
+<p>Runs the first reporter following a true condition and reports its value:</p>
+<pre><code class="language-NetLogo">(cf:ifelse-value
+  x &lt; 2 [ &quot;x is less than 2!&quot; ]
+  x &lt; 4 [ &quot;x is less than 4!&quot; ]
+  x &lt; 6 [ &quot;x is less than 6!&quot; ]
+        [ &quot;x is greater than or equal to 6!&quot; ])
+</code></pre>
+<p>The above code will report <code>x is less than 4!</code> since that&rsquo;s the first case with a true condition.</p>
+<p>Unlike <code>cf:ifelse</code>, the else-block is required in <code>cf:ifelse-value</code>. If no condition is true, the result of the else block will be reported.</p>
+<p>Note that <code>cf:ifelse-value</code> has somewhat different associativity than NetLogo&rsquo;s <code>ifelse</code>, making it so that you don&rsquo;t need to put parentheses around the conditions, as in the above example.</p>
+<p>The default number of arguments is 3, so that if you only have one condition, a consequent, and an else block (like a regular NetLogo <code>ifelse-value</code>), you do not need parentheses:</p>
+<pre><code class="language-NetLogo">cf:ifelse-value 0 &lt; 1 [ &quot;hi&quot; ] [ &quot;bye&quot; ]
+</code></pre>
+</div>

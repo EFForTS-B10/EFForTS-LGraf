@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<title>
+  NetLogo 6.0.4 User Manual: Tutorial #3: Procedures
+</title>
+<link rel="stylesheet" href="netlogo.css" type="text/css">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<h1><a href="#tutorial-3-procedures" id="tutorial-3-procedures" class="section-anchor">Tutorial #3: Procedures</a></h1>
+<div class="version">
+  NetLogo 6.0.4 User Manual
+</div>
+<p>This tutorial leads you through the process of building a complete model, built
+up in stages, with every step explained along the way.</p>
+<ul>
+<li><a href="#agents-and-procedures">Agents and procedures</a></li>
+<li><a href="#making-the-setup-button">Making the setup button</a></li>
+<li><a href="#switching-to-tick-based-view-updates">Switching to tick-based view updates</a></li>
+<li><a href="#making-the-go-button">Making the go button</a></li>
+<li><a href="#experimenting-with-commands">Experimenting with commands</a></li>
+<li><a href="#patches-and-variables">Patches and variables</a></li>
+<li><a href="#turtle-variables">Turtle variables</a></li>
+<li><a href="#monitors">Monitors</a></li>
+<li><a href="#switches-and-labels">Switches and labels</a></li>
+<li><a href="#more-procedures">More procedures</a></li>
+<li><a href="#plotting">Plotting</a></li>
+<li><a href="#tick-counter">Tick counter</a></li>
+<li><a href="#some-more-details">Some more details</a></li>
+<li><a href="#whats-next">What&rsquo;s next?</a></li>
+<li><a href="#appendix-complete-code">Appendix: Complete code</a></li>
+</ul>
+<h2><a href="#agents-and-procedures" id="agents-and-procedures" class="section-anchor">Agents and procedures</a></h2>
+<p>In Tutorial #2, you learned how to use the command center and agent monitors to
+inspect and modify agents and make them do things. Now you&rsquo;re ready to learn
+about the real heart of a NetLogo model: the Code tab.</p>
+<p>You&rsquo;ve seen that agents in NetLogo are divided into patches, turtles, links, and
+the observer. Patches are stationary and arranged in a grid. Turtles move over
+that grid. Links connect two turtles. The observer oversees everything that&rsquo;s
+going on and does whatever the turtles, patches and links can&rsquo;t do for
+themselves.</p>
+<p>All four types of agents can run NetLogo commands. All four can also run
+&ldquo;procedures&rdquo;. A procedure combines a series of NetLogo commands into a single
+new command that you define.</p>
+<p>You will now learn to write procedures that make turtles move, eat, reproduce,
+and die. You will also learn how to make monitors, sliders, and plots. The model
+we&rsquo;ll build is a simple ecosystem model not unlike Wolf Sheep Predation from
+Tutorial #1.</p>
+<h2><a href="#making-the-setup-button" id="making-the-setup-button" class="section-anchor">Making the setup button</a></h2>
+<p>To start a new model, select &ldquo;New&rdquo; from the File menu. Then begin by creating a
+setup button:</p>
+<blockquote>
+<ul>
+<li>Click the &ldquo;Add&rdquo; icon in the toolbar at the top of the Interface tab.</li>
+<li>On the menu next to Add, select Button (if it isn&rsquo;t already selected).</li>
+<li>Click wherever you want the button to appear in the empty white area of the
+Interface tab.</li>
+<li>A dialog box for editing the button opens. Type <code>setup</code> in the box labeled
+&ldquo;Commands&rdquo;.</li>
+<li>Press the OK button when you&rsquo;re done; the dialog box closes.</li>
+</ul>
+</blockquote>
+<p>Now you have a setup button. Pressing the button runs a procedure called
+&ldquo;setup&rdquo;. A procedure is a sequence of NetLogo commands that we assign a new
+name. We&rsquo;ll define that procedure soon, but we haven&rsquo;t yet. The button refers to
+a procedure that doesn&rsquo;t exist, so the button turns red:
+<img src="images/tutorial3/errors.gif" alt="Screenshot" class="screenshot" /></p>
+<p>If you want to see the actual error message, click the button.</p>
+<p>Now we&rsquo;ll create the &ldquo;setup&rdquo; procedure, so the error message will go away:</p>
+<blockquote>
+<ul>
+<li>Switch to the Code tab.</li>
+<li>Type the following:
+<pre><code>to setup
+  clear-all
+  create-turtles 100 [ setxy random-xcor random-ycor ]
+  reset-ticks
+end
+</code></pre>
+</li>
+</ul>
+</blockquote>
+<p>When you&rsquo;re done, the Code tab looks like this:
+<img src="images/tutorial3/setupcode.gif" alt="Screenshot" class="screenshot" /></p>
+<p>Note that some lines are indented. Most people find it helpful to indent their
+code. It isn&rsquo;t mandatory, but it makes the code easier to read and change.</p>
+<p>Your procedure begins with <a href="dictionary.html#to"><code>to</code></a> and ends with <a href="dictionary.html#end"><code>end</code></a>. Every procedure begins
+and ends with these words.</p>
+<p>Let&rsquo;s look at what you typed in and see what each line of your procedure does:</p>
+<ul>
+<li><code>to setup</code> begins defining a procedure named &ldquo;setup&rdquo;.</li>
+<li><a href="dictionary.html#clear-all"><code>clear-all</code></a> resets the world to an initial, empty state. All the patches
+turn black and any turtles you might have created disappear. Basically, it
+wipes the slate clean for a new model run.</li>
+<li><code>create-turtles 100</code> creates 100 turtles. They start out standing at the
+origin, that is, the center of patch 0,0.</li>
+<li>After <code>create-turtles</code> we can put commands for the new turtles to run,
+enclosed by square brackets.</li>
+<li><code>setxy random-xcor random-ycor</code> is a command using &ldquo;reporters&rdquo;. A reporter, as
+opposed to a command, reports a result. First each turtle runs the reporter
+<a href="dictionary.html#random-cor"><code>random-xcor</code></a> which will report a random number from the
+allowable range of turtle coordinates along the X axis. Then each turtle runs
+the reporter <a href="dictionary.html#random-cor"><code>random-ycor</code></a>, same for the Y axis. Finally each
+turtle runs the <a href="dictionary.html#setxy"><code>setxy</code></a> command with those two numbers as inputs. That makes
+the turtle move to the point with those coordinates.</li>
+<li><a href="dictionary.html#reset-ticks"><code>reset-ticks</code></a> starts the tick counter, now that setup is otherwise complete.</li>
+<li><a href="dictionary.html#end"><code>end</code></a> completes the definition of the &ldquo;setup&rdquo; procedure.</li>
+</ul>
+<p>When you&rsquo;re done typing, switch to the Interface tab and press the setup button
+you made before. You will see the turtles scattered around the world:
+<img src="images/tutorial3/scatter.gif" alt="Screenshot" class="screenshot" /></p>
+<p>Press setup a couple more times, and see how the arrangement of turtles is
+different each time. Note that some turtles may be right on top of each other.</p>
+<p>Think a bit about what you needed to do to make this happen. You needed to make
+a button in the interface and make a procedure that the button uses. The button
+only worked once you completed both of these separate steps. In the remainder of
+this tutorial, you will often have to complete two or more similar steps to add
+another feature to the model. If something doesn&rsquo;t appear to work after you
+completed what you thought is the final step for that new feature, continue to
+read ahead to see if there is still more to do. After reading ahead for a couple
+of paragraphs, you should then go back over the directions to see if there is
+any step you might have missed.</p>
+<h2><a href="#switching-to-tick-based-view-updates" id="switching-to-tick-based-view-updates" class="section-anchor">Switching to tick-based view updates</a></h2>
+<p>Now that we&rsquo;re using the tick counter (with <code>reset-ticks</code>), we should tell
+NetLogo that it only needs to update the view once per tick, instead of
+continuously updating it.</p>
+<blockquote>
+<ul>
+<li>Find the view updates menu. It&rsquo;s above the view and by default says
+&ldquo;continuous&rdquo;.</li>
+<li>Choose &ldquo;on ticks&rdquo; instead.</li>
+</ul>
+</blockquote>
+<p>This makes your model run faster and ensures a consistent appearance (since the
+updates will happen at consistent times). See the Programming Guide for a fuller
+discussion of view updates.</p>
+<h2><a href="#making-the-go-button" id="making-the-go-button" class="section-anchor">Making the go button</a></h2>
+<p>Now make a button called &ldquo;go&rdquo;. Follow the same steps you used to make the setup
+button, except:</p>
+<blockquote>
+<ul>
+<li>For Commands enter <code>go</code> instead of <code>setup</code>.</li>
+<li>Check the &ldquo;Forever&rdquo; checkbox in the edit dialog.</li>
+<li>Check the &ldquo;Disable until ticks start&rdquo; checkbox too.</li>
+</ul>
+</blockquote>
+<p><img src="images/tutorial3/gobutton.gif" alt="Screenshot" class="screenshot" /></p>
+<p>The &ldquo;Forever&rdquo; checkbox makes the button stay down once pressed, so its commands
+run over and over again, not just once.</p>
+<p>The &ldquo;Disable until ticks start&rdquo; prevents you from pressing go before setup.</p>
+<blockquote>
+<ul>
+<li>Then add a go procedure to the Code tab:
+<pre><code>to go
+  move-turtles
+  tick
+end
+</code></pre>
+</li>
+</ul>
+</blockquote>
+<p><a href="dictionary.html#tick"><code>tick</code></a> is a primitive that advances the tick counter by one tick.</p>
+<p>But what is <code>move-turtles</code>? Is it a primitive (in other words, built-in to
+NetLogo)? No, it&rsquo;s another procedure that you&rsquo;re about to add. So far, you have
+introduced two procedures that you added yourself: <code>setup</code> and <code>go</code>.</p>
+<blockquote>
+<ul>
+<li>Add the <code>move-turtles</code> procedure after the <code>go</code>procedure:
+<pre><code>to go
+  move-turtles
+  tick
+end
+
+to move-turtles
+  ask turtles [
+    right random 360
+    forward 1
+  ]
+end
+</code></pre>
+</li>
+</ul>
+</blockquote>
+<p>Note there are no spaces around the hyphen in <code>move-turtles</code>. In Tutorial #2 we
+used <code>red - 2</code>, with spaces, in order to subtract two numbers, but here we want
+<code>move-turtles</code>, without spaces. The &ldquo;-&rdquo; combines &ldquo;move&rdquo; and &ldquo;turtles&rdquo; into a
+single name.</p>
+<p>Here is what each command in the <code>move-turtles</code> procedure does:</p>
+<ul>
+<li><code>ask turtles [ ... ]</code> says that each turtle should run the commands in the
+brackets.</li>
+<li><code>right random 360</code> is another command that uses a reporter. First, each turtle
+picks a random whole number between 0 and 359.
+(<a href="dictionary.html#random"><code>random</code></a> doesn&rsquo;t include the number you give it as a possible result.) Then
+the turtle turns right this number of degrees.</li>
+<li><code>forward 1</code> makes the turtle move forward one step.</li>
+</ul>
+<p>Why couldn&rsquo;t we have just written all of these commands in <code>go</code> instead of in a
+separate procedure? We could have, but during the course of building your
+project, it&rsquo;s likely that you&rsquo;ll add many other parts. We&rsquo;d like to keep <code>go</code> as
+simple as possible, so that it is easy to understand. Eventually, it will
+include many other things you want to have happen as the model runs, such as
+calculating something or plotting the results. Each of these things to do will
+have its own procedure and each procedure will have its own unique name.</p>
+<p>The &lsquo;go&rsquo; button you made in the Interface tab is a forever button, meaning that
+it will continually run its commands until you shut it off (by clicking on it
+again). After you have pressed &lsquo;setup&rsquo; once, to create the turtles, press the
+&lsquo;go&rsquo; button. Watch what happens. Turn it off, and you&rsquo;ll see that all the
+turtles stop in their tracks.</p>
+<p>Note that if a turtle moves off the edge of the world, it &ldquo;wraps&rdquo;, that is, it
+appears on the other side. (This is the default behavior. It can be changed; see
+the <a href="programming.html#topology">Topology</a> section of the Programming Guide for
+more information.)</p>
+<h2><a href="#experimenting-with-commands" id="experimenting-with-commands" class="section-anchor">Experimenting with commands</a></h2>
+<p>We suggest you start experimenting with other turtle commands.</p>
+<p>Type commands into the Command Center (like <code>turtles&gt; set color red</code>), or add
+commands to <code>setup</code>, <code>go</code>, or <code>move-turtles</code>.</p>
+<p>Note that when you enter commands in the Command Center, you must choose
+<code>turtles&gt;</code>, <code>patches&gt;</code>, <code>links&gt;</code>, or <code>observer&gt;</code> in the popup menu on the left,
+depending on which agents are going to run the commands. It&rsquo;s just like using
+<code>ask turtles</code> or <code>ask patches</code>, but saves typing. You can also use the tab key
+to switch agent types, which you might find more convenient than using the menu.</p>
+<p>You might try typing <code>turtles&gt;</code> <code>pen-down</code> into the Command Center and then
+pressing the go button.</p>
+<p>Also, inside the <code>move-turtles</code> procedure you can try changing
+<code>right random 360</code> to <code>right random 45</code>.</p>
+<p>Play around. It&rsquo;s easy and the results are immediate and visible &ndash; one of
+NetLogo&rsquo;s many strengths.</p>
+<p>When you feel you&rsquo;ve done enough experimenting for now, you&rsquo;re ready to continue
+improving the model you are building.</p>
+<h2><a href="#patches-and-variables" id="patches-and-variables" class="section-anchor">Patches and variables</a></h2>
+<p>Now we&rsquo;ve got 100 turtles aimlessly moving around, completely unaware of
+anything else around them. Let&rsquo;s make things a little more interesting by giving
+these turtles a nice background against which to move.</p>
+<blockquote>
+<ul>
+<li>
+<p>Go back to the <code>setup</code> procedure. We can rewrite it as follows:</p>
+<pre><code>to setup
+  clear-all
+  setup-patches
+  setup-turtles
+  reset-ticks
+end
+</code></pre>
+</li>
+<li>
+<p>The new definition of <code>setup</code> refers to two new procedures. To define
+<code>setup-patches</code>, add this:</p>
+<pre><code>to setup-patches
+  ask patches [ set pcolor green ]
+end
+</code></pre>
+</li>
+</ul>
+<p>The <code>setup-patches</code> procedure sets the color of every patch to green to start
+with. (A turtle&rsquo;s color variable is <a href="dictionary.html#color"><code>color</code></a>; a patch&rsquo;s is <a href="dictionary.html#pcolor"><code>pcolor</code></a>.)</p>
+<p>The only part remaining in our new &lsquo;setup&rsquo; that is still undefined is
+<code>setup-turtles</code>.</p>
+<ul>
+<li>Add this procedure too:
+<pre><code>to setup-turtles
+  create-turtles 100
+  ask turtles [ setxy random-xcor random-ycor ]
+end
+</code></pre>
+</li>
+</ul>
+<p>Did you notice that the new <code>setup-turtles</code> procedure has most of the same
+commands as the old <code>setup</code> procedure?</p>
+<ul>
+<li>Switch back to the Interface tab.</li>
+<li>Press the setup button.</li>
+</ul>
+</blockquote>
+<p>Voila! A lush NetLogo landscape complete with turtles and green patches appears:
+<img src="images/tutorial3/scatter-on-green.gif" alt="Screenshot" class="screenshot" /></p>
+<p>After seeing the new <code>setup</code> procedure work a few times, you may find it helpful
+to read through the procedure definitions again.</p>
+<h2><a href="#turtle-variables" id="turtle-variables" class="section-anchor">Turtle variables</a></h2>
+<p>So we have some turtles running around on a landscape, but they aren&rsquo;t doing
+anything with it. Let&rsquo;s add some interaction between the turtles and the
+patches.</p>
+<p>We&rsquo;ll make the turtles eat &ldquo;grass&rdquo; (the green patches), reproduce, and die. The
+grass will gradually grow back after it is eaten.</p>
+<p>We&rsquo;ll need a way of controlling when a turtle reproduces and dies. We&rsquo;ll
+determine that by keeping track of how much &ldquo;energy&rdquo; each turtle has. To do that
+we need to add a new turtle variable.</p>
+<p>You&rsquo;ve already seen built-in turtle variables like <a href="dictionary.html#color"><code>color</code></a>. To make a new
+turtle variable, we add a <a href="dictionary.html#turtles-own"><code>turtles-own</code></a> declaration at the top of the Code
+tab, before all the procedures. Call it <code>energy</code>:</p>
+<pre><code>turtles-own [energy]
+
+to go
+  move-turtles
+  eat-grass
+  tick
+end
+</code></pre>
+<p>Let&rsquo;s use this newly defined variable (<code>energy</code>) to allow the turtles to eat.</p>
+<blockquote>
+<ul>
+<li>Switch to the Code tab.</li>
+<li>Rewrite the <code>go</code> procedure as follows:
+<pre><code>to go
+  move-turtles
+  eat-grass
+  tick
+end
+</code></pre>
+</li>
+<li>
+<p>Add a new <code>eat-grass</code> procedure:</p>
+<pre><code>to eat-grass
+  ask turtles [
+    if pcolor = green [
+      set pcolor black
+      set energy energy + 10
+    ]
+  ]
+end
+</code></pre>
+</li>
+</ul>
+</blockquote>
+<p>We are using the <a href="dictionary.html#if"><code>if</code></a> command for the first time. Look at the code carefully.
+Each turtle, when it runs these commands, compares the value of the patch color
+it is on (<a href="dictionary.html#pcolor"><code>pcolor</code></a>) to the value for <code>green</code>. (A turtle has direct access to
+the variables of the patch it is standing on.) If the patch color is green, the
+comparison reports <code>true</code>, and only then will the turtle run the commands inside
+the brackets (otherwise it skips them). The commands make the turtle change the
+patch color to black and increase its own energy by 10. The patch turns black to
+signify that the grass at that spot has been eaten. And the turtle is given more
+energy, from having just eaten.</p>
+<p>Next, let&rsquo;s make the movement of turtles use up some of the turtle&rsquo;s energy.</p>
+<blockquote>
+<ul>
+<li>Rewrite <code>move-turtles</code> as follows:
+<pre><code>to move-turtles
+  ask turtles [
+    right random 360
+    forward 1
+    set energy energy - 1
+  ]
+end
+</code></pre>
+</li>
+</ul>
+</blockquote>
+<p>As each turtle wanders, it will lose one unit of energy at each step.</p>
+<blockquote>
+<ul>
+<li>Switch to the Interface tab now and press the setup button and the go
+button.</li>
+</ul>
+<p>You&rsquo;ll see the patches turn black as turtles travel over them.
+<img src="images/tutorial3/eating-grass.gif" alt="Screenshot" class="screenshot" /></p>
+</blockquote>
+<h2><a href="#monitors" id="monitors" class="section-anchor">Monitors</a></h2>
+<p>Next you will create two monitors in the Interface tab with the toolbar. (You
+make them just like buttons and sliders, using the Add icon on the toolbar.)
+Let&rsquo;s make the first monitor now.</p>
+<blockquote>
+<ul>
+<li>Create a monitor by clicking the Add icon on the toolbar, selecting Monitor
+next to it, and clicking on an open spot in the Interface.</li>
+</ul>
+<p class="question">A dialog box will appear.</p>
+<ul>
+<li>In the dialog type: <code>count turtles</code> (see image below).</li>
+<li>Press the OK button to close the dialog.</li>
+</ul>
+</blockquote>
+<p><img src="images/tutorial3/monitor-1.gif" alt="Screenshot" class="screenshot" /></p>
+<p><a href="dictionary.html#turtles"><code>turtles</code></a> is an &ldquo;agentset&rdquo;, the set of all turtles. <a href="dictionary.html#count"><code>count</code></a> tells us how
+many agents are in that set.</p>
+<p>Let&rsquo;s make the second monitor now:</p>
+<blockquote>
+<ul>
+<li>Create a monitor by clicking the Add icon on the toolbar, selecting Monitor
+next to it, and clicking on an open spot in the Interface.</li>
+</ul>
+<p class="question">A dialog box will appear.</p>
+<ul>
+<li>In the Reporter section of the dialog box type:
+<code>count patches with [pcolor = green]</code> (see image below).</li>
+<li>In the Display name section of the dialog box type: <code>green patches</code></li>
+<li>Press the OK button to close the dialog box.</li>
+</ul>
+</blockquote>
+<p><img src="images/tutorial3/monitor-2.gif" alt="Screenshot" class="screenshot" /></p>
+<p>Here we&rsquo;re using <a href="dictionary.html#count"><code>count</code></a> again to see how many agents are in an agentset.
+<a href="dictionary.html#patches"><code>patches</code></a> is the set of all the patches, but we don&rsquo;t just want to know how
+many patches there are total, we want to know how many of them are green. That&rsquo;s
+what <a href="dictionary.html#with"><code>with</code></a> does; it makes a smaller agentset of just those agents for whom
+the condition in the brackets is true. The condition is <code>pcolor = green</code>, so
+that gives us just the green patches.</p>
+<p>Now we have two monitors that will report how many turtles and green patches we
+have, to help us track what&rsquo;s going on in our model. As the model runs, the
+numbers in the monitors will automatically change.</p>
+<blockquote>
+<ul>
+<li>Use the setup and go buttons and watch the numbers in the monitors change.</li>
+</ul>
+</blockquote>
+<h2><a href="#switches-and-labels" id="switches-and-labels" class="section-anchor">Switches and labels</a></h2>
+<p>The turtles aren&rsquo;t just turning the patches black. They&rsquo;re also gaining and
+losing energy. As the model runs, try using a turtle monitor to watch one
+turtle&rsquo;s energy go up and down.</p>
+<p>It would be nicer if we could see every turtle&rsquo;s energy all the time. We will
+now do exactly that, and add a switch so we can turn the extra visual
+information on and off.</p>
+<blockquote>
+<ul>
+<li>Click on the Add icon on the toolbar (in the Interface tab).</li>
+<li>Select Switch from the menu next to Add.</li>
+<li>Click on an open spot in the interface.</li>
+</ul>
+<p class="question">A dialog will appear.</p>
+<ul>
+<li>Into the Global variable field, type <code>show-energy?</code>
+Don&rsquo;t forget to include the question mark in the name. (See
+image below.)</li>
+</ul>
+</blockquote>
+<p><img src="images/tutorial3/switch.gif" alt="Screenshot" class="screenshot" /></p>
+<blockquote>
+<ul>
+<li>Now go back to the &lsquo;go&rsquo; procedure using the Code tab with the Toolbar.</li>
+<li>Rewrite the <code>eat-grass</code> procedure as follows:
+<pre><code>to eat-grass
+  ask turtles [
+    if pcolor = green [
+      set pcolor black
+      set energy energy + 10
+    ]
+    ifelse show-energy?
+      [ set label energy ]
+      [ set label &quot;&quot; ]
+  ]
+end
+</code></pre>
+</li>
+</ul>
+</blockquote>
+<p>The <code>eat-grass</code> procedure introduces the <a href="dictionary.html#ifelse"><code>ifelse</code></a> command. Look at the code
+carefully. Each turtle, when it runs these new commands, checks the value of
+<code>show-energy?</code> (determined by the switch). If the switch is on, comparison is
+true and the turtle will run the commands inside the first set of brackets. In
+this case, it assigns the value for the energy to the label of the turtle. If
+the comparison is false (the switch is off) then the turtle runs the commands
+inside the second set of brackets. In this case, it removes the text labels (by
+setting the label of the turtle to be nothing).</p>
+<p>(In NetLogo, a piece of text is called a &ldquo;string&rdquo;, short for string of
+characters. A string is a sequence of letters or other characters, written
+between double quotes. Here we have two double quotes right next to each other,
+with nothing in between them. That&rsquo;s an empty string. If a turtle&rsquo;s label is an
+empty string, no text is attached to the turtle.)</p>
+<blockquote>
+<ul>
+<li>Test this in the Interface tab, by running the model (using the setup and go
+buttons) switching the <code>show-energy?</code> switch back and forth.</li>
+</ul>
+</blockquote>
+<p>When the switch is on, you&rsquo;ll see the energy of each turtle go up each time it
+eats grass. You&rsquo;ll also see its energy going down whenever it moves.
+<img src="images/tutorial3/show-energy.png" alt="Screenshot" class="screenshot" /></p>
+<h2><a href="#more-procedures" id="more-procedures" class="section-anchor">More procedures</a></h2>
+<p>Now our turtles are eating. Let&rsquo;s make them reproduce and die, too. And let&rsquo;s
+make the grass grow back. We&rsquo;ll add all three of these of these behaviors now,
+by making three separate procedures, one for each behavior.</p>
+<blockquote>
+<ul>
+<li>Go to the Code tab.</li>
+<li>Rewrite the <code>go</code> procedure as follows:
+<pre><code>to go
+  move-turtles
+  eat-grass
+  reproduce
+  check-death
+  regrow-grass
+  tick
+end
+</code></pre>
+</li>
+<li>
+<p>Add the procedures for <code>reproduce</code>, <code>check-death</code>, and <code>regrow-grass</code> as
+shown below:</p>
+<pre><code>to reproduce
+  ask turtles [
+    if energy &gt; 50 [
+      set energy energy - 50
+      hatch 1 [ set energy 50 ]
+    ]
+  ]
+end
+
+to check-death
+  ask turtles [
+    if energy &lt;= 0 [ die ]
+  ]
+end
+
+to regrow-grass
+  ask patches [
+    if random 100 &lt; 3 [ set pcolor green ]
+  ]
+end
+</code></pre>
+</li>
+</ul>
+</blockquote>
+<p>Each of these procedures uses the <a href="dictionary.html#if"><code>if</code></a> command. Each turtle, when it runs
+<code>check-death</code> it will check to see if its energy is less or equal to 0. If this
+is true, then the turtle is told to <a href="dictionary.html#die"><code>die</code></a> (die is a NetLogo primitive).</p>
+<p>When each turtle runs <code>reproduce</code>, it checks the value of the turtle&rsquo;s <code>energy</code>
+variable. If it is greater than 50, then the turtle runs the commands inside the
+first set of brackets. In this case, it decreases the turtle&rsquo;s energy by 50,
+then &lsquo;hatches&rsquo; a new turtle with an energy of 50. The <a href="dictionary.html#hatch"><code>hatch</code></a> command is a
+NetLogo primitive which looks like this: <code>hatch</code> <em>number</em> [ <em>commands</em> ]. This
+turtle creates <em>number</em> new turtles, each identical to its parent, and asks the
+new turtle(s) that have been hatched to run <em>commands</em>. You can use the commands
+to give the new turtles different colors, headings, or whatever. In our case we
+run one command. We set the energy for the newly hatched turtle to be 50.</p>
+<p>When each patch runs <code>regrow-grass</code> it will check to see if a random integer
+from 0 to 99 is less than 3. If so, the patch color is set to green. This will
+happen 3% of the time (on average) for each patch, since there are three numbers
+(0, 1, and 2) out of 100 possible that are less than 3.</p>
+<blockquote>
+<ul>
+<li>Switch to the Interface tab now and press the setup and go buttons.</li>
+</ul>
+</blockquote>
+<p>You should see some interesting behavior in your model now. Some turtles die
+off, some new turtles are created (hatched), and some grass grows back. This is
+exactly what we set out to do.</p>
+<p>If you continue to watch your monitors in your model, you will see that the
+<strong>count turtles</strong> and <strong>green patches</strong> monitors both fluctuate. Is this pattern
+of fluctuation predictable? Is there a relationship between the variables?</p>
+<p>It&rsquo;d be nice if we had a easier way to track the changes in the model behavior
+over time. NetLogo allows us to plot data as we go along. That will be our next
+step.</p>
+<h2><a href="#plotting" id="plotting" class="section-anchor">Plotting</a></h2>
+<p>To make plotting work, we&rsquo;ll need to create a plot in the Interface tab and put
+some commands inside it.</p>
+<p>The commands we put in the plots will run automatically when our <code>setup</code>
+procedure calls <code>reset-ticks</code> and when our <code>go</code> procedure calls <code>tick</code>.</p>
+<blockquote>
+<ul>
+<li>Create a plot by clicking the Add icon on the toolbar, selecting Plot next
+to it, and clicking on an open spot in the Interface.</li>
+<li>Set its Name to &ldquo;Totals&rdquo; (see image below)</li>
+<li>Set the X axis label to &ldquo;time&rdquo;</li>
+<li>Set the Y axis label to &ldquo;totals&rdquo;</li>
+<li>Change the name of the &ldquo;default&rdquo; pen to &ldquo;turtles&rdquo;.</li>
+<li>Enter <code>plot count turtles</code> under Pen Update Commands.</li>
+<li>Press the &ldquo;Add Pen&rdquo; button.</li>
+<li>Change the name of the new pen to &ldquo;grass&rdquo;.</li>
+<li>Enter <code>plot count patches with [pcolor = green]</code> under Pen Update Commands.</li>
+</ul>
+</blockquote>
+<p>When you&rsquo;re done, the dialog should look like this:
+<img src="images/tutorial3/totals.gif" alt="Screenshot" class="screenshot" /></p>
+<blockquote>
+<ul>
+<li>Press OK in the Plot dialog to finish editing.</li>
+</ul>
+</blockquote>
+<p>Note that when you create the plot you can also set the minimum and maximum
+values on the X and Y axes. You&rsquo;ll want to leave the &ldquo;Auto Scale&rdquo; checkbox
+checked, so that if anything you plot exceeds the minimum and maximum values for
+the axes, the axes will automatically grow so you can see all the data.</p>
+<p>Note that we used the <a href="dictionary.html#plot"><code>plot</code></a> command to add the next point to a plot. This
+command moves the current plot pen to the point that has an X coordinate equal
+to 1 greater than the previously plotted X coordinate and a Y coordinate equal
+to the value given in the plot command (in the first case, the number of
+turtles, and in the second case, the number of green patches). As the pens move
+they each draw a line.</p>
+<blockquote>
+<ul>
+<li>Setup and run the model again.</li>
+</ul>
+</blockquote>
+<p>You can now watch the plot being drawn as the model is running. Your plot should
+have the general shape of the one below, though your plot might not look exactly
+the same.</p>
+<p>Remember that we left &ldquo;Auto Scale?&rdquo; on. This allows the plot to readjust itself
+when it runs out of room.
+<img src="images/tutorial3/plotwindow.png" alt="Screenshot" class="screenshot" /></p>
+<p>If you forget which pen is which, you can edit the plot and check the
+&ldquo;Show legend?&rdquo; checkbox.</p>
+<p>You might try running the model several times to see what aspects of the plot
+are the same and which are different from run to run.</p>
+<h2><a href="#tick-counter" id="tick-counter" class="section-anchor">Tick counter</a></h2>
+<p>To make comparisons between plots from one model run and another, it is often
+useful to do the comparison for the same length of model run. Learning how to
+stop or start an action at a specific time can help make this happen by stopping
+the model at the same point each model run. Keeping track of how many times the
+<code>go</code> procedure is run is a useful way to cue these actions. That&rsquo;s what the tick
+counter does.</p>
+<p>You&rsquo;re already using the tick counter in your model, with the <code>reset-ticks</code> and
+<code>tick</code> commands, which also trigger plotting.</p>
+<p>You can also use the tick counter for other things, such as to set a limit on
+the total length of a run.</p>
+<blockquote>
+<ul>
+<li>
+<p>Change the <code>go</code> procedure:</p>
+<pre><code>to go
+  if ticks &gt;= 500 [ stop ]
+  move-turtles
+  eat-grass
+  check-death
+  reproduce
+  regrow-grass
+  tick
+end
+</code></pre>
+</li>
+<li>
+<p>Now setup and run the model.</p>
+</li>
+</ul>
+</blockquote>
+<p>The graph and model won&rsquo;t keep running forever. They should stop automatically
+when the tick counter in the Interface tab&rsquo;s toolbar reaches 500.</p>
+<p>The <a href="dictionary.html#tick"><code>tick</code></a> command advances the tick counter by 1. <a href="dictionary.html#ticks"><code>ticks</code></a> is a reporter
+which reports the current value of the tick counter. <a href="dictionary.html#reset-ticks"><code>reset-ticks</code></a>, in your
+<code>setup</code> procedure, takes care of restarting the tick counter at 0 when a new run
+is set up and ready to begin.</p>
+<h2><a href="#some-more-details" id="some-more-details" class="section-anchor">Some more details</a></h2>
+<p>First, instead of always using 100 turtles, you can have a varying number of
+turtles.</p>
+<blockquote>
+<ul>
+<li>Create a slider named &ldquo;number&rdquo;: click the Add icon on the toolbar, select
+Slider next to it, and click on an open spot in the interface.</li>
+<li>Try changing the minimum and maximum values in the slider.</li>
+<li>Then inside of <code>setup-turtles</code>, instead of <code>create-turtles 100</code> you can
+type:
+<pre><code>to setup-turtles
+  create-turtles number [ setxy random-xcor random-ycor ]
+end
+</code></pre>
+</li>
+</ul>
+</blockquote>
+<p>Test this change and compare how having more or fewer turtles initially affect
+the plots over time.</p>
+<p>Second, wouldn&rsquo;t it be nice to adjust the energy the turtles gain and lose as
+they eat grass and reproduce?</p>
+<blockquote>
+<ul>
+<li>Make a slider called <code>energy-from-grass</code>.</li>
+<li>Make another slider called <code>birth-energy</code>.</li>
+<li>Then, inside of <code>eat-grass,</code> make this change:
+<pre><code>to eat-grass
+  ask turtles [
+    if pcolor = green [
+      set pcolor black
+      set energy (energy + energy-from-grass)
+    ]
+    ifelse show-energy?
+      [ set label energy ]
+      [ set label &quot;&quot; ]
+  ]
+end
+</code></pre>
+</li>
+<li>
+<p>And, inside of <code>reproduce</code>, make this change:</p>
+<pre><code>to reproduce
+  ask turtles [
+    if energy &gt; birth-energy [
+      set energy energy - birth-energy
+      hatch 1 [ set energy birth-energy ]
+    ]
+  ]
+end
+</code></pre>
+</li>
+</ul>
+</blockquote>
+<p>Finally, what other slider could you add to vary how often grass grows back? Are
+there rules you can add to the movement of the turtles or to the newly hatched
+turtles that happen only at certain times? Try writing them.</p>
+<h2><a href="#whats-next" id="whats-next" class="section-anchor">What&rsquo;s next?</a></h2>
+<p>So now you have a simple model of an ecosystem. Patches grow grass. Turtles
+wander, eat the grass, reproduce, and die.</p>
+<p>You have created an interface containing buttons, sliders, switches, monitors,
+and a plot. You&rsquo;ve even written a series of procedures to give the turtles
+something to do.</p>
+<p>That&rsquo;s where this tutorial leaves off.</p>
+<p>If you&rsquo;d like to look at some more documentation about NetLogo, the
+<a href="interface.html">Interface Guide</a> section of the manual walks you through every
+element of the NetLogo interface in order and explains its function. For a
+detailed description and specifics about writing procedures, refer to the
+<a href="programming.html">Programming Guide</a>. All of the primitives are listed and
+described in the <a href="dictionary.html">NetLogo Dictionary</a>.</p>
+<p>Also, you can continue experimenting with and expanding this model if you&rsquo;d
+like, experimenting with different variables and behaviors for the agents.</p>
+<p>Alternatively, you may want to revisit the first model in the tutorial, Wolf
+Sheep Predation. This is the model you used in <code>Tutorial #1</code>. In the Wolf Sheep
+Predation model, you saw sheep move around, consume resources that are
+replenished occasionally (grass), reproduce under certain conditions, and die if
+they ran out of resources. But that model had another type of creature moving
+around &ndash; wolves. The addition of wolves requires some additional procedures and
+some new primitives. Wolves and sheep are two different &ldquo;breeds&rdquo; of turtle. To
+see how to use breeds, study Wolf Sheep Predation.</p>
+<p>Alternatively, you can look at other models (including the many models in the
+Code Examples section of the Models Library) or even go ahead and build your own
+model. You don&rsquo;t even have to model anything. It can be interesting just to
+watch patches and turtles forming patterns, to try to create a game to play, or
+whatever.</p>
+<p>Hopefully you have learned some things, both in terms of the NetLogo language
+and about how to go about building a model. The entire set of procedures that
+was created above is shown below.</p>
+<h2><a href="#appendix-complete-code" id="appendix-complete-code" class="section-anchor">Appendix: Complete code</a></h2>
+<p>The complete model is also available in NetLogo&rsquo;s Models Library, in the Code
+Examples section. It&rsquo;s called &ldquo;Tutorial 3&rdquo;.</p>
+<p>Notice that this listing is full of &ldquo;comments&rdquo;, which begin with semicolons.
+Comments let you mix an explanation the code right in with the code itself. You
+might use comments to help others understand your model, or you might use them
+as notes to yourself.</p>
+<p>In the Code tab, comments are gray, so your eyes can pick them out easily.</p>
+<pre><code>turtles-own [energy] ;; for keeping track of when the turtle is ready
+                     ;; to reproduce and when it will die
+
+to setup
+  clear-all
+  setup-patches
+  setup-turtles
+  reset-ticks
+end
+
+to setup-patches
+  ask patches [ set pcolor green ]
+end
+
+to setup-turtles
+  create-turtles number    ;; uses the value of the number slider to create turtles
+  ask turtles [ setxy random-xcor random-ycor ]
+end
+
+to go
+  if ticks &gt;= 500 [ stop ]  ;; stop after 500 ticks
+  move-turtles
+  eat-grass
+  check-death
+  reproduce
+  regrow-grass
+  tick                    ;; increase the tick counter by 1 each time through
+end
+
+to move-turtles
+  ask turtles [
+    right random 360
+    forward 1
+    set energy energy - 1  ;; when the turtle moves it looses one unit of energy
+  ]
+end
+
+to eat-grass
+  ask turtles [
+    if pcolor = green [
+      set pcolor black
+           ;; the value of energy-from-grass slider is added to energy
+      set energy energy + energy-from-grass
+    ]
+  ifelse show-energy?
+    [ set label energy ] ;; the label is set to be the value of the energy
+    [ set label &quot;&quot; ]     ;; the label is set to an empty text value
+  ]
+end
+
+to reproduce
+  ask turtles [
+    if energy &gt; birth-energy [
+      set energy energy - birth-energy  ;; take away birth-energy to give birth
+      hatch 1 [ set energy birth-energy ] ;; give this birth-energy to the offspring
+    ]
+  ]
+end
+
+to check-death
+  ask turtles [
+    if energy &lt;= 0 [ die ] ;; removes the turtle if it has no energy left
+  ]
+end
+
+to regrow-grass
+  ask patches [ ;; 3 out of 100 times, the patch color is set to green
+    if random 100 &lt; 3 [ set pcolor green ]
+  ]
+end
+</code></pre>

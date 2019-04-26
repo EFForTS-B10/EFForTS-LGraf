@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<title>
+  NetLogo 6.0.4 User Manual: Logging
+</title>
+<link rel="stylesheet" href="netlogo.css" type="text/css">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<h1><a href="#logging" id="logging" class="section-anchor">Logging</a></h1>
+<div class="version">
+  NetLogo 6.0.4 User Manual
+</div>
+<p>NetLogo&rsquo;s logging facility allows researchers to record student actions for
+later analysis.</p>
+<p>Logging in NetLogo, once initiated, is invisible to the student. The researcher
+can choose the type of events logged through a configuration file.</p>
+<p>NetLogo uses the log4j package for logging. If you have previous experience with
+this package you&rsquo;ll find logging in NetLogo familiar.</p>
+<p>Logging is supported only by the special NetLogo Logging application.</p>
+<ul>
+<li><a href="#starting-logging">Starting logging</a></li>
+<li><a href="#using-logging">Using logging</a></li>
+<li><a href="#advanced-configuration">Advanced Configuration</a></li>
+</ul>
+<h2><a href="#starting-logging" id="starting-logging" class="section-anchor">Starting logging</a></h2>
+<p>This depends on what operating system you are using.</p>
+<h3><a href="#mac-os-x-or-windows" id="mac-os-x-or-windows" class="section-anchor">Mac OS X or Windows</a></h3>
+<p>There is a special logging launcher in the NetLogo directory called
+NetLogo Logging. Double click on the icon.</p>
+<p>On Windows, the NetLogo directory can be found at <code>C:\Program Files</code>, unless you
+chose a different location when you installed NetLogo.</p>
+<h3><a href="#linux-and-others" id="linux-and-others" class="section-anchor">Linux and others</a></h3>
+<p>To enable logging, invoke the <code>netlogo.sh</code> script as follows:</p>
+<pre><code>netlogo.sh --logging netlogo_logging.xml
+</code></pre>
+<p>You could also modify the script to include these flags, or copy the script and
+modify the copy.</p>
+<p>You can replace netlogo_logging.xml with any valid log4j XML configuration file,
+which will be discussed in more detail later.</p>
+<h2><a href="#using-logging" id="using-logging" class="section-anchor">Using logging</a></h2>
+<p>When NetLogo starts up it will ask for a user name. This name will appear in all
+the logs generated during this session.</p>
+<h3><a href="#where-logs-are-stored" id="where-logs-are-stored" class="section-anchor">Where logs are stored</a></h3>
+<p>Logs are stored in the OS-specific temp directory. On most Unix-like systems
+that is <code>/tmp</code>. On Windows Vista the logs can be found in
+<code>c:\Users\&lt;user&gt;\AppData\Local\Temp</code>, where <code>&lt;user&gt;</code> is the logged in user. On
+Mac OS X, the temp directory varies for each user. You can determine your temp
+directory by opening the Terminal application and typing <code>echo $TMPDIR</code>&gt; at the
+prompt.</p>
+<p>There are two convenience commands that will help you manage the logs.
+<code>__zip-log-files <em>filename</em></code> will gather all the logs in the temp
+directory and put them in one zip file, at the location specified. After doing
+<code>__zip-log-files</code> the existing logs are <strong>not</strong> deleted, you can do so
+explicitly by using <code>__delete-log-files</code>.</p>
+<p>The following is a chart describing the name of the loggers available, the type
+of events each logs, at what level, and provides a sample output using the
+XMLLayout. All the loggers are found in <code>org.nlogo.log.Logger</code>. When referring
+to the loggers in the configuration file you should use the fully qualified
+name. So, for example, the logger <code>GLOBALS</code> would actually be
+<code>org.nlogo.log.Logger.GLOBALS</code></p>
+<table border>
+  <thead>
+  <tr>
+    <th>Logger
+    <th>Events
+    <th>Level
+    <th>Example
+  <tbody>
+  <tr>
+    <td><code>GLOBALS
+    <td>a global variable changes
+    <td>info, debug
+    <td><pre>
+&lt;event logger="org.nlogo.log.Logger.GLOBALS"
+       timestamp="1177341065988"
+       level="INFO"
+       type="globals"&gt;
+   &lt;name&gt;FOO&lt;/name&gt;
+   &lt;value&gt;51.0&lt;/value&gt;
+&lt;/event&gt;</pre>
+  <tr>
+    <td><code>GREENS</code>
+    <td>sliders, switches, choosers, input boxes are changed through the interface
+    <td>info
+    <td><pre>
+&lt;event logger="org.nlogo.log.Logger.GREENS"
+       timestamp="1177341065988"
+       level="INFO"
+       type="slider"&gt;
+  &lt;action&gt;changed&lt;/action&gt;
+  &lt;name&gt;foo&lt;/name&gt;
+  &lt;value&gt;51.0&lt;/value&gt;
+  &lt;parameters&gt;
+    &lt;min&gt;0.0&lt;/min&gt;
+    &lt;max&gt;100.0&lt;/max&gt;
+    &lt;inc&gt;1.0&lt;/inc&gt;
+  &lt;/parameters&gt;
+&lt;/event&gt;</pre>
+  <tr>
+    <td><code>CODE</code>
+    <td>code is compiled, including: command center, Code tab, slider bounds, and buttons
+    <td>info
+    <td><pre>
+&lt;event logger="org.nlogo.log.Logger.CODE"
+       timestamp="1177341072208"
+       level="INFO"
+       type="command center"&gt;
+  &lt;action&gt;compiled&lt;/action&gt;
+  &lt;code&gt;crt 1&lt;/code&gt;
+  &lt;agentType&gt;O&lt;/agentType&gt;
+   &lt;errorMessage&gt;success&lt;/errorMessage&gt;
+&lt;/event&gt;</pre>
+  <tr>
+    <td><code>WIDGETS</code>
+    <td>a widget is added or removed from the interface
+    <td>info
+    <td><pre>
+&lt;event logger="org.nlogo.log.Logger.WIDGETS"
+       timestamp="1177341058351"
+       level="INFO"
+       type="slider"&gt;
+  &lt;name&gt;&lt;/name&gt;
+  &lt;action&gt;added&lt;/action&gt;
+&lt;/event&gt;</pre>
+  <tr>
+    <td><code>BUTTONS</code>
+    <td>a button is pressed or released
+    <td>info
+    <td><pre>
+&lt;event logger="org.nlogo.log.Logger.BUTTONS"
+        timestamp="1177341053679"
+        level="INFO"
+        type="button"&gt;
+  &lt;name&gt;show 1&lt;/name&gt;
+  &lt;action&gt;released&lt;/action&gt;
+  &lt;releaseType&gt;once&lt;/releaseType&gt;
+&lt;/event&gt;</pre>
+  <tr>
+    <td><code>SPEED</code>
+    <td>the speed slider changes
+    <td>info
+    <td><pre>
+&lt;event logger="org.nlogo.log.Logger.SPEED"
+       timestamp="1177341042202"
+       level="INFO"
+       type="speed"&gt;
+  &lt;value&gt;0.0&lt;/value&gt;
+&lt;/event&gt;</pre>
+  <tr>
+    <td><code>TURTLES</code>
+    <td>turtles die or are born
+    <td>info
+    <td><pre>
+&lt;event logger="org.nlogo.log.Logger.TURTLES"
+       timestamp="1177341094342"
+       level="INFO"
+       type="turtle"&gt;
+  &lt;name&gt;turtle 1&lt;/name&gt;
+  &lt;action&gt;born&lt;/action&gt;
+  &lt;breed&gt;TURTLES&lt;/breed&gt;
+&lt;/event&gt;</pre>
+  <tr>
+    <td><code>LINKS</code>
+    <td>links die or are born
+    <td>info
+    <td><pre>
+&lt;event logger="org.nlogo.log.Logger.LINKS"
+       timestamp="1177341094342"
+       level="INFO"
+       type="link"&gt;
+  &lt;name&gt;link 2 7&lt;/name&gt;
+  &lt;action&gt;born&lt;/action&gt;
+  &lt;breed&gt;LINKS&lt;/breed&gt;
+&lt;/event&gt;</pre>
+</table>
+<h3><a href="#how-to-configure-the-logging-output" id="how-to-configure-the-logging-output" class="section-anchor">How to configure the logging output</a></h3>
+<p>The default logging configuration (netlogo_logging.xml) looks something like
+this:</p>
+<p>NetLogo defines 8 loggers, all descend directly from the root logger, which
+means unless you explicitly set the properties (appender, layout, and output
+level) in the configuration they will inherit them from the root. In the default
+configuration the root is set to level INFO, the appender is
+<code>org.nlogo.log.XMLFileAppender</code> and layout is <code>org.nlogo.log.XMLLayout</code>.
+Together these generate a nicely formatted XML file as defined in the
+<code>netlogo_logging.dtd</code> which is based on the log4j dtd. If the appender is a
+<code>FileAppender</code> (including the <code>XMLFileAppender</code>) a new file is start each time
+the user opens a model.</p>
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+&lt;!DOCTYPE log4j:configuration SYSTEM &quot;log4j.dtd&quot;&gt;
+
+&lt;log4j:configuration debug=&quot;false&quot; xmlns:log4j='http://jakarta.apache.org/log4j/'&gt;
+
+        &lt;appender name=&quot;A1&quot; class=&quot;org.nlogo.log.XMLFileAppender&quot;&gt;
+           &lt;layout class=&quot;org.nlogo.log.XMLLayout&quot;/&gt;
+        &lt;/appender&gt;
+
+        &lt;category name=&quot;org.nlogo.log.Logger.WIDGETS&quot;&gt;
+          &lt;priority value=&quot;off&quot; /&gt;
+        &lt;/category&gt;
+
+        &lt;category name=&quot;org.nlogo.log.Logger.TURTLES&quot;&gt;
+          &lt;priority value=&quot;off&quot; /&gt;
+        &lt;/category&gt;
+
+        &lt;category name=&quot;org.nlogo.log.Logger.LINKS&quot;&gt;
+          &lt;priority value=&quot;off&quot; /&gt;
+        &lt;/category&gt;
+
+        &lt;root&gt;
+           &lt;priority value =&quot;info&quot; /&gt;
+           &lt;appender-ref ref=&quot;A1&quot; /&gt;
+        &lt;/root&gt;
+
+&lt;/log4j:configuration&gt;
+</code></pre>
+<p>This configuration, first defines an appender named &ldquo;A1&rdquo; of type XMLFileAppender
+with an XMLLayout. The appender defines where the logging data goes, in this
+case the data goes into a file. In fact, if NetLogo is given a FileAppender it
+will automatically start a new file every time the user opens a new model. The
+XMLFileAppender also does some formatting and writes the appropriate headers to
+the file. The layout defines how to write each individual message. Unless you
+are an advanced user there is no need change (or worry about) the appender or
+the layout.</p>
+<p>At the end of the configuration notice the definition of the root logger. All of
+the other loggers descend from the root logger and, thus, inherit the properties
+of the root unless explicitly set. This case is fairly simple, having set up the
+appender A1 we make that the default appender for the root (and all other
+loggers) and make the default priority &ldquo;INFO&rdquo;. Messages that are logged at the
+INFO level or higher will be written, messages logged at lower levels will not.
+Note that with only one exception NetLogo always logs at level INFO. Sets to
+globals that don&rsquo;t change the value of the global are logged at level DEBUG.
+Which means that these messages are disabled by default, since debug is lower
+level than info. The rest of the body of the configuration file overrides
+properties of the root logger in a few specific loggers (or categories as they
+are known in the configuration file, the terms can be assumed to be synonymous
+for the proposes of this document). That is it turns off the WIDGET, TURTLES,
+and LINKS loggers, by default. To re-enable them you can changes the priority
+from off to info, like this:</p>
+<pre><code>&lt;category name=&quot;org.nlogo.log.Logger.TURTLES&quot;&gt;
+  &lt;priority value=&quot;info&quot; /&gt;
+&lt;/category&gt;
+</code></pre>
+<p>or you can simply remove the entire reference to the category from the
+configuration file, as it is not serving any other purpose.</p>
+<h2><a href="#advanced-configuration" id="advanced-configuration" class="section-anchor">Advanced Configuration</a></h2>
+<p>This is only a basic introduction to configuration files for logging in NetLogo.
+There are many more configuration options available through the log4j framework.
+See the <a href="https://logging.apache.org/log4j/1.2/manual.html" target="_blank">log4j documentation</a>.</p>

@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<style type="text/css">
+  /* The following is about making the nested lists look like headings with lists inside */
+
+  #questions > ul {
+    padding-left: 0px;
+  }
+
+  #questions > ul > li {
+    list-style-type: none;
+  }
+
+  #questions > ul > li > a {
+    display: block;
+    clear: both;
+    margin: 1em 0em;
+    padding: 0.2em;
+    font-size: 125%;
+    font-weight: bold;
+    text-decoration: none;
+    background: rgb(175,175,175);
+    color: inherit;
+  }
+
+  #questions > ul > li > ul > li {
+    list-style-type: disc;
+    font-size: 80%;
+    font-weight: bold;
+  }
+</style>
+<title>
+  NetLogo 6.0.4 User Manual: FAQ (Frequently Asked Questions)
+</title>
+<link rel="stylesheet" href="netlogo.css" type="text/css">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<h1><a href="#faq-frequently-asked-questions" id="faq-frequently-asked-questions" class="section-anchor">FAQ (Frequently Asked Questions)</a></h1>
+<div class="version">
+  NetLogo 6.0.4 User Manual
+</div>
+<p>Feedback from users is very valuable to us in designing and improving
+NetLogo. We&rsquo;d like to hear from you. (See <a href="contact.html">Contacting Us</a>.)</p>
+<div id="questions">
+<ul>
+<li><a href="#general">General</a>
+<ul>
+<li><a href="#why-is-it-called-netlogo">Why is it called NetLogo?</a></li>
+<li><a href="#how-do-i-cite-netlogo-or-hubnet-in-a-publication">How do I cite NetLogo or HubNet in a publication?</a></li>
+<li><a href="#how-do-i-cite-a-model-from-the-models-library-in-a-publication">How do I cite a model from the Models Library in a publication?</a></li>
+<li><a href="#where-and-when-was-netlogo-created">Where and when was NetLogo created?</a></li>
+<li><a href="#what-programming-language-was-netlogo-written-in">What programming language was NetLogo written in?</a></li>
+<li><a href="#whats-the-relationship-between-starlogo-and-netlogo">What&rsquo;s the relationship between StarLogo and NetLogo?</a></li>
+<li><a href="#under-what-license-is-netlogo-released-is-the-source-code-available">Under what license is NetLogo released? Is the source code available?</a></li>
+<li><a href="#do-you-offer-any-workshops-or-other-training-opportunities-for-netlogo">Do you offer any workshops or other training opportunities for NetLogo?</a></li>
+<li><a href="#are-there-any-netlogo-textbooks">Are there any NetLogo textbooks?</a></li>
+<li><a href="#is-netlogo-available-in-other-languages-besides-english">Is NetLogo available in other languages besides English?</a></li>
+<li><a href="#is-netlogo-compiled-or-interpreted">Is NetLogo compiled or interpreted?</a></li>
+<li><a href="#has-anyone-built-a-model-of-x">Has anyone built a model of &lt;x&gt;?</a></li>
+<li><a href="#are-netlogo-models-runs-scientifically-reproducible">Are NetLogo models runs scientifically reproducible?</a></li>
+<li><a href="#will-netlogo-and-netlogo-3d-remain-separate">Will NetLogo and NetLogo 3D remain separate?</a></li>
+<li><a href="#can-i-run-netlogo-on-my-phone-or-tablet">Can I run NetLogo on my phone or tablet?</a></li>
+</ul>
+</li>
+<li><a href="#downloading">Downloading</a>
+<ul>
+<li><a href="#can-i-have-multiple-versions-of-netlogo-installed-at-the-same-time">Can I have multiple versions of NetLogo installed at the same time?</a></li>
+<li><a href="#im-on-a-unix-system-and-i-cant-untar-the-download-why">I&rsquo;m on a UNIX system and I can&rsquo;t untar the download. Why?</a></li>
+<li><a href="#how-do-i-install-netlogo-unattended">How do I install NetLogo unattended?</a></li>
+</ul>
+</li>
+<li><a href="#running">Running</a>
+<ul>
+<li><a href="#can-i-run-netlogo-from-a-cd-a-network-drive-or-a-usb-drive">Can I run NetLogo from a CD, a network drive, or a USB drive?</a></li>
+<li><a href="#why-is-netlogo-so-much-slower-when-i-unplug-my-windows-laptop">Why is NetLogo so much slower when I unplug my Windows laptop?</a></li>
+<li><a href="#why-does-netlogo-bundle-java">Why does NetLogo bundle Java?</a></li>
+<li><a href="#how-come-netlogo-wont-start-up-on-my-linux-machine">How come NetLogo won&rsquo;t start up on my Linux machine?</a></li>
+<li><a href="#when-i-try-to-install-netlogo-on-windows-i-see-windows-protected-your-pc">When I try to install NetLogo on Windows, I see &ldquo;Windows protected your PC&rdquo;</a></li>
+<li><a href="#when-i-try-to-start-netlogo-on-windows-i-get-an-error-the-jvm-could-not-be-started-help">When I try to start NetLogo on Windows I get an error &ldquo;The JVM could not be started&rdquo;. Help!</a></li>
+<li><a href="#netlogo-wont-start-on-mac-os-sierra-or-later">NetLogo won&rsquo;t start on Mac OS Sierra (or later)</a></li>
+<li><a href="#netlogo-wont-start-on-windows-or-crashes-suddenly-on-mac-os-sierra">NetLogo won&rsquo;t start on Windows or crashes suddenly on Mac OS Sierra</a></li>
+<li><a href="#can-i-run-netlogo-from-the-command-line-without-the-gui">Can I run NetLogo from the command line, without the GUI?</a></li>
+<li><a href="#does-netlogo-take-advantage-of-multiple-processors">Does NetLogo take advantage of multiple processors?</a></li>
+<li><a href="#can-i-distribute-netlogo-model-runs-across-a-cluster-or-grid-of-computers">Can I distribute NetLogo model runs across a cluster or grid of computers?</a></li>
+<li><a href="#is-there-any-way-to-recover-lost-work-if-netlogo-crashes-or-freezes">Is there any way to recover lost work if NetLogo crashes or freezes?</a></li>
+<li><a href="#why-is-hubnet-discovery-not-working">Why is HubNet Discovery Not Working?</a></li>
+</ul>
+</li>
+<li><a href="#usage">Usage</a>
+<ul>
+<li><a href="#when-i-move-the-speed-slider-all-the-way-to-the-right-why-does-my-model-seem-to-stop">When I move the speed slider all the way to the right, why does my model seem to stop?</a></li>
+<li><a href="#can-i-use-the-mouse-to-paint-in-the-view">Can I use the mouse to &ldquo;paint&rdquo; in the view?</a></li>
+<li><a href="#how-big-can-my-model-be-how-many-turtles-patches-procedures-buttons-and-so-on-can-my-model-contain">How big can my model be? How many turtles, patches, procedures, buttons, and so on can my model contain?</a></li>
+<li><a href="#can-i-use-gis-data-in-netlogo">Can I use GIS data in NetLogo?</a></li>
+<li><a href="#my-model-runs-slowly-how-can-i-speed-it-up">My model runs slowly. How can I speed it up?</a></li>
+<li><a href="#can-i-have-more-than-one-model-open-at-a-time">Can I have more than one model open at a time?</a></li>
+<li><a href="#can-i-change-the-choices-in-a-chooser-on-the-fly">Can I change the choices in a chooser on the fly?</a></li>
+<li><a href="#can-i-divide-the-code-for-my-model-up-into-several-files">Can I divide the code for my model up into several files?</a></li>
+</ul>
+</li>
+<li><a href="#programming">Programming</a>
+<ul>
+<li><a href="#how-does-the-netlogo-language-differ-from-other-logos">How does the NetLogo language differ from other Logos?</a></li>
+<li><a href="#how-come-my-model-from-an-earlier-netlogo-doesnt-work-right">How come my model from an earlier NetLogo doesn&rsquo;t work right?</a></li>
+<li><a href="#how-do-i-take-the-negative-of-a-number">How do I take the negative of a number?</a></li>
+<li><a href="#my-turtle-moved-forward-1-but-its-still-on-the-same-patch-why">My turtle moved forward 1, but it&rsquo;s still on the same patch. Why?</a></li>
+<li><a href="#how-do-i-keep-my-turtles-on-patch-centers">How do I keep my turtles on patch centers?</a></li>
+<li><a href="#patch-ahead-1-is-reporting-the-same-patch-my-turtle-is-already-standing-on-why"><code>patch-ahead 1</code> is reporting the same patch my turtle is already standing on. Why?</a></li>
+<li><a href="#how-do-i-give-my-turtles-vision">How do I give my turtles &ldquo;vision&rdquo;?</a></li>
+<li><a href="#can-agents-sense-whats-in-the-drawing-layer">Can agents sense what&rsquo;s in the drawing layer?</a></li>
+<li><a href="#im-getting-numbers-like-010000000004-and-0799999999999-instead-of-01-and-08-why">I&rsquo;m getting numbers like 0.10000000004 and 0.799999999999 instead of 0.1 and 0.8. Why?</a></li>
+<li><a href="#the-documentation-says-that-random-float-1-might-return-0-but-will-never-return-1-what-if-i-want-1-to-be-included">The documentation says that <code>random-float 1</code> might return 0 but will never return 1. What if I want 1 to be included?</a></li>
+<li><a href="#how-can-i-keep-two-turtles-from-occupying-the-same-patch">How can I keep two turtles from occupying the same patch?</a></li>
+<li><a href="#how-can-i-find-out-if-a-turtle-is-dead">How can I find out if a turtle is dead?</a></li>
+<li><a href="#does-netlogo-have-arrays">Does NetLogo have arrays?</a></li>
+<li><a href="#does-netlogo-have-hash-tables-or-associative-arrays">Does NetLogo have hash tables or associative arrays?</a></li>
+<li><a href="#how-can-i-use-different-patch-neighborhoods-circular-von-neumann-moore-etc">How can I use different patch &ldquo;neighborhoods&rdquo; (circular, Von Neumann, Moore, etc.)?</a></li>
+<li><a href="#how-can-i-convert-an-agentset-to-a-list-of-agents-or-vice-versa">How can I convert an agentset to a list of agents, or vice versa?</a></li>
+<li><a href="#how-do-i-stop-foreach">How do I stop foreach?</a></li>
+<li><a href="#im-trying-to-make-a-list-why-do-i-keep-getting-the-error-expected-a-constant">I&rsquo;m trying to make a list. Why do I keep getting the error &ldquo;Expected a constant&rdquo;?</a></li>
+</ul>
+</li>
+<li><a href="#behaviorspace">BehaviorSpace</a>
+<ul>
+<li><a href="#why-are-the-rows-in-my-behaviorspace-table-results-out-of-order">Why are the rows in my BehaviorSpace table results out of order?</a></li>
+<li><a href="#how-do-i-measure-runs-every-n-ticks">How do I measure runs every n ticks?</a></li>
+<li><a href="#im-varying-a-global-variable-i-declared-in-the-code-tab-but-it-doesnt-work-why">I&rsquo;m varying a global variable I declared in the Code tab, but it doesn&rsquo;t work. Why?</a></li>
+</ul>
+</li>
+<li><a href="#netlogo-3d">NetLogo 3D</a>
+<ul>
+<li><a href="#does-netlogo-work-with-my-stereoscopic-device">Does NetLogo work with my stereoscopic device?</a></li>
+</ul>
+</li>
+<li><a href="#extensions">Extensions</a>
+<ul>
+<li><a href="#im-writing-an-extension-why-does-the-compiler-say-it-cant-find-orgnlogoapi">I&rsquo;m writing an extension. Why does the compiler say it can&rsquo;t find <code>org.nlogo.api</code>?</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<h2><a href="#general" id="general" class="section-anchor">General</a></h2>
+<h3><a href="#why-is-it-called-netlogo" id="why-is-it-called-netlogo" class="section-anchor">Why is it called NetLogo?</a></h3>
+<p>The &ldquo;Logo&rdquo; part is because NetLogo is a dialect of the Logo
+language.</p>
+<p>&ldquo;Net&rdquo; is meant to evoke the decentralized, interconnected
+nature of the phenomena you can model with NetLogo, including network
+phenomena. It also refers to HubNet, the multiuser participatory
+simulation environment included in NetLogo.</p>
+<h3><a href="#how-do-i-cite-netlogo-or-hubnet-in-a-publication" id="how-do-i-cite-netlogo-or-hubnet-in-a-publication" class="section-anchor">How do I cite NetLogo or HubNet in a publication?</a></h3>
+<p>If you use or refer to NetLogo, HubNet or a model from the NetLogo
+models library, we ask that you cite it as follows:</p>
+<p><em>NetLogo itself:</em> Wilensky, U. 1999. NetLogo. <a href="http://ccl.northwestern.edu/netlogo/" target="_blank">http://ccl.northwestern.edu/netlogo/</a>.
+Center for Connected Learning and Computer-Based Modeling,
+Northwestern University. Evanston, IL.</p>
+<p><em>HubNet:</em> Wilensky, U. &amp; Stroup, W., 1999. HubNet. <a href="http://ccl.northwestern.edu/netlogo/hubnet.html" target="_blank">http://ccl.northwestern.edu/netlogo/hubnet.html</a>.
+Center for Connected Learning and Computer-Based Modeling,
+Northwestern University. Evanston, IL.</p>
+<h3><a href="#how-do-i-cite-a-model-from-the-models-library-in-a-publication" id="how-do-i-cite-a-model-from-the-models-library-in-a-publication" class="section-anchor">How do I cite a model from the Models Library in a publication?</a></h3>
+<p>The correct citation is included in the &ldquo;Credits and References&rdquo; section of each
+model&rsquo;s Info tab.</p>
+<h3><a href="#where-and-when-was-netlogo-created" id="where-and-when-was-netlogo-created" class="section-anchor">Where and when was NetLogo created?</a></h3>
+<p>NetLogo was first created in 1999 by Uri Wilensky at the Center for
+Connected Learning and Computer-Based Modeling, then at Tufts University in the
+Boston area. NetLogo grew out of StarLogoT, which was authored by Wilensky in
+1997. In 2000, the CCL moved to Northwestern University, in the Chicago area.
+NetLogo 1.0 came out in 2002, 2.0 in 2003, 3.0 in 2005, 4.0 in 2007, 4.1 in
+2009, and 5.0 in 2012.</p>
+<h3><a href="#what-programming-language-was-netlogo-written-in" id="what-programming-language-was-netlogo-written-in" class="section-anchor">What programming language was NetLogo written in?</a></h3>
+<p>NetLogo is written mostly in Scala, with some parts in Java. (Scala code
+compiles to Java byte code and is fully interoperable with Java and other JVM
+languages.)</p>
+<h3><a href="#whats-the-relationship-between-starlogo-and-netlogo" id="whats-the-relationship-between-starlogo-and-netlogo" class="section-anchor">What&rsquo;s the relationship between StarLogo and NetLogo?</a></h3>
+<p>The original StarLogo began at the MIT Media Lab in 1989 and ran on the
+Connection Machine. Later versions were developed for Macintosh computers:
+MacStarLogo (1994, MIT) and StarLogoT (1997, Tufts).</p>
+<p>Today there are two StarLogo descendants under active development: NetLogo (from
+the CCL at Northwestern University) and StarLogo TNG (from MIT). NetLogo is the
+most widely used agent-based modeling environment in both education and
+research. StarLogo TNG is distinguished by its programming interface based on
+colored blocks.</p>
+<h3><a href="#under-what-license-is-netlogo-released-is-the-source-code-available" id="under-what-license-is-netlogo-released-is-the-source-code-available" class="section-anchor">Under what license is NetLogo released? Is the source code available?</a></h3>
+<p>NetLogo is free, open source software under the
+<a href="http://www.gnu.org/licenses/gpl-2.0.html" target="_blank">GPL (GNU General Public License), version 2</a>,
+or (at your option) any later version.</p>
+<p>Commercial licenses are also available. To inquire about commercial licenses,
+please contact Uri Wilensky at <a href="mailto:uri@northwestern.edu">uri@northwestern.edu</a>.</p>
+<p>The source code is
+<a href="https://github.com/NetLogo/NetLogo" target="_blank">on GitHub, here</a>. Development discussion is
+on the <a href="https://groups.google.com/group/netlogo-devel" target="_blank">netlogo-devel</a> group.</p>
+<p>The User Manual is published under a Creative Commons Attribution-ShareAlike
+license (<a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank">CC BY-SA 3.0</a>).</p>
+<p>Source code for all of the extensions bundled with NetLogo is
+<a href="https://github.com/NetLogo/" target="_blank">on GitHub, here</a>. Most of the extensions are in
+the public domain (<a href="https://creativecommons.org/about/cc0" target="_blank">CC0 notice</a>). Other
+extensions are released under open source licenses. See each extension&rsquo;s README
+for details.</p>
+<p>The Code Examples in the Models Library are in the public domain
+(<a href="https://creativecommons.org/about/cc0" target="_blank">CC0 notice</a>).</p>
+<p>The rest of the models in the Models Library are provided under a variety of
+licenses. Some are public domain and some are open source, but most are under
+the Creative Commons Attribution-ShareAlike license
+(<a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" target="_blank">CC BY-NC-SA</a>), which is not
+an open source license, though the models are free for noncommercial
+distribution and use.</p>
+<p>See each model&rsquo;s Info tab to check its particular license.</p>
+<p>The models are in a public Git repository
+<a href="https://github.com/NetLogo/models" target="_blank">here</a>.</p>
+<h3><a href="#do-you-offer-any-workshops-or-other-training-opportunities-for-netlogo" id="do-you-offer-any-workshops-or-other-training-opportunities-for-netlogo" class="section-anchor">Do you offer any workshops or other training opportunities for NetLogo?</a></h3>
+<p>We offer workshops from time to time. If a workshop has been scheduled, we will
+announce it on the
+<a href="http://groups.google.com/d/forum/netlogo-users" target="_blank">NetLogo Users Group</a>.</p>
+<h3><a href="#are-there-any-netlogo-textbooks" id="are-there-any-netlogo-textbooks" class="section-anchor">Are there any NetLogo textbooks?</a></h3>
+<p>The CCL has published a textbook (written by the author of NetLogo) that gives
+an introduction to agent-based modeling methods using NetLogo. It goes step by
+step with coding examples how to design, build, revise, and analyze models. And
+it presents some advanced techniques.</p>
+<p>See <a href="http://www.intro-to-abm.com" target="_blank">www.intro-to-abm.com</a> for more information on
+that textbook.</p>
+<p>See the Textbooks section of our
+<a href="http://ccl.northwestern.edu/netlogo/resources.shtml" target="_blank">Resources</a> page.</p>
+<p>We at the CCL have hoped to write several more NetLogo textbooks. These could be
+aimed at different audiences, such as: middle school, high school, undergraduate
+course in modeling or complexity, practical guide for interested adults.</p>
+<p>Unfortunately, we have not yet been able to find the time to make these happen.
+If anyone from the user community would like to collaborate on such a venture,
+please let us know. We would welcome it.</p>
+<h3><a href="#is-netlogo-available-in-other-languages-besides-english" id="is-netlogo-available-in-other-languages-besides-english" class="section-anchor">Is NetLogo available in other languages besides English?</a></h3>
+<p>Volunteers have translated the user manual into Chinese and Czech. The
+translated versions are available from the NetLogo web site.</p>
+<p>So far, the NetLogo user interface has been localized in English, Spanish,
+Chinese, Russian, and Japanese. All five languages are included in the standard
+download.</p>
+<p>We are seeking volunteers to complete and improve these localizations and to
+translate the NetLogo software and manual into as many other languages as
+possible. If you&rsquo;re able to help in this endeavor, please
+<a href="contact.html">contact us</a>.</p>
+<h3><a href="#is-netlogo-compiled-or-interpreted" id="is-netlogo-compiled-or-interpreted" class="section-anchor">Is NetLogo compiled or interpreted?</a></h3>
+<p>Short answer: some of both.</p>
+<p>Long answer: NetLogo does include a compiler that generates Java byte code.
+However, this compiler does not yet support the entire language, so some parts
+of user code remain interpreted. Note that our compiler generates Java byte
+code, and Java virtual machines have &ldquo;just-in-time&rdquo; compilers that in turn
+compile Java byte code all the way to native code, so much user code is
+ultimately translated to native code.</p>
+<h3><a href="#has-anyone-built-a-model-of-x" id="has-anyone-built-a-model-of-x" class="section-anchor">Has anyone built a model of &lt;x&gt;?</a></h3>
+<p>Try looking at the
+<a href="http://ccl.northwestern.edu/netlogo/models/" target="_blank">NetLogo Models Library</a>, the
+<a href="http://modelingcommons.org/" target="_blank">NetLogo Modeling Commons</a>, our
+<a href="http://ccl.northwestern.edu/netlogo/models/community/" target="_blank">Community Models</a> page,
+and our
+<a href="http://ccl.northwestern.edu/netlogo/references.shtml" target="_blank">list of references to NetLogo in outside works</a>.</p>
+<p>You might also ask the question on the
+<a href="http://groups.google.com/d/forum/netlogo-users" target="_blank">NetLogo Users Group</a> and/or search past messages on the group.</p>
+<h3><a href="#are-netlogo-models-runs-scientifically-reproducible" id="are-netlogo-models-runs-scientifically-reproducible" class="section-anchor">Are NetLogo models runs scientifically reproducible?</a></h3>
+<p>Yes. NetLogo&rsquo;s pseudorandom number generator and agent scheduling algorithms are
+deterministic, and NetLogo always uses Java&rsquo;s &ldquo;strict math&rdquo; library, which gives
+bit-for-bit identical results regardless of platform. But keep the following
+cautions in mind:</p>
+<ul>
+<li>If your model uses random numbers, then in order to get reproducible behavior,
+you must use the <code>random-seed</code> command to set the random seed in advance, so
+that your model will receive the exact same sequence of random numbers every
+time. Remember that agentsets are always in random order, so anything you do
+with agentsets uses random numbers.</li>
+<li>If your model uses the <code>every</code> or <code>wait</code> commands in such a way that affects
+the outcome of the model, then you may get different results on different
+computers, or even on the same computer, since the model may run at a
+different speed.</li>
+<li>In order to reproduce model runs exactly, you must be using the exact same
+version of NetLogo. The details of the agent scheduling mechanism and the
+random number generator may change between NetLogo versions, and other changes
+(bugfixes in the engine, language changes, and so forth) may also affect the
+behavior of your model. (Then again, they may not.)</li>
+<li>We have expended every effort to make NetLogo model runs fully reproducible,
+but of course this can never truly be an iron-clad guarantee, due not only to
+the possibility of random hardware failure, but also the possibility of human
+error in the design of: your model, NetLogo, your Java VM, your hardware, and
+so on.</li>
+</ul>
+<h3><a href="#will-netlogo-and-netlogo-3d-remain-separate" id="will-netlogo-and-netlogo-3d-remain-separate" class="section-anchor">Will NetLogo and NetLogo 3D remain separate?</a></h3>
+<p>For now, yes. NetLogo 3D is included with NetLogo, but it is still a separate
+application.</p>
+<p>Ideally a single unified application would support both 2D and 3D modeling. We
+would design the 3D world support so it doesn&rsquo;t get in the way when you are
+building 2D models. Models built in NetLogo 3D might require changes in order to
+run in the hypothetical unified application.</p>
+<h3><a href="#can-i-run-netlogo-on-my-phone-or-tablet" id="can-i-run-netlogo-on-my-phone-or-tablet" class="section-anchor">Can I run NetLogo on my phone or tablet?</a></h3>
+<p>No. Neither iOS, nor Android, nor Windows RT supports running Java applications
+such as NetLogo.</p>
+<p>We are working on an alternate implementation of NetLogo on a JavaScript and
+HTML5 base, instead of Java. It will work on a variety of tablets and phones. We
+don&rsquo;t know yet when it will be ready, and we expect that for a long time it will
+only support a subset of the features in desktop NetLogo. The many person-years
+of development effort that have gone into the Java version can&rsquo;t cheaply or
+easily be replicated on another platform.</p>
+<p>For technical details on this new project, go
+<a href="https://github.com/NetLogo/NetLogo/wiki/Tortoise" target="_blank">here</a>.</p>
+<h2><a href="#downloading" id="downloading" class="section-anchor">Downloading</a></h2>
+<h3><a href="#can-i-have-multiple-versions-of-netlogo-installed-at-the-same-time" id="can-i-have-multiple-versions-of-netlogo-installed-at-the-same-time" class="section-anchor">Can I have multiple versions of NetLogo installed at the same time?</a></h3>
+<p>Yes. When you install NetLogo, the folder that is created contains has the
+version number in its name, so multiple versions can coexist.</p>
+<p>On Windows systems, whichever version you installed last will be the version
+that opens when you double click a model file in Windows Explorer. On Macs, you
+can control what version opens via &ldquo;Get Info&rdquo; in the Finder.</p>
+<h3><a href="#im-on-a-unix-system-and-i-cant-untar-the-download-why" id="im-on-a-unix-system-and-i-cant-untar-the-download-why" class="section-anchor">I&rsquo;m on a UNIX system and I can&rsquo;t untar the download. Why?</a></h3>
+<p>Some of the files in the tarball have long pathnames, too long for the standard
+tar format. You must use the GNU version of tar instead (or another program
+which understands the GNU tar extensions). On some systems, the GNU version of
+tar is available under the name &ldquo;gnutar&rdquo;. You can find out if you are already
+using the GNU version by typing <code>tar --version</code> and seeing if the output says
+&ldquo;tar (GNU tar)&rdquo;.</p>
+<h3><a href="#how-do-i-install-netlogo-unattended" id="how-do-i-install-netlogo-unattended" class="section-anchor">How do I install NetLogo unattended?</a></h3>
+<p>It depends on which platform you are using.</p>
+<ul>
+<li><strong>Linux:</strong> Untar NetLogo into the appropriate place.</li>
+<li><strong>Mac:</strong> Copy the NetLogo directory from the disk image into the Applications
+folder.</li>
+<li><strong>Windows:</strong> The installer is an MSI which can be run  using one of the following commands (these may require admin privileges):
+<pre><code>msiexec.exe /i C:\Path\to\NetLogo.msi ALLUSERS=1 ADDLOCAL=Shortcuts   :: To install with desktop shortcuts
+msiexec.exe /i C:\Path\to\NetLogo.msi ALLUSERS=1 ADDLOCAL=BaseInstall :: To install without desktop shortcuts
+</code></pre>
+</li>
+</ul>
+<p>We also maintain an <a href="https://github.com/NetLogo/NetLogo/wiki/Advanced-Installation" target="_blank">advanced installation wiki page</a>
+which may have additional tips and tricks.
+We encourage users who have problems with unattended installation or ideas on
+how it could be improved to email <a href="mailto:feedback@ccl.northwestern.edu?subject=Unattended%20Installation">feedback@ccl.northwestern.edu</a>.</p>
+<h2><a href="#running" id="running" class="section-anchor">Running</a></h2>
+<h3><a href="#can-i-run-netlogo-from-a-cd-a-network-drive-or-a-usb-drive" id="can-i-run-netlogo-from-a-cd-a-network-drive-or-a-usb-drive" class="section-anchor">Can I run NetLogo from a CD, a network drive, or a USB drive?</a></h3>
+<p>Yes. NetLogo runs fine from any file system, including read-only file systems.</p>
+<h3><a href="#why-is-netlogo-so-much-slower-when-i-unplug-my-windows-laptop" id="why-is-netlogo-so-much-slower-when-i-unplug-my-windows-laptop" class="section-anchor">Why is NetLogo so much slower when I unplug my Windows laptop?</a></h3>
+<p>Your computer is switching to power saving mode when unplugged. It&rsquo;s normal for
+this to reduce speed a little, but unfortunately there is a bug in Java that
+drastically slows down Swing applications, including NetLogo.</p>
+<p>One workaround is to change the power settings on your computer so it doesn&rsquo;t go
+into power saving mode when you unplug it. (If you do this, your battery won&rsquo;t
+last as long.)</p>
+<p>Another workaround is to run NetLogo with an option recommended by Oracle, by
+editing the NetLogo 6.0.4.vmoptions file, found in the NetLogo directory
+(under Program Files on your hard drive, unless you installed NetLogo in a
+different location). Add on a new line:</p>
+<pre><code>-Dsun.java2d.ddoffscreen=false
+</code></pre>
+<p>You can see the details of the Java bug and vote for Oracle to fix it
+<a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id" target="_blank">here</a>.</p>
+<h3><a href="#why-does-netlogo-bundle-java" id="why-does-netlogo-bundle-java" class="section-anchor">Why does NetLogo bundle Java?</a></h3>
+<p>Since Mac OS X Lion, Apple have encouraged Mac application developers to bundle
+Java. NetLogo bundles Java because it allows us to deliver a consistent,
+convenient experience to our users. Bundling Java allows us to test for
+compatibility once and avoid any bugs caused by version mismatches or Java
+configuration incompatibilities.</p>
+<p>If users are interested in using Java on their system instead of the version of
+Java bundled with NetLogo, they can configure NetLogo to use a different Java
+runtime. Please note that <strong>this change is done at your own risk</strong>. We are
+unable to offer support for problems caused by running NetLogo with an alternate
+Java Runtime. To change the Java runtime used by NetLogo, open the
+<a href="#where-is-cfg-file">NetLogo.cfg</a> file and modify the <code>app.runtime</code> property to
+the path of your preferred Java Runtime.</p>
+<h3><a href="#how-come-netlogo-wont-start-up-on-my-linux-machine" id="how-come-netlogo-wont-start-up-on-my-linux-machine" class="section-anchor">How come NetLogo won&rsquo;t start up on my Linux machine?</a></h3>
+<p>We bundle Oracle&rsquo;s Java runtime when using NetLogo on Linux. If you would like
+to change the version of linux used, you can modify the .cfg files to point to a
+different version of java (see
+<a href="#how-big-can-my-model-be-how-many-turtles-patches-procedures-buttons-and-so-on-can-my-model-contain">How big can my model be?</a>
+for more information).</p>
+<p>In theory, any Java 8 or later runtime will run NetLogo. In practice, some Java
+implementations aren&rsquo;t high enough quality. Recent versions of OpenJDK should
+work; older ones may not. GNU libgcj does not work.</p>
+<p>Ubuntu users should consult <a href="https://help.ubuntu.com/community/Java" target="_blank">https://help.ubuntu.com/community/Java</a>.</p>
+<h3><a href="#when-i-try-to-install-netlogo-on-windows-i-see-windows-protected-your-pc" id="when-i-try-to-install-netlogo-on-windows-i-see-windows-protected-your-pc" class="section-anchor">When I try to install NetLogo on Windows, I see &ldquo;Windows protected your PC&rdquo;</a></h3>
+<p>Windows attempts to protect users from downloading malicious software by
+maintaining a list of &ldquo;good&rdquo; and &ldquo;malicious&rdquo; software. The first users to
+install any NetLogo release will see this warning. Later users may or may not
+see this warning. Before going any further, ensure you are protected. The CCL
+can only vouch for NetLogo downloads hosted on the CCL Website. NetLogo can be
+freely downloaded from
+<a href="http://ccl.northwestern.edu/netlogo/download.shtml" target="_blank">the official NetLogo download page</a>.
+If you obtain NetLogo from anywhere else, you install it at your own risk!</p>
+<p>You can continue past the Windows prompt by taking the following steps:</p>
+<ul>
+<li>In the &ldquo;Windows protected your PC&rdquo; prompt, click &ldquo;More Info&rdquo;, the prompt will
+change</li>
+<li>In the changed prompt, click &ldquo;Run Anyway&rdquo; and continue with installation as
+normal</li>
+</ul>
+<p>Note in order to see the &ldquo;More Info&rdquo; or &ldquo;Run Anyway&rdquo; options, you will need to
+run the installer as an administrator. If you do not see those options,
+right-click and choose &ldquo;Run as administrator&rdquo; and/or change your user account to
+an administrator account before installing.</p>
+<p>We at the CCL are working on solving this problem and hope to free our users of
+the added installation difficulty soon!</p>
+<h3><a href="#when-i-try-to-start-netlogo-on-windows-i-get-an-error-the-jvm-could-not-be-started-help" id="when-i-try-to-start-netlogo-on-windows-i-get-an-error-the-jvm-could-not-be-started-help" class="section-anchor">When I try to start NetLogo on Windows I get an error &ldquo;The JVM could not be started&rdquo;. Help!</a></h3>
+<p>A nearly certain fix is to use a text editor to edit the NetLogo.cfg file,
+changing 1024m to a smaller number, like 512m. This should permit NetLogo to
+start, although the lower heap size limit may affect your ability to run models
+with many agents. See
+<a href="#how-big-can-my-model-be-how-many-turtles-patches-procedures-buttons-and-so-on-can-my-model-contain">How big can my model be?</a>
+for information on model size and how to edit the cfg file.</p>
+<p>If running with the lower heap size limit is unacceptable, read on.</p>
+<p>Some Windows systems have trouble allocating large amounts of contiguous virtual
+memory. Upgrading to a newer version of Windows may help.</p>
+<p>Running Windows in 64-bit mode instead of 32-bit mode may also help. Double
+check that Windows is actually running in 64-bit mode; see
+<a href="https://windows.microsoft.com/en-US/windows-vista/32-bit-and-64-bit-Windows-frequently-asked-questions" target="_blank">Microsoft&rsquo;s FAQ page on 64-bit Windows</a>.</p>
+<h3><a href="#netlogo-wont-start-on-mac-os-sierra-or-later" id="netlogo-wont-start-on-mac-os-sierra-or-later" class="section-anchor">NetLogo won&rsquo;t start on Mac OS Sierra (or later)</a></h3>
+<p>Some users have reported problems opening NetLogo 6 on Mac OS Sierra. We&rsquo;ve been
+unable to determine a root cause for this problem, but we&rsquo;re continuing to
+investigate. We&rsquo;re looking for assistance from you if you run into this problem.
+It would be extremely helpful if you could run the following command in the
+&ldquo;Terminal&rdquo; application and send the output in an email to
+<a href="mailto:bugs@ccl.northwestern.edu?subject=Sierra%20NetLogo%206%20Bug">bugs@ccl.northwestern.edu</a>.</p>
+<pre><code>xattr -pl com.apple.quarantine /Applications/NetLogo\ 6.0.4/NetLogo\ 6.0.4.app
+</code></pre>
+<p>running it should give you a single line of output (something like
+<code>com.apple.quarantine: 01e1;58ac6af2;Firefox;F2E0B1E2-D203-4B05-8DF9-ABA58B52EFEA</code>,
+but yours will have different numbers, letters, and words). Please copy and
+paste this string into the email you send us.</p>
+<p>There is also a partial workaround! Running the following command in the
+Terminal will enable users to run NetLogo without turning Gatekeeper completely
+off. The command is:</p>
+<pre><code>sudo xattr -dr com.apple.quarantine /Applications/NetLogo\ 6.0.4/NetLogo\ 6.0.4.app
+</code></pre>
+<p>Note that if you plan to run NetLogo 3D, HubNet Client, or NetLogo Logging, you
+may also need to re-run that command once for each of those applications. If the
+workaround was not effective for you, please
+<a href="mailto:bugs@ccl.northwestern.edu?subject=Sierra%20NetLogo%206%20Bug%20Workaround">send us an email and let us know</a>.</p>
+<h3><a href="#netlogo-wont-start-on-windows-or-crashes-suddenly-on-mac-os-sierra" id="netlogo-wont-start-on-windows-or-crashes-suddenly-on-mac-os-sierra" class="section-anchor">NetLogo won&rsquo;t start on Windows or crashes suddenly on Mac OS Sierra</a></h3>
+<p>Some users on Mac OS with discrete graphics cards experience sudden crashes of
+NetLogo when switching between integrated and discrete graphics. It&rsquo;s possible
+to prevent these crashes by
+<a href="https://support.apple.com/en-us/HT202043" target="_blank">disabling automatic graphics switching in System Preferences</a>.</p>
+<p>Some Windows users may also be unable to open NetLogo due to graphics card
+settings or drivers. If you are unable to open NetLogo on Windows, you might be
+able to fix this by updating or reinstalling your graphics driver and/or
+disabling any graphics card utilities. Because NetLogo might be unable to start
+for a number of reasons, we encourage you to
+<a href="mailto:bugs@ccl.northwestern.edu?subject=NetLogo%206%20Launch%20Problem%20in%20Windows">contact us</a>
+if these steps aren&rsquo;t effective in resolving the problem.</p>
+<h3><a href="#can-i-run-netlogo-from-the-command-line-without-the-gui" id="can-i-run-netlogo-from-the-command-line-without-the-gui" class="section-anchor">Can I run NetLogo from the command line, without the GUI?</a></h3>
+<p>Yes. The easiest way is to set up your model run or runs as a BehaviorSpace
+experiment. No additional programming is required. See the
+<a href="behaviorspace.html">BehaviorSpace Guide</a> for details.</p>
+<p>Another option is to use our Controlling API. Some light Java programming is
+required. See the
+<a href="https://github.com/NetLogo/NetLogo/wiki/Controlling-API" target="_blank">Controlling API Guide</a>
+for details and sample code.</p>
+<h3><a href="#does-netlogo-take-advantage-of-multiple-processors" id="does-netlogo-take-advantage-of-multiple-processors" class="section-anchor">Does NetLogo take advantage of multiple processors?</a></h3>
+<p>Only when using BehaviorSpace. BehaviorSpace does parallel runs, one per
+processor.</p>
+<p>For a single model run, only one processor is used.</p>
+<p>We are seeking funding to make it possible to split a single model run across
+multiple processors or multiple computers.</p>
+<h3><a href="#can-i-distribute-netlogo-model-runs-across-a-cluster-or-grid-of-computers" id="can-i-distribute-netlogo-model-runs-across-a-cluster-or-grid-of-computers" class="section-anchor">Can I distribute NetLogo model runs across a cluster or grid of computers?</a></h3>
+<p>Many of the same comments in the previous answer apply. It is not possible to
+split a single model run across multiple computers, but you can have each
+machine in a cluster doing one or more separate, independent model runs, using
+either BehaviorSpace or our Controlling API. We don&rsquo;t have automated support for
+splitting the runs across clusters, so you&rsquo;ll need to arrange that yourself.</p>
+<p>Various users are already using NetLogo on clusters, with a variety of hardware
+and software. You can seek them out on the
+<a href="http://groups.google.com/d/forum/netlogo-users" target="_blank">NetLogo Users Group</a>.</p>
+<h3><a href="#is-there-any-way-to-recover-lost-work-if-netlogo-crashes-or-freezes" id="is-there-any-way-to-recover-lost-work-if-netlogo-crashes-or-freezes" class="section-anchor">Is there any way to recover lost work if NetLogo crashes or freezes?</a></h3>
+<p>Yes. NetLogo auto-saves files as you are working on them. The path to the
+auto-save file depends on whether or not the NetLogo model has been saved.</p>
+<p>For NetLogo models which have been saved, a hidden file with the name
+&ldquo;.<em>filename</em>.tmp.nlogo&rdquo; will be created in the same directory as the NetLogo
+model.</p>
+<p>For unsaved NetLogo models, autosave files can be found in your OS-specific java
+temporary directory. The files are named according to the following format:
+<code>autosave_yyyy-MM-dd.HH_mm_ss.nlogo</code> where the time and date are the time and
+date the model was opened. The exact path will depend on your operating system:</p>
+<ul>
+<li>On Mac OS, the temporary directory is
+<code>/var/folders/68/&lt;30-character-alphanumeric-sequence&gt;/T/</code>. The
+30-character-alphanumeric-sequence is unique to each machine.</li>
+<li>On Windows the logs can be found in <code>C:\Users\&lt;user&gt;\AppData\Local\Temp</code>,
+where <code>&lt;user&gt;</code> is the logged in user.</li>
+<li>On most non-Mac Unix-like systems the temp directory is <code>/tmp</code>.</li>
+</ul>
+<h3><a href="#why-is-hubnet-discovery-not-working" id="why-is-hubnet-discovery-not-working" class="section-anchor">Why is HubNet Discovery Not Working?</a></h3>
+<p>HubNet discovery provides the ability for HubNet clients running on the same
+local network as the HubNet server to automatically display the IP address
+and current activity of the server. This uses IPv4 multicast over a local area
+network - it won&rsquo;t identify HubNet servers on the internet or on different
+networks. Some networks also do not support multicast traffic and it will
+simply not work on those networks. For HubNet Discovery to work, the server
+must be broadcasting to the same network that the client is polling for messages.
+Often, both the client and server are only connected to a single network and
+there is no need for further configuration.</p>
+<p>Since NetLogo 6.0.3, we have tools in place to allow clients and/or servers
+connected to multiple networks to select the network on which they will
+broadcast/listen. When running a HubNet server, this is done by selecting
+the appropriate &ldquo;broadcast network&rdquo; via selection dropdown when starting
+a HubNet server. This preference will be remembered until NetLogo is restarted,
+so if you end up needing to broadcast on a different network, restart NetLogo.
+HubNet clients also see a similar dropdown when selecting which activity to
+join. Unlike HubNet server, clients may change the network on which they
+listen at any time. HubNet discovery will only work when both client
+and server are listening/broadcasting on the <em>same</em> network, so some
+trial and error may be required to figure out a working configuration.
+Generally speaking, the shared network is the one on which the client
+and the server have the most similar IP address prefixes. For instance,
+if the server selects to broadcast on a network where it has IP address
+192.168.0.101, a client should prefer listening on a network where it
+has an IP like 192.167.0.203 over a network where it has an IP like
+10.5.0.101. Even when the same network is selected, it is possible
+that that network may not support IPv4 multicast, in which case discovery
+will <em>not</em> work and clients must enter IP addresses manually.</p>
+<p>Note that the change made in 6.0.3 simply enable selection of the network
+on which clients and servers broadcast/listen on. The HubNet server still
+listens on <em>all</em> network connections, so all listed IP addresses given in
+the server broadcast network selection dropdown are potentially valid for
+a HubNet client (even a client on a different network) to connect to.
+Similarly HubNet clients may connect to any HubNet server reachable from
+their computer.</p>
+<h2><a href="#usage" id="usage" class="section-anchor">Usage</a></h2>
+<h3><a href="#when-i-move-the-speed-slider-all-the-way-to-the-right-why-does-my-model-seem-to-stop" id="when-i-move-the-speed-slider-all-the-way-to-the-right-why-does-my-model-seem-to-stop" class="section-anchor">When I move the speed slider all the way to the right, why does my model seem to stop?</a></h3>
+<p>The only way NetLogo can make your model run faster is by updating the view less
+frequently. As you move the speed slider to the right, view updates become less
+and less frequent. Since view updates take time, that means more speed.</p>
+<p>However, fewer updates also means that the updates come farther apart. When
+several seconds pass between updates, it may seem like your model has stopped.
+It hasn&rsquo;t. It&rsquo;s running at full speed. Watch the tick counter! (If your model
+uses it. If it doesn&rsquo;t, watch something else, like a plot.)</p>
+<p>To get a feel for what&rsquo;s going on, try moving the slider to the right gradually
+rather than suddenly. If you find the updates too infrequent at the rightmost
+position, just don&rsquo;t push the slider that far.</p>
+<h3><a href="#can-i-use-the-mouse-to-paint-in-the-view" id="can-i-use-the-mouse-to-paint-in-the-view" class="section-anchor">Can I use the mouse to &ldquo;paint&rdquo; in the view?</a></h3>
+<p>NetLogo does not have a built-in set of painting tools for painting in the view.
+But with only a few lines of code, you can add painting capability to your
+model. To see how it&rsquo;s done, look at Mouse Example, in the Code Examples section
+of the Models Library. The same techniques can be used to let the user interact
+with your model using the mouse in other ways, too.</p>
+<p>Another possibility is to create an image in another program and import it using
+the import items on the File menu or the <code>import-*</code> primitives.</p>
+<h3><a href="#how-big-can-my-model-be-how-many-turtles-patches-procedures-buttons-and-so-on-can-my-model-contain" id="how-big-can-my-model-be-how-many-turtles-patches-procedures-buttons-and-so-on-can-my-model-contain" class="section-anchor">How big can my model be? How many turtles, patches, procedures, buttons, and so on can my model contain?</a></h3>
+<p>We have tested NetLogo with models that use hundreds of megabytes of RAM and
+they work fine. We haven&rsquo;t tested models that use gigabytes of RAM, though.
+Theoretically it should work, but you might hit some limits that are inherent in
+the underlying Java VM and/or operating system (either designed-in limits, or
+bugs).</p>
+<p>The NetLogo engine has no fixed limits on size. By default, though, NetLogo
+ships with a one-gigabyte ceiling on how much total RAM it can use. If your
+model exceeds that limit, you&rsquo;ll get an OutOfMemoryError dialog.</p>
+<p>If you are using BehaviorSpace, note that doing runs in parallel will multiply
+your RAM usage accordingly.</p>
+<p><a id="where-is-cfg-file"></a>
+Each platform contains &ldquo;.cfg&rdquo; files containing JVM settings. There is one cfg
+file for each sub-application (NetLogo, NetLogo 3D, HubNet Client, etc.)
+Although the file location varies by platform, the process for changing it is
+the same. Locate the section of the file that looks like the following:</p>
+<pre><code>[JVMOptions]
+# there may be one or more lines, leave them unchanged
+-Xmx1024m
+# there may be one or more lines, leave them unchanged
+</code></pre>
+<p>Modify the value immediately following <code>-Xmx</code>, changing it to the amount of
+space you need, save the file, and restart NetLogo. Platform specific notes
+follow:</p>
+<ul>
+<li><strong>Windows:</strong> The cfg files will be in
+<code>C:\Program Files (x86)\NetLogo 6.0.4\app</code> if you are running 64-bit
+windows, and <code>C:\Program Files\NetLogo 6.0.4\app</code> otherwise.</li>
+<li><strong>Mac OS X:</strong> The file for NetLogo will be located at:
+<code>/Application/NetLogo 6.0.4/NetLogo.app/Contents/Java/NetLogo.cfg</code> For
+NetLogo 3D and the other applications, you will find the file in the
+corresponding location for each application package. You can reach the cfg
+file by control-clicking the application in the Finder and choosing &ldquo;Show
+Package Contents&rdquo; from the popup menu.
+<p>Please note that depending on your version of Mac OS X, changing the cfg file
+<em>may</em> break application signing. If this happens, follow Apple&rsquo;s directions on
+<a href="https://support.apple.com/en-us/HT202491" target="_blank">this page</a> to temporarily allow
+apps from &ldquo;Anywhere&rdquo;, run NetLogo once, then restore the setting to &ldquo;Mac App
+Store and Identified Developers&rdquo;.</p>
+</li>
+<li><strong>Other:</strong> The cfg files will be located in the <code>netlogo-6.0.4/app</code>
+folder after untarring.</li>
+</ul>
+<p>By default, Mac builds of NetLogo bundle a 64-bit JVM, which should be able to
+make use of as much memory as the lesser of available system memory and the
+value following <code>-Xmx</code>. Windows and Linux will bundle a 32-bit or 64-bit JVM,
+depending on which version you have downloaded. It is recommended that you
+install 64-bit NetLogo on all 64-bit operating systems for best performance.</p>
+<h3><a href="#can-i-use-gis-data-in-netlogo" id="can-i-use-gis-data-in-netlogo" class="section-anchor">Can I use GIS data in NetLogo?</a></h3>
+<p>Yes, many users are using GIS data with NetLogo. The most complete way to do
+that is with the GIS extension. See the <a href="gis.html">GIS Extension Guide</a>.</p>
+<p>A simpler way is to use <code>import-pcolors</code>, but that only works for importing maps
+that are images, not maps in other formats.</p>
+<p>It is also possible to write NetLogo code that reads GIS data using our file I/O
+primitives such as <code>file-open</code>. For example, see the Grand Canyon model in the
+Earth Science section of Sample Models.</p>
+<h3><a href="#my-model-runs-slowly-how-can-i-speed-it-up" id="my-model-runs-slowly-how-can-i-speed-it-up" class="section-anchor">My model runs slowly. How can I speed it up?</a></h3>
+<p>Here&rsquo;s some ways to make it run faster without changing the structure of the
+code:</p>
+<ul>
+<li>Use tick-based view updates, not continuous updates.</li>
+<li>Decrease the frequency of view updates by pushing the speed slider to the
+right, or turn updates off using the checkbox.</li>
+<li>If your model is using all available RAM on your computer, then installing
+more RAM should help. If your hard drive makes a lot of noise while your model
+is running, you probably need more RAM.</li>
+<li>Use turtle size 1, 1.5, or 2, as the 2D renderings for these sizes are cached
+by NetLogo. (This only affects graphics speed in the 2D view, not computation
+speed.)</li>
+</ul>
+<p>In many cases, though, if you want your model to run faster, you may need to
+make some changes to the code. Usually the most obvious opportunity for speedup
+is that you&rsquo;re doing too many computations that involve all the turtles or all
+the patches. Often this can be reduced by reworking the model so that it does
+less computation per time step. The members of the
+<a href="http://groups.google.com/d/forum/netlogo-users" target="_blank">NetLogo Users Group</a> may be able
+to help with this.</p>
+<p>The <a href="profiler.html">profiler extension</a> is useful for identifying which parts of
+your code are taking the most time.</p>
+<p>Unless you are running the exact same strings over and over, using <code>run</code> and
+<code>runresult</code> are much slower than running code directly; you should avoid using
+these primitives on fresh strings in performance-critical code.</p>
+<h3><a href="#can-i-have-more-than-one-model-open-at-a-time" id="can-i-have-more-than-one-model-open-at-a-time" class="section-anchor">Can I have more than one model open at a time?</a></h3>
+<p>One instance of NetLogo can only have one model open at a time. (Unfortunately,
+it is unlikely that this will change in a future version, due to the engineering
+difficulties involved.)</p>
+<p>You can have multiple models open by opening multiple instances of NetLogo,
+though. On Windows and Linux, simply start the application again. On a Mac,
+you&rsquo;ll need to duplicate the application (not the whole folder, just the
+application itself) in the Finder, then open the copy. (The copy takes up only a
+very small amount of additional disk space.)</p>
+<h3><a href="#can-i-change-the-choices-in-a-chooser-on-the-fly" id="can-i-change-the-choices-in-a-chooser-on-the-fly" class="section-anchor">Can I change the choices in a chooser on the fly?</a></h3>
+<p>No.</p>
+<h3><a href="#can-i-divide-the-code-for-my-model-up-into-several-files" id="can-i-divide-the-code-for-my-model-up-into-several-files" class="section-anchor">Can I divide the code for my model up into several files?</a></h3>
+<p>On an experimental basis, this is available using the <code>__includes</code> keyword.</p>
+<h2><a href="#programming" id="programming" class="section-anchor">Programming</a></h2>
+<h3><a href="#how-does-the-netlogo-language-differ-from-other-logos" id="how-does-the-netlogo-language-differ-from-other-logos" class="section-anchor">How does the NetLogo language differ from other Logos?</a></h3>
+<p>This is answered in detail at the end of the <a href="programming.html">Programming Guide</a>.</p>
+<h3><a href="#how-come-my-model-from-an-earlier-netlogo-doesnt-work-right" id="how-come-my-model-from-an-earlier-netlogo-doesnt-work-right" class="section-anchor">How come my model from an earlier NetLogo doesn&rsquo;t work right?</a></h3>
+<p>See the <a href="transition.html">Transition Guide</a> for help.</p>
+<h3><a href="#how-do-i-take-the-negative-of-a-number" id="how-do-i-take-the-negative-of-a-number" class="section-anchor">How do I take the negative of a number?</a></h3>
+<p>Any of these ways:</p>
+<pre><code>(- x)
+-1 * x
+0 - x
+</code></pre>
+<p>With the first way, the parentheses are required.</p>
+<h3><a href="#my-turtle-moved-forward-1-but-its-still-on-the-same-patch-why" id="my-turtle-moved-forward-1-but-its-still-on-the-same-patch-why" class="section-anchor">My turtle moved forward 1, but it&rsquo;s still on the same patch. Why?</a></h3>
+<p>If you have disabled wrapping at the world edges in your model, then the turtle
+might be at a world edge and unable to move any further. You can test for this
+using <code>can-move?</code>.</p>
+<p>Assuming the turtle isn&rsquo;t hitting a world edge, moving forward 1 is only
+guaranteed to take a turtle to a new patch if the turtle&rsquo;s heading is a multiple
+of 90 (that is, exactly north, south, east, or west).</p>
+<p>It&rsquo;s because the turtle might not be standing in the center of a patch. It might
+be near the corner of a patch. For example, suppose your turtle is close to the
+southwest corner of a patch and is facing northeast. The length of the patch
+diagonal is 1.414&hellip; (the square root of two), so <code>fd 1</code> will leave the turtle
+near the northeast corner of the same patch.</p>
+<p>If you don&rsquo;t want to have to think about these issues, one possibility is to
+write your model in such a way that your turtles always come to rest on patch
+centers. See next question.</p>
+<h3><a href="#how-do-i-keep-my-turtles-on-patch-centers" id="how-do-i-keep-my-turtles-on-patch-centers" class="section-anchor">How do I keep my turtles on patch centers?</a></h3>
+<p>A turtle is on a patch center when its <code>xcor</code> and <code>ycor</code> are integers.</p>
+<p>You can move a turtle to the center of its current patch with either of these
+two equivalent commands:</p>
+<pre><code>move-to patch-here
+setxy pxcor pycor
+</code></pre>
+<p>But you&rsquo;ll never need to do that if you never allow turtles off of patch centers
+in the first place.</p>
+<p>The <code>sprout</code> command creates turtles on patch centers. For example:</p>
+<pre><code>ask n-of 50 patches [ sprout 1 [ face one-of neighbors4 ] ]
+</code></pre>
+<p>Another way for a turtle to start on a patch center is with a command such as
+this line of turtle code, which moves it to the center of a random patch:</p>
+<pre><code>move-to one-of patches
+</code></pre>
+<p>Once a turtle is on a patch center, as long as its heading always stays an exact
+multiple of 90 (that is to say, due north, east, south, or west), and as it long
+as it moves forward or back by integer amounts, it will always land on patch
+centers.</p>
+<p>See Random Grid Walk Example, in the Code Examples section of the Models
+Library, to see these code snippets in use.</p>
+<h3><a href="#patch-ahead-1-is-reporting-the-same-patch-my-turtle-is-already-standing-on-why" id="patch-ahead-1-is-reporting-the-same-patch-my-turtle-is-already-standing-on-why" class="section-anchor"><code>patch-ahead 1</code> is reporting the same patch my turtle is already standing on. Why?</a></h3>
+<p>See the answer two answers up. It&rsquo;s the same issue.</p>
+<p>This might not be the meaning of &ldquo;ahead&rdquo; you were expecting. With <code>patch-ahead</code>,
+you must specify the distance ahead that you want to look. If you want to know
+the next patch a turtle would cross into if it moved forward continuously, it is
+possible to find that out. See Next Patch Example, in the Code Examples section
+of the Models Library.</p>
+<h3><a href="#how-do-i-give-my-turtles-vision" id="how-do-i-give-my-turtles-vision" class="section-anchor">How do I give my turtles &ldquo;vision&rdquo;?</a></h3>
+<p>You can use <code>in-radius</code> to let a turtle see a circular area around it.</p>
+<p>Several primitives let the turtle &ldquo;look&rdquo; at specific points. The <code>patch-ahead</code>
+primitive is useful for letting a turtle see what is directly in front of it. If
+you want the turtle to look in another direction besides straight ahead, try
+<code>patch-left-and-ahead</code> and <code>patch-right-and-ahead</code>.</p>
+<p>If you want the turtle to have a full &ldquo;cone&rdquo; of vision, use the <code>in-cone</code>
+primitive.</p>
+<p>You can also find out the next patch a turtle would cross into if it moved
+forward continuously. See Next Patch Example, in the Code Examples section of
+the Models Library.</p>
+<h3><a href="#can-agents-sense-whats-in-the-drawing-layer" id="can-agents-sense-whats-in-the-drawing-layer" class="section-anchor">Can agents sense what&rsquo;s in the drawing layer?</a></h3>
+<p>No. If you want to make marks that agents can sense, use patch colors.</p>
+<h3><a href="#im-getting-numbers-like-010000000004-and-0799999999999-instead-of-01-and-08-why" id="im-getting-numbers-like-010000000004-and-0799999999999-instead-of-01-and-08-why" class="section-anchor">I&rsquo;m getting numbers like 0.10000000004 and 0.799999999999 instead of 0.1 and 0.8. Why?</a></h3>
+<p>See the <a href="programming.html#math">&ldquo;Math&rdquo; section of the Programming Guide</a> for a
+discussion of this issue.</p>
+<h3><a href="#the-documentation-says-that-random-float-1-might-return-0-but-will-never-return-1-what-if-i-want-1-to-be-included" id="the-documentation-says-that-random-float-1-might-return-0-but-will-never-return-1-what-if-i-want-1-to-be-included" class="section-anchor">The documentation says that <code>random-float 1</code> might return 0 but will never return 1. What if I want 1 to be included?</a></h3>
+<p>It really doesn&rsquo;t matter. Even if 1 were a possible result, it would only come
+up approximately 1 in 2^64 tries, which means you&rsquo;d be waiting hundreds of years
+before it ever came up exactly 1.</p>
+<p>Nonetheless, if you are convinced that it really must be possible to get 1, you
+can use <code>precision</code> to round your answer to a certain number of decimal places.
+For example:</p>
+<pre><code>print precision (random-float 1) 10
+0.2745173723
+</code></pre>
+<p>(If you use this method, note that 0 and 1 are only half as likely to come up as
+other answers. To see why this is so, consider the case where you only keep one
+digit after the decimal point. Results between 0 and 0.5 get rounded to 0, but
+results between 0.5 and 1.5 get rounded to 1; the latter range is twice as
+large. If you want 0, 0.1, 0.2, &hellip;, 0.9, and 1 to all be equally likely, an
+alternative is to write <code>random 11 / 10</code>; this gives all 11 answers with equal
+probability.)</p>
+<h3><a href="#how-can-i-keep-two-turtles-from-occupying-the-same-patch" id="how-can-i-keep-two-turtles-from-occupying-the-same-patch" class="section-anchor">How can I keep two turtles from occupying the same patch?</a></h3>
+<p>See One Turtle Per Patch Example, in the Code Examples section of the Models
+Library.</p>
+<h3><a href="#how-can-i-find-out-if-a-turtle-is-dead" id="how-can-i-find-out-if-a-turtle-is-dead" class="section-anchor">How can I find out if a turtle is dead?</a></h3>
+<p>When a turtle dies, it turns into <code>nobody</code>. <code>nobody</code> is a special value used in
+NetLogo used to indicate the absence of a turtle or patch. So for example:</p>
+<pre><code>if turtle 0 != nobody [ ... ]
+</code></pre>
+<p>You could also use <code>is-turtle?</code>:</p>
+<pre><code>if is-turtle? turtle 0 [ ... ]
+</code></pre>
+<h3><a href="#does-netlogo-have-arrays" id="does-netlogo-have-arrays" class="section-anchor">Does NetLogo have arrays?</a></h3>
+<p>Nearly all models should just use lists for this.</p>
+<p>The usual motivation for using arrays in other programming languages is that
+they provide fast random access (<code>item</code>) and mutation (<code>replace-item</code>). But
+NetLogo&rsquo;s lists, even though they are immutable, now provide near constant time
+performance on these operations.</p>
+<p>Lists in earlier versions of NetLogo (4.1 and 4.0) were simple singly-linked
+lists and therefore these operations took linear time. The data structure
+underlying NetLogo&rsquo;s lists now is the immutable Vector class from the Scala
+collections library. It uses 32-wide
+<a href="https://en.wikipedia.org/wiki/Hash_array_mapped_trie" target="_blank">hash array mapped tries</a>,
+as implemented by Tiark Rompf, based in part on work by Phil Bagwell and Rich
+Hickey.</p>
+<p>If you are certain you want to use raw, mutable JVM arrays in your model, they
+are provided by the array extension. See the Arrays &amp; Tables section of the User
+Manual.</p>
+<h3><a href="#does-netlogo-have-hash-tables-or-associative-arrays" id="does-netlogo-have-hash-tables-or-associative-arrays" class="section-anchor">Does NetLogo have hash tables or associative arrays?</a></h3>
+<p>Yes, using the table extension. See the Arrays &amp; Tables section of the User
+Manual.</p>
+<h3><a href="#how-can-i-use-different-patch-neighborhoods-circular-von-neumann-moore-etc" id="how-can-i-use-different-patch-neighborhoods-circular-von-neumann-moore-etc" class="section-anchor">How can I use different patch &ldquo;neighborhoods&rdquo; (circular, Von Neumann, Moore, etc.)?</a></h3>
+<p>The <code>in-radius</code> primitives lets you access circular neighborhoods of any radius.</p>
+<p>The <code>neighbors</code> primitive gives you a Moore neighborhood of radius 1, and the
+<code>neighbors4</code> primitive gives you a Von Neumann neighborhood of radius 1.</p>
+<p>For Moore or Von Neumann neighborhoods of a larger radius, see Moore &amp; Von
+Neumann Example in the Code Examples section of the Models Library.</p>
+<h3><a href="#how-can-i-convert-an-agentset-to-a-list-of-agents-or-vice-versa" id="how-can-i-convert-an-agentset-to-a-list-of-agents-or-vice-versa" class="section-anchor">How can I convert an agentset to a list of agents, or vice versa?</a></h3>
+<p>If you want the list in a particular order, use the <code>sort</code> or <code>sort-by</code>
+primitives. The Lists section of the Programming Guide explains how to do this.
+See also Ask Ordering Example, in the Code Examples section of the Models
+Library.</p>
+<p>If you want the list in a random order, here&rsquo;s how:</p>
+<pre><code>[self] of &lt;agentset&gt;
+</code></pre>
+<p>Because all operations on agentsets are in random order, the resulting list is
+in random order.</p>
+<p>To convert a list of agents to an agentset, use the <code>turtle-set</code>, <code>patch-set</code>,
+or <code>link-set</code> primitives.</p>
+<h3><a href="#how-do-i-stop-foreach" id="how-do-i-stop-foreach" class="section-anchor">How do I stop foreach?</a></h3>
+<p>To stop a foreach from executing you need to define a separate procedure that
+contains only the foreach, for example:</p>
+<pre><code>to test
+  foreach [1 2 3] [ i -&gt;
+    if i = 2 [ stop ]
+    print i
+  ]
+end
+</code></pre>
+<p>This code will only print the number 1. The <code>stop</code> returns from the current
+procedure so nothing after the foreach will be executed either. (If the
+procedure is a reporter procedure, use <code>report</code> instead of <code>stop</code>.)</p>
+<h3><a href="#im-trying-to-make-a-list-why-do-i-keep-getting-the-error-expected-a-constant" id="im-trying-to-make-a-list-why-do-i-keep-getting-the-error-expected-a-constant" class="section-anchor">I&rsquo;m trying to make a list. Why do I keep getting the error &ldquo;Expected a constant&rdquo;?</a></h3>
+<p>If a list contains only constants, you can write it down just by putting square
+brackets around it, like <code>[1 2 3]</code>.</p>
+<p>If you want your list to contain items that may vary at runtime, the list cannot
+be written down directly. Instead, you build it using the
+<a href="dictionary.html#list">list</a> primitive.</p>
+<h2><a href="#behaviorspace" id="behaviorspace" class="section-anchor">BehaviorSpace</a></h2>
+<h3><a href="#why-are-the-rows-in-my-behaviorspace-table-results-out-of-order" id="why-are-the-rows-in-my-behaviorspace-table-results-out-of-order" class="section-anchor">Why are the rows in my BehaviorSpace table results out of order?</a></h3>
+<p>This is normal when doing multiple runs in parallel. For a discussion of the
+issue, see the section on parallel runs in the
+<a href="behaviorspace.html">BehaviorSpace Guide</a> section of the User Manual.</p>
+<h3><a href="#how-do-i-measure-runs-every-n-ticks" id="how-do-i-measure-runs-every-n-ticks" class="section-anchor">How do I measure runs every n ticks?</a></h3>
+<p>Use <code>repeat</code> in your experiment&rsquo;s go commands, e.g.:</p>
+<pre><code>repeat 10 [ go ]
+</code></pre>
+<p>to measure the run after every 10 ticks. Essentially you are making one
+experiment step equal 10 ticks.</p>
+<h3><a href="#im-varying-a-global-variable-i-declared-in-the-code-tab-but-it-doesnt-work-why" id="im-varying-a-global-variable-i-declared-in-the-code-tab-but-it-doesnt-work-why" class="section-anchor">I&rsquo;m varying a global variable I declared in the Code tab, but it doesn&rsquo;t work. Why?</a></h3>
+<p>It&rsquo;s probably because your setup commands or setup procedure are using
+<code>clear-all</code>, causing the values set by BehaviorSpace to be cleared.</p>
+<p>One possible workaround is to change your experiment&rsquo;s setup commands to
+preserve the value of the variable, e.g.:</p>
+<pre><code>let old-var1 var1
+setup
+set var1 old-var1
+</code></pre>
+<p>This works because even <code>clear-all</code> doesn&rsquo;t clear the values of local variables
+made with <code>let</code></p>
+<p>Another possible workaround is to change your model&rsquo;s setup procedure to use
+more specific clearing commands to clear only what you want cleared.</p>
+<h2><a href="#netlogo-3d" id="netlogo-3d" class="section-anchor">NetLogo 3D</a></h2>
+<h3><a href="#does-netlogo-work-with-my-stereoscopic-device" id="does-netlogo-work-with-my-stereoscopic-device" class="section-anchor">Does NetLogo work with my stereoscopic device?</a></h3>
+<p>NetLogo supports fullscreen exclusive mode. If that is all your device needs
+then, possibly yes. However, it can be tricky to get it working. We don&rsquo;t have
+any such devices so it is difficult for us to make the process easier. If your
+device needs something else, for example, quadbuffers enabled, the answer is
+probably no.</p>
+<h2><a href="#extensions" id="extensions" class="section-anchor">Extensions</a></h2>
+<h3><a href="#im-writing-an-extension-why-does-the-compiler-say-it-cant-find-orgnlogoapi" id="im-writing-an-extension-why-does-the-compiler-say-it-cant-find-orgnlogoapi" class="section-anchor">I&rsquo;m writing an extension. Why does the compiler say it can&rsquo;t find <code>org.nlogo.api</code>?</a></h3>
+<p>You need to add NetLogo.jar to your classpath when compiling. <code>NetLogo.jar</code> is
+included with NetLogo.</p>

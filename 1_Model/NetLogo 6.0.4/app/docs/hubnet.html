@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<title>
+  NetLogo 6.0.4 User Manual: HubNet Guide
+</title>
+<link rel="stylesheet" href="netlogo.css" type="text/css">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<h1><a href="#hubnet-guide" id="hubnet-guide" class="section-anchor">HubNet Guide</a></h1>
+<div class="version">
+  NetLogo 6.0.4 User Manual
+</div>
+<p>This section of the User Manual introduces the HubNet system and
+includes instructions to set up and run a HubNet activity.</p>
+<p>HubNet is a technology that lets you use NetLogo to run
+<em>participatory simulations</em> in the classroom. In a participatory
+simulation, a whole class takes part in enacting the behavior of a
+system as each student controls a part of the system by using an
+individual device, such as a networked computer.</p>
+<p>For example, in the Gridlock simulation, each student controls a
+traffic light in a simulated city. The class as a whole tries to make
+traffic flow efficiently through the city. As the simulation runs,
+data is collected which can afterwards be analyzed on a computer.</p>
+<p>For more information on participatory simulations and their learning
+potential, please visit the
+<a href="http://ccl.northwestern.edu/rp/ps/index.shtml" target="_blank">Participatory Simulations Project web site</a>.</p>
+<ul>
+<li><a href="#understanding-hubnet">Understanding HubNet</a></li>
+<li><a href="#computer-hubnet">Computer HubNet</a></li>
+<li><a href="#teacher-workshops">Teacher workshops</a></li>
+<li><a href="#hubnet-authoring-guide">HubNet Authoring Guide</a></li>
+<li><a href="#running-hubnet-in-headless-mode">Running HubNet in headless mode</a></li>
+<li><a href="#getting-help">Getting help</a></li>
+</ul>
+<h2><a href="#understanding-hubnet" id="understanding-hubnet" class="section-anchor">Understanding HubNet</a></h2>
+<h3><a href="#netlogo" id="netlogo" class="section-anchor">NetLogo</a></h3>
+<p>NetLogo is a programmable modeling environment. It comes with a large library of
+existing simulations, both participatory and traditional, that you can use and
+modify. Content areas include social science and economics, biology and
+medicine, physics and chemistry, and mathematics and computer science. You and
+your students can also use it to build your own simulations.</p>
+<p>In traditional NetLogo simulations, the simulation runs according to rules that
+the simulation author specifies. HubNet adds a new dimension to NetLogo by
+letting simulations run not just according to rules, but by direct human
+participation.</p>
+<p>Since HubNet builds upon NetLogo, we recommend that before trying HubNet for the
+first time, you become familiar with the basics of NetLogo. To get started using
+NetLogo models, see <a href="tutorial1.html">Tutorial #1: Running Models</a> in the
+NetLogo Users Manual.</p>
+<h3><a href="#hubnet-architecture" id="hubnet-architecture" class="section-anchor">HubNet Architecture</a></h3>
+<p>HubNet simulations are based on a client/server architecture. The activity
+leader uses the NetLogo application to run a HubNet activity. When NetLogo is
+running a HubNet activity, we refer to it as a HubNet server. Participants use a
+client application to log in and interact with the HubNet server.</p>
+<p>While HubNet is only supported via the Java Desktop clients at the moment, we
+hope to add support for other types of clients such as tablets and phones in the
+future.</p>
+<h2><a href="#computer-hubnet" id="computer-hubnet" class="section-anchor">Computer HubNet</a></h2>
+<h3><a href="#activities" id="activities" class="section-anchor">Activities</a></h3>
+<p>The following activities are available in the Models Library, in the
+HubNet Activities folder. Information on how to run the models and activities
+can be found in the Info tab of each model. Additional discussion of educational
+goals and ways to incorporate many of the activities into your classroom in the
+Participatory Simulations Guide on the
+<a href="http://ccl.northwestern.edu/rp/ps/index.shtml" target="_blank">Participatory Simulations Project web site</a>.</p>
+<ul>
+<li>Bug Hunters Camouflage - students hunt bugs and camouflaging emerges.</li>
+<li>Dice Stalagmite HubNet - students roll dice and explore the space of dependent
+and independent events.</li>
+<li>Disease - A disease spreads through the simulated population of students.</li>
+<li>Disease Doctors - A slight modification to the Disease activity where some
+students can recover from the disease.</li>
+<li>Gridlock - Students use traffic lights to control the flow of traffic through
+a city.</li>
+<li>Polling - Ask students questions and plot their answers.</li>
+<li>Root Beer Game - An adaptation of a popular game created at MIT in the early
+1960s that shows how small delays in a distribution system can create big
+problems.</li>
+<li>Sampler - Students engage in statistical analysis as individuals and as a
+classroom. Through these activities, students discover the meaning and use of
+basic concepts in statistics.</li>
+<li>Tragedy of the Commons - Students work as farmers sharing a common resource.</li>
+</ul>
+<h3><a href="#clients" id="clients" class="section-anchor">Clients</a></h3>
+<p>To use the client application you simply need to launch the HubNet client
+application that is bundled with NetLogo.</p>
+<h3><a href="#requirements" id="requirements" class="section-anchor">Requirements</a></h3>
+<p>To use Computer HubNet, you need a networked computer with NetLogo installed for
+the server. When using the client application you will also need a networked
+computer with NetLogo installed for each participant. When using in classroom
+settings we also suggest an attached projector for the leader to project the
+entire simulation to the participants.</p>
+<h3><a href="#starting-an-activity" id="starting-an-activity" class="section-anchor">Starting an activity</a></h3>
+<p>You&rsquo;ll find the HubNet activities in NetLogo&rsquo;s Models Library, in the
+HubNet Activities folder. We suggest doing a few practice runs of an activity
+before trying it in front of a class.
+<img src="images/hubnet/hubnetstartactivity.gif" alt="Screenshot" class="screenshot" /></p>
+<p>Open a Computer HubNet model. NetLogo will prompt you to enter the name of your
+new HubNet session. This is the name that participants will use to identify this
+activity.
+You may also see a broadcast network selection dropdown for which more
+extensive documentation is available
+<a href="faq.html#why-is-hubnet-discovery-not-working">in the FAQ</a>.
+For now, just enter a name and press Start.</p>
+<p>NetLogo will open the HubNet Control Center, which lets you interact with the
+HubNet server.</p>
+<p>You, as the leader, should then notify everyone that they may join. To join the
+activity, participants launch the HubNet Client application and enter their
+name. They should see your activity listed and can join your activity by
+selecting it and pressing Enter. If the activity you started is not listed the
+student can enter the server address manually which can be found in the
+HubNet Control Center.</p>
+<h3><a href="#hubnet-control-center" id="hubnet-control-center" class="section-anchor">HubNet Control Center</a></h3>
+<p><img src="images/hubnet/hubnetcontrolcenter.gif" alt="Screenshot" class="screenshot" /></p>
+<p>The HubNet Control Center lets you interact with the HubNet server. It displays
+the name, activity, address and port number of your server. The
+&ldquo;Mirror 2D View on clients&rdquo; checkbox controls whether the HubNet participants
+can see the view on their clients, assuming there is a view in the client setup.
+The &ldquo;Mirror plots on clients&rdquo; checkbox controls whether participants will
+receive plot information.</p>
+<p>The client list on the right displays the names of clients that are currently
+connected to you activity. To remove a participant from the activity, select
+their name in the list and press the Kick button. To launch your own HubNet
+client press the Local button, this is particularly useful when you are
+debugging an activity. The &ldquo;Reset&rdquo; button kicks out all currently logged in
+clients and reloads the client interface.</p>
+<p>The lower part of the Control Center displays messages when a participant joins
+or leaves the activity. To broadcast a message to all the participants, click on
+the field at the bottom, type your message and press Broadcast Message.</p>
+<h3><a href="#troubleshooting" id="troubleshooting" class="section-anchor">Troubleshooting</a></h3>
+<h4><a href="#i-started-a-hubnet-activity-but-when-participants-open-a-hubnet-client-my-activity-isnt-listed" id="i-started-a-hubnet-activity-but-when-participants-open-a-hubnet-client-my-activity-isnt-listed" class="section-anchor">I started a HubNet activity, but when participants open a HubNet Client, my activity isn&rsquo;t listed.</a></h4>
+<p>On some networks, the HubNet Client cannot automatically detect a HubNet server.
+Tell your participants to manually enter the server address and port of your
+HubNet server, which appear in the HubNet Control Center.</p>
+<p>Note: The technical details on this are as follows. In order for the client to
+detect the server, multicast routing must be available between them. Not all
+networks support multicast routing. In particular, networks that use the IPsec
+protocol typically do not support multicast. The IPsec protocol is used on many
+Virtual Private Networks (VPNs).</p>
+<h4><a href="#when-a-participant-tries-to-connect-to-an-activity-nothing-happens-the-client-appears-to-hang-or-gives-an-error-saying-that-no-server-was-found" id="when-a-participant-tries-to-connect-to-an-activity-nothing-happens-the-client-appears-to-hang-or-gives-an-error-saying-that-no-server-was-found" class="section-anchor">When a participant tries to connect to an activity, nothing happens (the client appears to hang or gives an error saying that no server was found).</a></h4>
+<p>If your computer or network has a firewall, it may be impeding the HubNet server
+from communicating. Make sure that your computer and network are not blocking
+ports used by the HubNet server (ports 9173-9180).</p>
+<h4><a href="#the-view-on-the-hubnet-client-is-gray" id="the-view-on-the-hubnet-client-is-gray" class="section-anchor">The view on the HubNet client is gray.</a></h4>
+<ul>
+<li>Verify that the &ldquo;Mirror 2D view on clients&rdquo; checkbox in the
+HubNet Control Center is selected.</li>
+<li>Make sure that the display switch in the model is on.</li>
+<li>If you have made changes to the size of the view on the server you may need to
+press the &ldquo;Reset&rdquo; button in the Control Center to ensure the clients get the
+new size.</li>
+</ul>
+<h4><a href="#there-is-no-view-on-the-hubnet-client" id="there-is-no-view-on-the-hubnet-client" class="section-anchor">There is no view on the HubNet client.</a></h4>
+<p>Some activities don&rsquo;t have a view on the client. If you want to add a view
+simply select &ldquo;HubNet Client Editor&rdquo; from the Tools Menu and add a view like any
+other widget. Make sure to press the &ldquo;Reset&rdquo; button before having clients log
+in.</p>
+<h4><a href="#i-cant-quit-a-hubnet-client" id="i-cant-quit-a-hubnet-client" class="section-anchor">I can&rsquo;t quit a HubNet client.</a></h4>
+<p>You will have to force the client to quit. On OS X, force quit the application
+by selecting Force Quit&hellip; in the Apple menu. On Windows, press Ctrl-Alt-Delete
+to open the Task Manager, select HubNet Client and press End Task.</p>
+<h4><a href="#my-computer-went-to-sleep-while-running-a-hubnet-activity-when-i-woke-the-computer-up-i-got-an-error-and-hubnet-wouldnt-work-anymore" id="my-computer-went-to-sleep-while-running-a-hubnet-activity-when-i-woke-the-computer-up-i-got-an-error-and-hubnet-wouldnt-work-anymore" class="section-anchor">My computer went to sleep while running a HubNet activity. When I woke the computer up, I got an error and HubNet wouldn&rsquo;t work anymore.</a></h4>
+<p>The HubNet server may stop working if the computer goes to sleep. If this
+happens, quit the NetLogo application and start over. Change the settings on
+your computer so it won&rsquo;t sleep again.</p>
+<h4><a href="#my-problem-is-not-addressed-on-this-page" id="my-problem-is-not-addressed-on-this-page" class="section-anchor">My problem is not addressed on this page.</a></h4>
+<p>See <a href="contact.html">Contacting Us</a>.</p>
+<h3><a href="#known-limitations" id="known-limitations" class="section-anchor">Known Limitations</a></h3>
+<p>If HubNet malfunctions, see the bug reporting information at
+<a href="contact.html">Contacting Us</a>.</p>
+<p>Please note that:</p>
+<ul>
+<li>HubNet has not yet been extensively tested with large numbers of clients (i.e.
+more than about 25). Unexpected results may occur with more clients.</li>
+<li>Out-of-memory conditions are not handled gracefully</li>
+<li>Sending large amounts of plotting messages to the clients can take a long time.</li>
+<li>NetLogo does not handle malicious clients in a robust manner (in other words,
+it is likely vulnerable to denial-of-service type attacks).</li>
+<li>Performance does not degrade gracefully over slow or unreliable network
+connections.</li>
+<li>If you are on a wireless network or sub-LAN, the IP address in the
+HubNet Control Center is not always the entire IP address of the server.</li>
+<li>Computer HubNet has only been tested on LANs, and not on dial-up connections
+or WANs.</li>
+</ul>
+<h2><a href="#teacher-workshops" id="teacher-workshops" class="section-anchor">Teacher workshops</a></h2>
+<p>For information on upcoming workshops and NetLogo and HubNet use in the
+classroom, please <a href="contact.html">contact us</a>.</p>
+<h2><a href="#hubnet-authoring-guide" id="hubnet-authoring-guide" class="section-anchor">HubNet Authoring Guide</a></h2>
+<p>To learn about authoring or modifying HubNet activities, see the
+<a href="hubnet-authoring.html">HubNet Authoring Guide</a>.</p>
+<h2><a href="#running-hubnet-in-headless-mode" id="running-hubnet-in-headless-mode" class="section-anchor">Running HubNet in headless mode</a></h2>
+<p>To learn about running HubNet activities from the command line, with no GUI on
+the server, see the HubNet section in the <a href="controlling.html">Controlling Guide</a>.</p>
+<h2><a href="#getting-help" id="getting-help" class="section-anchor">Getting help</a></h2>
+<p>If you have any questions about HubNet or need help getting started,
+<a href="contact.html">contact us</a>.</p>

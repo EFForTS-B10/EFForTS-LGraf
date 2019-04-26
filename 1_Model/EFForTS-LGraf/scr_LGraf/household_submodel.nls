@@ -1,0 +1,812 @@
+
+
+;###################################################################################
+; Initialize Households
+;###################################################################################
+
+To create-and-place-villages
+  
+  ;; Determine village sizes based on distribution and report a list of villages
+  ; set vlg-sizes determine-village-sizes ;vlg-sizes is now global variable and defined elsewhere
+  print (word "vlg-sizes: " vlg-sizes)
+  
+  ;; Define the homebases, for sequential option: only on the last established road; for all other options: all road patches outside plantations
+  let potential-homebases patches with [p_road = 1 and p_landuse != 1000] ;road patches outside large scale plantations
+  
+  let village_id 1  ; 
+  
+  ;; Determine proportion of transmigrants in village and report a list
+  let proportion determine-transmigrant-proportion ; 
+  
+  ;; Dummy-variables to save warning to report
+  let warning-distance 0
+  let warning-next 0
+  let warning-vlg 0
+  
+  ;; Loop trough the village sizes:
+  foreach vlg-sizes
+  [
+    vlg-size ->
+    
+    ;; Select a central start patch for the current village:
+    
+    let current-patch one-of potential-homebases with [not any? turtles-here and not any? turtles-on patches in-radius min-distance] ; 
+    ;; Try less restrictive if there is no such patch
+    if (current-patch = nobody)
+    [
+      let i 1  ; 
+      while [current-patch = nobody and (min-distance - i) > 0]  ; 
+      [
+        set current-patch one-of potential-homebases with [not any? turtles-here and not any? turtles-on patches in-radius (min-distance - i)]  ; 
+        set i (i + 1)
+        if print-messages?
+        [
+          print "WARNING distance between villages fell below set value"
+        ]
+        set warning-distance 1
+        
+      ]
+    ]
+  
+    if (current-patch = nobody) 
+    [
+      set current-patch one-of potential-homebases with [not any? turtles-here]
+      if print-messages?
+      [
+        print "WARNING villages are built next to each other"  ; 
+      ]
+      set warning-next 1
+    ]
+    
+    
+    
+    ;; Create households: start by filling up the start-patch, then go on with a neighbor road cell, ...
+    let k 1
+    let j 0
+    let counter 0
+    while [k <= vlg-size]
+    [
+      ;; Check if there is still space left in the current-patch
+      ifelse (count turtles-on current-patch < households-per-cell)
+      [
+        ask current-patch
+        [
+          let turtle-identity 0
+          sprout 1 
+          [
+            init.household   
+            set homebase-xcor pxcor
+            set homebase-ycor pycor
+            set homebase-road-nr p_road_nr
+            set turtle-identity who
+          ]
+          
+          set p_homebase replace-item 0 p_homebase village_id ; 
+          
+          ifelse random-float 1.0 < item (village_id - 1) proportion ; 
+          [
+            set p_homebase replace-item 2 p_homebase (item 2 p_homebase + 1) ; 
+          ] ;; if household is transmigrant increase count of item 2 in p_homebase
+          [
+            set p_homebase replace-item 1 p_homebase (item 1 p_homebase + 1) ; 
+          ] ;; if household is local increase count of item 1 in p_homebase
+          set p_homebase_id replace-item ((count turtles-here) - 1) p_homebase_id turtle-identity 
+          set p_landuse 2
+          
+          ;; Increase counter
+          set k (k + 1)
+          set j 0
+          set counter 0
+        ]
+      ]
+      
+      [
+        ;; If there is no space left, find a new patch:
+        ask current-patch
+        [
+          set current-patch one-of neighbors with [member? self potential-homebases and not any? turtles-here]
+          ;; Try less restrictive if there is no such patch:
+          ifelse (count neighbors with [member? self potential-homebases] = 0)
+          [
+            if print-messages?
+            [
+              print "WARNING: no more homebases to put households. Think about changing the model parameters"
+            ]
+            set log-list-households lput "There are no more homebases to put households. Think about changing the model parameters" log-list-households
+            set number-of-households count turtles
+            stop
+          ]
+            
+          [
+            set current-patch one-of neighbors with [member? self potential-homebases]
+            set counter counter + 1
+            if counter > (1000 * counter-nr) ; sometimes it takes the model a while to find a suitable patch thus the counter is increased
+            [
+              if print-messages?
+              [
+                print "WARNING: no more neighboring cells to put households"
+              ]
+              if warning-vlg = 0
+              [
+                set log-list-households lput "The model could not create any more households as there were no more neighboring empty cells." log-list-households
+                set warning-vlg 1
+              ]
+              set log-list-households lput (word "Village " village_id " was not completely filled.") log-list-households
+              set k (vlg-size + 1)
+            ]
+          ]
+            
+        ]
+      ]
+      
+    ]
+    
+    
+    ;; Count number of local & transmigrant households per village ; 
+    let local-vlg [item 1 p_homebase] of patches with [item 0 p_homebase = village_id]
+    set local lput sum local-vlg local
+    let transmigrant-vlg [item 2 p_homebase] of patches with [item 0 p_homebase = village_id]
+    set transmigrant lput sum transmigrant-vlg transmigrant
+    
+    
+    
+    ;; Calculate the proportion of transmigrant households in a village ; 
+    let prop 0
+    ifelse ((sum local-vlg + sum transmigrant-vlg) = 0)
+      [
+        set prop 0
+        if print-messages?
+        [
+          print (word "WARNING village nr " village_id " empty")
+        ]
+    ]
+      [
+        set prop sum transmigrant-vlg / (sum local-vlg + sum transmigrant-vlg)
+      ]
+    set real-proportion lput prop real-proportion
+    
+    set village_id (village_id + 1) ; 
+    
+  ]
+  
+  if warning-distance = 1
+  [
+    set log-list-households lput "Minimal distance between villages fell below set value." log-list-households
+  ]
+  
+  if warning-next = 1
+  [
+    set log-list-households lput "Villages are built next to each other." log-list-households
+  ]
+    
+ ; plot-expected-village-areas
+  plot-village-areas
+  
+  set number-of-households count turtles
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To init.household
+  
+  set shape "person"
+  set color black
+  set size  4
+   
+  set household-size item 0 household-sizes
+  set household-sizes remove-item 0 household-sizes
+  set household-reached-final-size 0
+  set household-number-of-patches 0; number of fields
+  set household-number-of-land-use-types 0 ;number of land-use types applied in this household
+  set household-LUT-patches n-values length LUT-fractions-list [0]
+  set household-patch-id-list []
+  set household-area-realized 0
+  set visited-patches no-patches
+   
+end
+
+
+
+;###################################################################################
+; Household size
+;###################################################################################
+To determine-household-sizes 
+    
+  if setup-model = "number-of-households"
+  [ 
+    ;; store number of households that should have been created
+    set no-hh-setup number-of-households
+    
+    ;; create list with length of number of households with household-area-values
+    set household-sizes n-values number-of-households [draw-hh-area-value]
+    
+     ;; Create a list with the household sizes that does not get deleted when households are set up
+    set household-sizes-list n-values number-of-households [0]
+    let counter 0
+    while [counter < number-of-households]
+    [
+      set household-sizes-list replace-item counter (household-sizes-list) (item counter household-sizes)
+      set counter counter + 1
+    ]
+    
+    
+    ;;update agricutural-area
+    set proportion-agricultural-area (sum household-sizes / count patches)
+  ]
+  
+  if setup-model = "number-of-villages"
+  [
+    ;; store number of villages that should have been created
+    set no-vlg-setup number-of-villages
+    
+    let vlg-id 0 ; used as village_id
+    let current-vlg-area 0
+    let hh-vlg 0 ; used to count households per village
+    
+    let reached-vlg-size 0
+    ;; while the area of the current village is smaller or equal to the area drawn from the distribution, keep adding households to village
+    while [vlg-id < length vlg-areas]
+    [
+      ;; draw a value from the area distribution for the household
+      let hh-area draw-hh-area-value 
+      
+      if (abs ((item vlg-id vlg-areas) - current-vlg-area) <= abs (item vlg-id vlg-areas - (current-vlg-area + hh-area)))
+      [
+        set reached-vlg-size 1
+      ]
+      
+      ;; only add household if difference between theoretical and new value gets smaller
+      ifelse reached-vlg-size = 0
+      [
+        ;; add household-area to list
+        set household-sizes lput hh-area household-sizes
+        
+        ;; add area of household to village area
+        set current-vlg-area (current-vlg-area + hh-area)
+        
+        set hh-vlg (hh-vlg + 1)
+      ]
+      
+      [
+        ;; keep count of households in village
+        set vlg-sizes lput hh-vlg vlg-sizes
+        
+        ;; store realised village area
+        set real-vlg-areas lput current-vlg-area real-vlg-areas
+        set hh-vlg 0
+        set vlg-id (vlg-id + 1)
+        
+        set current-vlg-area 0
+        set reached-vlg-size 0
+      ]    
+    ]
+    ;; stop procedure if all villages are empty
+    if sum vlg-sizes = 0
+    [
+      set log-list-households lput "All villages are empty. Think about changing the model parameters." log-list-households
+      stop
+    ]
+    
+    ;; count how many households there are in the end  
+    set number-of-households sum vlg-sizes
+
+    ;;update agricutural-area
+    set proportion-agricultural-area (sum household-sizes / count patches)
+    
+    ;; Plot village size distributions:
+    plot-village-size-distribution
+  ]
+  
+  if setup-model = "agricultural-area"
+  [
+    ;; store proportion of agricultural area that should have been created
+    set area-setup proportion-agricultural-area
+    
+    let area (proportion-agricultural-area * count patches)
+    let current-hh-area 0
+    
+    while [current-hh-area <= area]
+    [
+      ;; draw a value from the area distribution for the household
+      let hh-area draw-hh-area-value 
+      ;; add household-area to list
+      set household-sizes lput hh-area household-sizes
+      
+      ;; add area of household to total area
+      set current-hh-area (current-hh-area + hh-area)
+    ]
+    
+    ;; create list with length of number of households with household-area-values
+    set number-of-households length household-sizes
+  ]
+
+  ;; Calculate the household-road-ratio: Estimation for the number of households per road patch    
+   set household-road-ratio number-of-households / total-road-length
+       
+   ;; Calculate max and total area:
+   set max-household-size max household-sizes ; needed as global variable, to determine, if a field should be added, when the resulting household size then exceeds the max-hh-size
+   set expected-total-household-area sum household-sizes ;calculate the expected total household area (needed to calculate the expected forest cover)
+  
+end
+
+
+to-report draw-hh-area-value ;; draw a value from the household-area-distribution ; 
+  ;; constant distribution
+  if hh-area-distribution = "constant"
+  [
+    report round(hh-area-mean-ha * conversion-ha-cell)
+  ]
+  
+  ;; normal distribution
+  if hh-area-distribution = "normal"
+  [
+    let new-hh-area round((random-normal hh-area-mean-ha hh-area-sd-ha) * conversion-ha-cell)
+    
+    ;; Check if value is below 0:
+    if (new-hh-area <= 1) [set new-hh-area 1]
+    
+    report new-hh-area
+  ]
+  
+  ;; lognormal distribution
+  if hh-area-distribution = "log-normal"
+  [
+    let new-hh-area round(exp(random-normal hh-area-mean-ha hh-area-sd-ha) * conversion-ha-cell)
+    
+    ;; Check if value is below 0:
+    if (new-hh-area <= 1) [set new-hh-area 1]
+    
+    report new-hh-area
+  ]
+end
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To calc-freq-of-household-sizes
+  ;calculates the actual frequencies of household sizes [cell] and
+  ;writes the frequencies into the list actual-freq-of-household-sizes
+  
+  ;what is the maximum household size in cells?
+  let max-hh-size max [household-area-realized] of turtles
+   
+  ;make a list with the right length, filled with 0
+  set actual-freq-of-household-sizes n-values (max-hh-size + 1) [0] 
+  
+  ask turtles
+  [
+   ;here we need to count also those households with size 0, they should be in the first item of the list
+   set actual-freq-of-household-sizes replace-item (household-area-realized) actual-freq-of-household-sizes (item (household-area-realized) actual-freq-of-household-sizes + 1)  
+  ]
+  
+  ;print "actual-freq-of-household-sizes"
+  ;print actual-freq-of-household-sizes
+  
+  ;plot this distribution into the existing plot 
+  plot-household-area-distribution
+
+End
+
+
+
+
+To determine-expected-field-sizes 
+   ;plots the expected distribution of field sizes into the gui (field size distribution plot)
+  
+   let counter 0
+   let expected-freq-of-field-sizes[] ;in the first item of the list, are fields with size 1. Fields of size 0 do not exist. 
+  
+   if field-size-distribution = "constant" 
+   [ set counter 0
+     let counter-max (2 * ceiling(field-size-mean-ha) * conversion-ha-cell)
+     
+     set expected-freq-of-field-sizes n-values counter-max [0]
+    
+     let const-hh-size round(field-size-mean-ha * conversion-ha-cell) ; all fields are expected to have that size
+     set expected-freq-of-field-sizes replace-item (const-hh-size - 1) expected-freq-of-field-sizes round(expected-total-household-area / const-hh-size) 
+   ]  
+   
+   if field-size-distribution = "uniform"
+   [ 
+     let max-field-size round(field-size-mean-ha * conversion-ha-cell)
+       
+     let counter-max (2 * ceiling(field-size-mean-ha) * conversion-ha-cell)
+      
+     set expected-freq-of-field-sizes n-values counter-max [0]
+    
+     let helpsum 0 ;sum up all occuring field sizes, the frequency with uniform distribution is simply the total-hh-area / this sum
+     set counter 1
+     while[counter <= max-field-size]  ;<=
+     [
+       set helpsum helpsum + counter 
+       set counter counter + 1 
+     ]
+     
+     let freq round( expected-total-household-area / helpsum) 
+     set counter 0
+     while [counter < round(field-size-mean-ha * conversion-ha-cell)]  ; <=
+     [
+       set expected-freq-of-field-sizes replace-item counter expected-freq-of-field-sizes (freq)    
+       set counter counter + 1  
+     ]   
+   ] 
+   
+   if field-size-distribution = "normal"
+   [ ;for the normal distribution we cannot use the exact formula of the distribution, as it is cut at zero.
+     ;therefore, random draws are used to approximate the expected distribution
+     let list-of-draws []
+     let max-field-size 0
+     let draw-counter 0
+    while [draw-counter < 10000]             ; former version: < expected-total-household-area
+     [
+       let field-size round((random-normal field-size-mean-ha field-size-sd-ha) * conversion-ha-cell) ; as input is in ha, to get to cells, multiply by 4 and round
+       if field-size >= 1
+       [ 
+         set list-of-draws lput field-size list-of-draws
+         set draw-counter (draw-counter + 1)
+         if max-field-size < field-size [set max-field-size field-size]       
+       ]
+     ]   
+     
+     set expected-freq-of-field-sizes n-values (max-field-size + 2) [0]
+  
+     set counter 0
+     while [counter < length list-of-draws]
+     [
+       set expected-freq-of-field-sizes replace-item (item counter list-of-draws) expected-freq-of-field-sizes (item (item counter list-of-draws) expected-freq-of-field-sizes + 1)
+       set counter counter + 1  
+     ]    
+     
+   ] 
+  
+   if field-size-distribution = "log-normal"
+   [;now we can use the exact distribution
+     
+     set expected-freq-of-field-sizes []
+     set expected-freq-of-field-sizes lput 0 expected-freq-of-field-sizes ;the first item 0 needs to be inserted by hand
+     
+     set counter 0.25
+     
+     let interval cell-size
+     while[counter < 10000]
+     [
+       set expected-freq-of-field-sizes lput ((1 / (sqrt(2 * pi) * field-size-sd-ha * counter)) * exp(-((ln(counter) - field-size-mean-ha)^ 2) / (2 * field-size-sd-ha ^ 2))) expected-freq-of-field-sizes
+       set counter counter + interval 
+     ]
+   ]
+       
+   ;plot the expected number of fields into the plot field size distribution (for comparison with realized field size distribution) 
+End
+
+
+;###################################################################################
+; Village size
+;###################################################################################
+to determine-village-sizes 
+    
+  if setup-model = "number-of-households"
+  [
+    let k 0 ; used as hh_id
+    let hh-vlg 0; used to count households in village
+    let current-vlg-area 0
+    let counter 0
+    
+    let village-area determine-village-area
+    set vlg-areas lput village-area vlg-areas
+
+    let reached-vlg-size 0
+    ;; while the there are still households left keep adding households to village
+    while [k < number-of-households] ; k=0 equals 1 household
+    [   
+      ;; check if theoretical village area is reached
+      if (abs (village-area - current-vlg-area) <= abs (village-area - (current-vlg-area + (item k household-sizes))))
+      [
+        set reached-vlg-size 1
+        set counter counter + 1
+      ]
+      
+      if (counter > counter-nr)
+      [
+        if print-messages?
+        [
+          print "WARNING: stuck in endless loop, think about changing the model parameters"
+        ]
+        set log-list-households lput "Model was stuck in endless loop while creating villages. Think about changing the model parameters." log-list-households
+        set number-of-households count turtles
+        stop
+      ]
+      
+      ;; only add household if difference between theoretical and new value gets smaller
+      ifelse reached-vlg-size = 0
+      [
+        ;; add area of household to village area
+        set current-vlg-area (current-vlg-area + (item k household-sizes))
+        
+        set k (k + 1)
+        set hh-vlg (hh-vlg + 1)
+
+      ]
+      
+      [
+        ;; keep count of households in village
+        set vlg-sizes lput hh-vlg vlg-sizes
+        
+        ;; store realised village area
+        set real-vlg-areas lput current-vlg-area real-vlg-areas
+     
+        set hh-vlg 0
+        set current-vlg-area 0
+        set reached-vlg-size 0
+        
+        ;; draw a village area from the distribution
+        set village-area determine-village-area
+        ;; store drawn area in list
+        set vlg-areas lput village-area vlg-areas
+        
+      ] 
+    ]
+    
+    if hh-vlg > 0 ; when households are used up village might not be full
+    [
+      ;; keep count of households in village
+      set vlg-sizes lput hh-vlg vlg-sizes
+        
+      ;; store realised village area
+      set real-vlg-areas lput current-vlg-area real-vlg-areas
+      
+      if print-messages?
+      [
+        print "WARNING last village is not full"
+      ]
+      set log-list-households lput "Last village is not full." log-list-households
+    ]
+        
+    set number-of-villages length vlg-sizes
+    
+    ;; Plot village size distributions:
+    plot-village-size-distribution
+ 
+  ]
+
+  
+  if setup-model = "number-of-villages"
+  [
+    ;; create list with length of number of villages with village-area-values
+    set vlg-areas n-values number-of-villages [determine-village-area]
+  ]
+  
+  
+  if setup-model = "agricultural-area"
+  [
+    let area (proportion-agricultural-area * count patches)
+    let total-vlg-area 0
+    
+    while [total-vlg-area <= area]
+    [
+      ;; draw a value from the area distribution for the villages
+      let vlg-area determine-village-area 
+      ;; add village-area to list
+      set vlg-areas lput vlg-area vlg-areas
+      
+      ;; add area of village to total area
+      set total-vlg-area (total-vlg-area + vlg-area)
+    ]
+    ;; create list with length of number of households with household-area-values
+    set number-of-villages length vlg-areas
+    
+    
+    let k 0 ; used as hh-id
+    let vlg-id 0 ; used as vlg-id
+    let hh-vlg 0; used to count households in village
+    let current-vlg-area 0
+   
+    ;; while there are still households and villages left, keep adding households to villages
+    while [k < number-of-households and vlg-id < number-of-villages] ; < and not <= because k=0 equals 1 household and vlg-id=0 equals 1 village
+    [
+      let reached-vlg-size 0
+        
+      ;; check if theoretical village area is reached
+      if ((current-vlg-area > 0) and (abs ((item vlg-id vlg-areas) - current-vlg-area) <= abs ((item vlg-id vlg-areas) - (current-vlg-area + (item k household-sizes)))))
+      [
+        set reached-vlg-size 1
+      ]
+        
+      ;; only add household if difference between theoretical and new value gets smaller
+      ifelse reached-vlg-size = 0
+      [
+        ;; add area of household to village area
+        set current-vlg-area (current-vlg-area + (item k household-sizes))
+          
+        set k (k + 1)
+        set hh-vlg (hh-vlg + 1)
+      ]
+      [
+        ;; keep count of households in village
+        set vlg-sizes lput hh-vlg vlg-sizes
+        
+        ;; store realised village area
+        set real-vlg-areas lput current-vlg-area real-vlg-areas
+        
+        set hh-vlg 0
+        
+        set current-vlg-area 0
+        set reached-vlg-size 0
+        set vlg-id (vlg-id + 1)
+      ]
+    ]
+    
+    if hh-vlg > 0 ; when households are used up village might not be full
+    [
+      ;; keep count of households in village
+      set vlg-sizes lput hh-vlg vlg-sizes
+        
+      ;; store realised village area
+      set real-vlg-areas lput current-vlg-area real-vlg-areas
+      
+      if print-messages?
+      [
+        print "WARNING last village is not full"
+      ]
+      set log-list-households lput "Last village is not full." log-list-households
+    ]
+    
+    ;; Plot village size distributions:
+    plot-village-size-distribution
+  ]
+
+end
+
+to-report determine-village-area ;; draw a value from the village-area-distribution 
+  ;; constant distribution
+  if vlg-area-distribution = "constant"
+  [
+    report vlg-area-mean
+  ]
+
+  ;; uniform distribution
+  if vlg-area-distribution = "uniform"
+  [
+    ;; For uniform we assume a minimum of mean - sd and a maximum of mean + sd
+    let min-area vlg-area-mean - vlg-area-sd
+    let max-area vlg-area-mean + vlg-area-sd
+    let new-village-area round((min-area + random (max-area - min-area)) * conversion-ha-cell)
+
+    ;; Check if value is below 0:
+    if (new-village-area <= 1) [set new-village-area 1]
+
+    report new-village-area
+  ]
+
+  ;; normal distribution
+  if vlg-area-distribution = "normal"
+  [
+    let new-village-area round((random-normal vlg-area-mean vlg-area-sd) * conversion-ha-cell)
+
+    ;; Check if value is below 0:
+    if (new-village-area <= 1) [set new-village-area 1]
+    
+    report new-village-area
+  ]
+
+  ;; lognormal distribution
+  if vlg-area-distribution = "lognormal"
+  [
+    let new-village-area round (exp(random-normal vlg-area-mean vlg-area-sd) * conversion-ha-cell)
+
+    ;; Check if value is below 0:
+    if (new-village-area <= 1) [set new-village-area 1]
+    
+    report new-village-area
+  ]
+
+end
+
+;###################################################################################
+; Proportion of transmigrants
+;###################################################################################
+
+  To-report determine-transmigrant-proportion 
+  
+  ;; Creates a list with the proportion of transmigrants in a village
+  let transmigrant-proportion []
+  
+  if hh-distribution = "uniform"
+  [
+    ; set vlg-sizes determine-village-sizes ;vlg-sizes is now global variable and defined elsewhere
+    let counter n-values length vlg-sizes [i -> i] ;so that list has the same length as there are villages
+    foreach counter
+    [
+      ;; For uniform we assume a minimum of mean - sd and a maximum of mean + sd
+      let min-size hh-type-mean - hh-type-sd
+      let max-size hh-type-mean + hh-type-sd
+      let new-hh-proportion (min-size + random-float (max-size - min-size))
+    
+      ;; Check if value is below 0:
+      if (new-hh-proportion < 0) [set new-hh-proportion 0]
+    
+      ;; Check if value is larger than 1:
+      if (new-hh-proportion > 1) [set new-hh-proportion 1]
+      
+      ;; If occurance probability is bigger than one print warning!
+      if (occ-probability > 1)
+      [
+        if print-messages?
+        [
+          print "occurance probability for household-type 2 must be 1 or lower!"
+        ]
+        set log-list-households lput "Occurance probability for household-type 2 must be 1 or lower." log-list-households
+      ]
+      
+      ifelse random-float 1.0 < occ-probability ;             occ-probability: probability that there is an other household type in village
+      [set transmigrant-proportion lput new-hh-proportion transmigrant-proportion]
+      [set transmigrant-proportion lput 0 transmigrant-proportion] 
+    ]
+  
+    ;; Report final list: 
+    report transmigrant-proportion
+  ]
+  
+  if hh-distribution = "log-normal"
+  [
+    ; set vlg-sizes determine-village-sizes ;vlg-sizes is now global variable and defined elsewhere
+    let counter n-values length vlg-sizes [i -> i] ;so that list has the same length as there are villages
+    foreach counter
+    [
+      let new-hh-proportion (exp(random-normal hh-type-mean hh-type-sd))
+      
+      ;; Check if value is below 0:
+      if (new-hh-proportion < 0) [set new-hh-proportion 0]
+    
+      ;; Check if value is larger than 1:
+      if (new-hh-proportion > 1) [set new-hh-proportion 1]
+      
+      ;; If occurance probability is bigger than one print warning!
+      if (occ-probability > 1)
+      [
+        if print-messages?
+        [
+          print "occurance probability for household-type 2 must be 1 or lower!"
+        ]
+        set log-list-households lput "Occurance probability for household-type 2 must be 1 or lower." log-list-households
+      ]
+      
+      ifelse random-float 1.0 < occ-probability ;             occ-probability: probability that there is an other household type in village
+      [set transmigrant-proportion lput new-hh-proportion transmigrant-proportion]
+      [set transmigrant-proportion lput 0 transmigrant-proportion] 
+    ]
+  
+    ;; Report final list: 
+    report transmigrant-proportion
+  ]
+  
+  if hh-distribution = "normal"
+  [
+    ; set vlg-sizes determine-village-sizes ;vlg-sizes is now global variable and defined elsewhere
+    let counter n-values length vlg-sizes [i -> i] ;so that list has the same length as there are villages
+    foreach counter
+    [
+      let new-hh-proportion (random-normal hh-type-mean hh-type-sd)
+      
+      ;; Check if value is below 0:
+      if (new-hh-proportion < 0) [set new-hh-proportion 0]
+    
+      ;; Check if value is larger than 1:
+      if (new-hh-proportion > 1) [set new-hh-proportion 1]
+      
+      ;; If occurance probability is bigger than one print warning!
+      if (occ-probability > 1)
+      [
+        if print-messages?
+        [
+          print "occurance probability for household-type 2 must be 1 or lower!"
+        ]
+        set log-list-households lput "Occurance probability for household-type 2 must be 1 or lower." log-list-households
+      ]
+      
+      ifelse random-float 1.0 < occ-probability ;             occ-probability: probability that there is an other household type in village
+      [set transmigrant-proportion lput new-hh-proportion transmigrant-proportion]
+      [set transmigrant-proportion lput 0 transmigrant-proportion] 
+    ]
+  
+    ;; Report final list: 
+    report transmigrant-proportion
+  ]
+end

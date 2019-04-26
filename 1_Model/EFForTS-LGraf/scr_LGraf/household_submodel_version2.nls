@@ -1,0 +1,659 @@
+
+
+;###################################################################################
+; Initialize Households
+;###################################################################################
+
+To create-and-place-villages
+  
+  ;; Determine village sizes based on distribution and report a list of villages
+  let vlg-sizes determine-village-sizes
+  print (word "vlg-sizes: " vlg-sizes)
+  
+  ;; Define the homebases, for sequential option: only on the last established road; for all other options: all road patches outside plantations
+  let potential-homebases patches with [p_road = 1 and p_landuse != 1000] ;road patches outside large scale plantations
+
+  let village_id 1  ; JANA
+  
+  ;; Determine proportion of transmigrants in village and report a list
+  let proportion determine-transmigrant-proportion ; JANA
+  
+  ;; Loop trough the village sizes:
+  foreach vlg-sizes
+  [
+    vlg-size ->
+    
+    ;; Select a central start patch for the current village:
+    
+    let current-patch one-of potential-homebases with [not any? turtles-here and not any? turtles-on patches in-radius min-distance] ; JANA
+    ;; Try less restrictive if there is no such patch
+    if (current-patch = nobody)
+    [
+      let i 1  ; JANA
+      while [current-patch = nobody and (min-distance - i) > 0]  ; JANA
+      [
+        set current-patch one-of potential-homebases with [not any? turtles-here and not any? turtles-on patches in-radius (min-distance - i)]  ; JANA
+        set i (i + 1)
+        print (word "WARNING distance between villages fell below set value")
+      ]
+    ]
+  
+    if (current-patch = nobody) 
+    [
+      set current-patch one-of potential-homebases with [not any? turtles-here]
+      print (word "WARNING villages are built next to each other")  ; JANA
+    ]
+    
+    ;; Create households: start by filling up the start-patch, than go on with a neighbor road cell, ...
+    let i 1
+    while [i < vlg-size]
+    [
+      ;; Check if there is still space left in the current-patch
+      ifelse (count turtles-on current-patch < households-per-cell)
+      [
+        ask current-patch
+        [
+          let turtle-identity 0
+          sprout 1 
+          [
+            init.household   
+            set homebase-xcor pxcor
+            set homebase-ycor pycor
+            set homebase-road-nr p_road_nr
+            set turtle-identity who
+          ]
+          
+          set p_homebase replace-item 0 p_homebase village_id ; JANA
+          
+          ifelse random-float 1.0 < item (village_id - 1) proportion ; JANA
+          [
+            set p_homebase replace-item 2 p_homebase (item 2 p_homebase + 1) ; JANA
+          ] ;; if household is transmigrant increase count of item 2 in p_homebase
+          [
+            set p_homebase replace-item 1 p_homebase (item 1 p_homebase + 1) ; JANA
+          ] ;; if household is local increase count of item 1 in p_homebase
+          set p_homebase_id replace-item ((count turtles-here) - 1) p_homebase_id turtle-identity 
+          set p_landuse 2
+          
+          ;; Increase counter
+          set i (i + 1)
+        ]
+      ]
+      [
+        ;; If there is no space left, find a new patch:
+        ask current-patch
+        [
+          set current-patch one-of neighbors with [member? self potential-homebases and not any? turtles-here]
+          ;; Try less restrictive if there is no such patch:
+          if (current-patch = nobody)
+          [
+            set current-patch one-of neighbors with [member? self potential-homebases]
+          ]
+            
+        ]
+      ]
+    ]
+    
+    ;; Count number of local & transmigrant households per village ; JANA
+    let local-vlg [item 1 p_homebase] of patches with [item 0 p_homebase = village_id]
+    set local lput sum local-vlg local
+    let transmigrant-vlg [item 2 p_homebase] of patches with [item 0 p_homebase = village_id]
+    set transmigrant lput sum transmigrant-vlg transmigrant
+    
+    ;; Calculate the proportion of transmigrant households in a village ; JANA
+    let prop sum transmigrant-vlg / (sum local-vlg + sum transmigrant-vlg)
+    set real-proportion lput prop real-proportion
+    
+    set village_id (village_id + 1) ; JANA
+  ]
+    
+end
+     
+
+
+
+;To create-and-place-households_OLD [number] 
+;  ;create number turtles and place them in road cells 
+;  ;households are not put within large plantations (they have p_landuse 1000) 
+;  
+;  ;; Define the homebases, for sequential option: only on the last established road; for all other options: all road patches outside plantations
+;  let potential-homebases patches with [p_road = 1 and p_landuse != 1000] ;road patches outside large scale plantations
+;
+;  ;create turtles
+;  crt number
+;  [
+;    init.household
+;  ]
+;  
+;  ;place the turtles
+;  ;only ask the new turtles
+;  let potential-home 0
+;  ask turtles
+;  [
+;   let turtle-identity who 
+;   ifelse any? potential-homebases with [count turtles-here < households-per-cell]
+;    [
+;      ;; First check if the new turtle will move to a clumping settlement
+;      ifelse (random-float 1 < clumping-prob)
+;      [
+;        ;; If clumping = TRUE, choos a patch which already has some turtles
+;        set potential-home one-of potential-homebases with [count turtles-here < households-per-cell and count turtles-here > 0]
+;        ;; If there is no such patch, choose a patch with turtles around on neighbors
+;        if (potential-home = nobody)
+;        [
+;          set potential-home one-of potential-homebases with [count turtles-here < households-per-cell and count turtles-on neighbors > 0]
+;        ]
+;        ;; If there is again no such patch, choose a random homebase patch
+;        if (potential-home = nobody)
+;        [
+;          set potential-home one-of potential-homebases with [count turtles-here < households-per-cell]
+;        ]
+;      ]
+;      ;; If no clumping, just choose one-of the potential homebase patches
+;      [
+;        set potential-home one-of potential-homebases with [count turtles-here < households-per-cell]
+;      ]
+;        
+;      ask potential-home
+;      [
+;        set p_homebase 1
+;        set p_homebase_id replace-item (count turtles-here) p_homebase_id turtle-identity 
+;        set p_landuse 2
+;      ] 
+;     
+;      ;; Move turtle to homebase
+;      move-to potential-home
+;      ;; Store the coordinates
+;      set homebase-xcor pxcor
+;      set homebase-ycor pycor
+;      set homebase-road-nr p_road_nr
+;    ]
+;    [
+;      user-message "Sorry, there is no space left to place home-bases."
+;    ]
+;  ]
+;   
+;End  
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To init.household
+  
+  set shape "person"
+  set color black
+  set size  4
+   
+  set household-size item 0 household-sizes
+  set household-sizes remove-item 0 household-sizes
+  set household-reached-final-size 0
+  set household-number-of-patches 0; number of fields
+  set household-number-of-land-use-types 0 ;number of land-use types applied in this household
+  set household-LUT-patches n-values length LUT-fractions-list [0]
+  set household-patch-id-list []
+  set household-area-realized 0
+  set visited-patches no-patches
+   
+end
+
+
+
+;###################################################################################
+; Household size
+;###################################################################################
+
+;; Initialize household size distributions:
+To determine-household-sizes
+ 
+   ;; Creates a list with household-sizes for the households, the sizes will then be distributed when turtles are created  
+   set household-sizes []
+   
+   ;; If number of households is provided by agricultural area, we have to calculate the number of patches:
+   let household-cells round(total-agricultural-area * count patches)
+   
+   ;; Constant distribution
+   if hh-area-distribution = "constant" 
+   [ 
+     let const-hh-size round(hh-area-mean-ha * conversion-ha-cell) ; all households are expected to have that size
+     
+     ;; Check if number of households should be used, otherwise calculate:
+     if (nr-of-hhs-by-agri-area?) [set number-of-households round(household-cells / const-hh-size)]
+    if setup-model = "number-of-villages" [set number-of-households (sum vlg-areas / hh-area-mean-ha)] ; JANA
+     set household-sizes n-values number-of-households [const-hh-size]
+   ]  
+  
+  
+   if hh-area-distribution = "normal"
+   [ 
+     set stopper 0
+     while[stopper = 0]
+     [
+       let hh-size round((random-normal hh-area-mean-ha hh-area-sd-ha) * conversion-ha-cell) ; as input is in ha, to get to cells, multiply by 4 and round
+       if hh-size >= 1
+       [ 
+         set household-sizes lput hh-size household-sizes         
+         
+         ifelse (nr-of-hhs-by-agri-area?)
+         [
+           ;; If yes:
+           if (sum household-sizes >= household-cells)
+           [
+           set number-of-households length household-sizes
+           set stopper 1
+           ]
+         ]
+         [
+           ;; If no, use number of households from interface;
+           if (length household-sizes = number-of-households)
+           [
+             set stopper 1
+           ]
+         ]
+       ]
+     ]   
+   ] 
+     
+   if hh-area-distribution = "log-normal"
+   [ 
+     set stopper 0
+     while[stopper = 0]
+     [
+       let hh-size round(exp(random-normal hh-area-mean-ha hh-area-sd-ha) * conversion-ha-cell)  ; as input is in ha, to get to cells, multiply by 4 and round 
+       if hh-size >= 1
+       [ 
+         set household-sizes lput hh-size household-sizes         
+         
+         ifelse (nr-of-hhs-by-agri-area?)
+         [
+           ;; If yes:
+           if (sum household-sizes >= household-cells)
+           [
+           set number-of-households length household-sizes
+           set stopper 1
+           ]
+         ]
+         [
+           ;; If no, use number of households from interface;
+           if (length household-sizes = number-of-households)
+           [
+             set stopper 1
+           ]
+         ]
+       ]
+     ]   
+   ] 
+   
+   ;; Calculate the household-road-ratio: Estimation for the number of households per road patch    
+   set household-road-ratio number-of-households / total-road-length
+       
+   ;; Calculate max and total area:
+   set max-household-size max household-sizes ; needed as global variable, to determine, if a field should be added, when the resulting household size then exceeds the max-hh-size
+   set expected-total-household-area sum household-sizes ;calculate the expected total household area (needed to calculate the expected forest cover)
+          
+  
+   draw_hh_distributions
+   
+End
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+;; Draw from initialized household distributions
+to draw_hh_distributions
+  
+;  paint also the smooth distribution with a black line
+   set-current-plot "Household area distribution"
+   set-current-plot-pen "distribution"
+   let interval cell-size
+   set-plot-pen-interval interval
+   let counter cell-size
+   plot 0 ;this is for the households with size 0
+   while [counter < length household-sizes / 4]
+   [ 
+    if hh-area-distribution = "constant"
+    [
+      ;plot
+      if counter < hh-area-mean-ha [plot 0]
+      if counter = hh-area-mean-ha or (counter < hh-area-mean-ha and counter + interval > hh-area-mean-ha) [plot conversion-ha-cell] 
+      if counter > hh-area-mean-ha  [plot 0]
+    ]
+    
+    if hh-area-distribution = "normal"
+    [
+      plot (1 / (hh-area-sd-ha * sqrt(2 * pi))) * exp(-((counter - hh-area-mean-ha) ^ 2) / (sqrt(2 * (hh-area-sd-ha ^ 2)))) 
+    ]
+    
+    if hh-area-distribution = "log-normal"
+    [
+      plot (1 / (sqrt(2 * pi) * hh-area-sd-ha * counter)) * exp(-((ln(counter) - hh-area-mean-ha)^ 2) / (2 * hh-area-sd-ha ^ 2)) 
+    ]
+    set counter counter + interval 
+   ]
+
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To calc-freq-of-household-sizes
+  ;calculates the actual frequencies of household sizes [cell] and
+  ;writes the frequencies into the list actual-freq-of-household-sizes
+  
+  ;what is the maximum household size in cells?
+  let max-hh-size max [household-area-realized] of turtles
+   
+  ;make a list with the right length, filled with 0
+  set actual-freq-of-household-sizes n-values (max-hh-size + 1) [0] 
+  
+  ask turtles
+  [
+   ;here we need to count also those households with size 0, they should be in the first item of the list
+   set actual-freq-of-household-sizes replace-item (household-area-realized) actual-freq-of-household-sizes (item (household-area-realized) actual-freq-of-household-sizes + 1)  
+  ]
+  
+  ;print "actual-freq-of-household-sizes"
+  ;print actual-freq-of-household-sizes
+  
+  ;plot this distribution into the existing plot 
+  set-current-plot "Household area distribution"
+  set-plot-y-range 0 ((max actual-freq-of-household-sizes) / 100 );* conversion-ha-cell) 
+  set-current-plot-pen "pen-1"
+  plot-pen-reset 
+   set-plot-pen-interval cell-size
+   let counter 0
+   while[counter < length actual-freq-of-household-sizes]
+   [
+      plot item counter actual-freq-of-household-sizes  / 100 ; * conversion-ha-cell ;for scaling the histogram from frequencies to fractions, one needs to divide by 100 and multiply by 4, as unit along the x-axis is ha, but unit of the frequencies is cells, i.e. 1/4 ha
+      set counter counter + 1
+   ]
+
+End
+
+
+
+
+To determine-expected-field-sizes 
+   ;plots the expected distribution of field sizes into the gui (field size distribution plot)
+  
+   let counter 0
+   let expected-freq-of-field-sizes[] ;in the first item of the list, are fields with size 1. Fields of size 0 do not exist. 
+  
+   if field-size-distribution = "constant" 
+   [ set counter 0
+     let counter-max (2 * ceiling(field-size-mean-ha) * conversion-ha-cell)
+     
+     set expected-freq-of-field-sizes n-values counter-max [0]
+    
+     let const-hh-size round(field-size-mean-ha * conversion-ha-cell) ; all fields are expected to have that size
+     set expected-freq-of-field-sizes replace-item (const-hh-size - 1) expected-freq-of-field-sizes round(expected-total-household-area / const-hh-size) 
+   ]  
+   
+   if field-size-distribution = "uniform"
+   [ 
+     let max-field-size round(field-size-mean-ha * conversion-ha-cell)
+       
+     let counter-max (2 * ceiling(field-size-mean-ha) * conversion-ha-cell)
+      
+     set expected-freq-of-field-sizes n-values counter-max [0]
+    
+     let helpsum 0 ;sum up all occuring field sizes, the frequency with uniform distribution is simply the total-hh-area / this sum
+     set counter 1
+     while[counter <= max-field-size]  ;<=
+     [
+       set helpsum helpsum + counter 
+       set counter counter + 1 
+     ]
+     
+     let freq round( expected-total-household-area / helpsum) 
+     set counter 0
+     while [counter < round(field-size-mean-ha * conversion-ha-cell)]  ; <=
+     [
+       set expected-freq-of-field-sizes replace-item counter expected-freq-of-field-sizes (freq)    
+       set counter counter + 1  
+     ]   
+   ] 
+ 
+   if field-size-distribution = "normal"
+   [ ;for the normal distribution we cannot use the exact formula of the distribution, as it is cut at zero.
+     ;therefore, random draws are used to approximate the expected distribution
+     let list-of-draws []
+     let max-field-size 0
+     let drawn-area 0
+     while [drawn-area < expected-total-household-area]
+     [
+       let field-size round((random-normal field-size-mean-ha field-size-sd-ha) * conversion-ha-cell) ; as input is in ha, to get to cells, multiply by 4 and round
+       if field-size >= 1
+       [ 
+         set list-of-draws lput field-size list-of-draws
+         set drawn-area drawn-area + field-size
+         if max-field-size < field-size [set max-field-size field-size]       
+       ]
+     ]   
+     
+     set expected-freq-of-field-sizes n-values (max-field-size + 2) [0]
+  
+     set counter 0
+     while [counter < length list-of-draws]
+     [
+       set expected-freq-of-field-sizes replace-item (item counter list-of-draws) expected-freq-of-field-sizes (item (item counter list-of-draws) expected-freq-of-field-sizes + 1)
+       set counter counter + 1  
+     ]    
+     
+   ] 
+   
+   if field-size-distribution = "log-normal"
+   [;now we can use the exact distribution
+     
+     set expected-freq-of-field-sizes []
+     set expected-freq-of-field-sizes lput 0 expected-freq-of-field-sizes ;the first item 0 needs to be inserted by hand
+     
+     set counter 0.25
+     
+     let interval cell-size
+     while[counter < 100]
+     [
+       set expected-freq-of-field-sizes lput ((1 / (sqrt(2 * pi) * field-size-sd-ha * counter)) * exp(-((ln(counter) - field-size-mean-ha)^ 2) / (2 * field-size-sd-ha ^ 2))) expected-freq-of-field-sizes
+       set counter counter + interval 
+     ]
+   ]
+        
+   ;plot the expected number of fields into the plot field size distribution (for comparison with realized field size distribution) 
+   set-current-plot "Field size distribution"
+   set-plot-pen-interval cell-size
+   plot 0
+   set counter 0
+   while[counter < length expected-freq-of-field-sizes]
+   [
+      plot item counter expected-freq-of-field-sizes /( sum expected-freq-of-field-sizes * cell-size )  
+      set counter counter + 1
+   ]     
+End
+
+
+;###################################################################################
+; Village size
+;###################################################################################
+
+To-report determine-village-sizes
+  
+  ;; Creates a list with village-sizes - the sizes will then be matches when households are placed in the landscape
+  let vlg-sizes []
+   
+  ;; Constant distribution
+  if vlg-size-distribution = "constant" 
+  [ 
+    ;; If constant village size is used, we can calculate how many villages we have:
+    let nr-of-vlgs (number-of-households / vlg-size-mean)
+    ;; Write to list:
+    set vlg-sizes n-values nr-of-vlgs [vlg-size-mean]
+    
+    ;; Add a village for the remainder:
+    if (remainder number-of-households vlg-size-mean > 0)
+    [
+      set vlg-sizes lput (remainder number-of-households vlg-size-mean) vlg-sizes
+    ]
+  ]  
+  
+  if vlg-size-distribution = "uniform"
+  [
+    let remaining-hhs number-of-households
+    while [remaining-hhs > 0]
+    [
+      ;; Draw samples until sum of list = number-of-households
+      ;; For uniform we assume a minimum of mean - sd and a maximum of mean + sd
+      let min-size vlg-size-mean - vlg-size-sd
+      let max-size vlg-size-mean + vlg-size-sd
+      let new-village-size (min-size + random (max-size - min-size))
+    
+      ;; Check if value is below 1:
+      if (new-village-size < 1) [set new-village-size 1]
+    
+      ;; Check if value is larger then number-of-households are left:
+      if (new-village-size > remaining-hhs) [set new-village-size remaining-hhs]
+    
+      ;; Store value in list:
+      set vlg-sizes lput new-village-size vlg-sizes
+      
+      ;; Update remaining households:
+      set remaining-hhs (number-of-households - sum vlg-sizes)
+    ]
+  ]
+    
+  
+  
+  if vlg-size-distribution = "normal"
+  [
+    let remaining-hhs number-of-households
+    while [remaining-hhs > 0]
+    [
+      ;; Draw samples until sum of list = number-of-households
+      let new-village-size round (random-normal vlg-size-mean vlg-size-sd)
+    
+      ;; Check if value is below 1:
+      if (new-village-size < 1) [set new-village-size 1]
+    
+      ;; Check if value is larger then number-of-households are left:
+      if (new-village-size > remaining-hhs) [set new-village-size remaining-hhs]
+    
+      ;; Store value in list:
+      set vlg-sizes lput new-village-size vlg-sizes
+      
+      ;; Update remaining households:
+      set remaining-hhs (number-of-households - sum vlg-sizes)
+    ]
+  ]
+  
+  if vlg-size-distribution = "log-normal"
+  [
+    let remaining-hhs number-of-households
+    while [remaining-hhs > 0]
+    [
+      ;; Draw samples until sum of list = number-of-households
+      let new-village-size round (exp(random-normal vlg-size-mean vlg-size-sd))
+    
+      ;; Check if value is below 1:
+      if (new-village-size < 1) [set new-village-size 1]
+    
+      ;; Check if value is larger then number-of-households are left:
+      if (new-village-size > remaining-hhs) [set new-village-size remaining-hhs]
+    
+      ;; Store value in list:
+      set vlg-sizes lput new-village-size vlg-sizes
+      
+      ;; Update remaining households:
+      set remaining-hhs (number-of-households - sum vlg-sizes)
+    ]
+  ]
+  
+  
+  ;; Plot village size distributions:
+  set-current-plot "village-size-distribution"
+  set-current-plot-pen "default"
+  set-plot-x-range 1 (max vlg-sizes + 1)
+  histogram vlg-sizes
+ 
+  ;; Report final list: 
+  report vlg-sizes
+  
+End
+
+;###################################################################################
+; Proportion of transmigrants
+;###################################################################################
+
+  To-report determine-transmigrant-proportion ; JANA
+  
+  ;; Creates a list with the proportion of transmigrants in a village
+  let transmigrant-proportion []
+  
+  if hh-distribution = "uniform"
+  [
+    let vlg-sizes determine-village-sizes
+    let counter n-values length vlg-sizes [i -> i] ;so that list has the same length as there are villages
+    foreach counter
+    [
+      ;; For uniform we assume a minimum of mean - sd and a maximum of mean + sd
+      let min-size hh-type-mean - hh-type-sd
+      let max-size hh-type-mean + hh-type-sd
+      let new-hh-proportion (min-size + random-float (max-size - min-size))
+    
+      ;; Check if value is below 0:
+      if (new-hh-proportion < 0) [set new-hh-proportion 0]
+    
+      ;; Check if value is larger than 1:
+      if (new-hh-proportion > 1) [set new-hh-proportion 1]
+      
+      ifelse random-float 1.0 < occ-probability ;             occ-probability: probability that there is an other household type in village
+      [set transmigrant-proportion lput new-hh-proportion transmigrant-proportion]
+      [set transmigrant-proportion lput 0 transmigrant-proportion] 
+    ]
+  
+    ;; Report final list: 
+    report transmigrant-proportion
+  ]
+  
+  if hh-distribution = "log-normal"
+  [
+    let vlg-sizes determine-village-sizes
+    let counter n-values length vlg-sizes [i -> i] ;so that list has the same length as there are villages
+    foreach counter
+    [
+      let new-hh-proportion (exp(random-normal hh-type-mean hh-type-sd))
+      
+      ;; Check if value is below 0:
+      if (new-hh-proportion < 0) [set new-hh-proportion 0]
+    
+      ;; Check if value is larger than 1:
+      if (new-hh-proportion > 1) [set new-hh-proportion 1]
+      
+      ifelse random-float 1.0 < occ-probability ;             occ-probability: probability that there is an other household type in village
+      [set transmigrant-proportion lput new-hh-proportion transmigrant-proportion]
+      [set transmigrant-proportion lput 0 transmigrant-proportion] 
+    ]
+  
+    ;; Report final list: 
+    report transmigrant-proportion
+  ]
+  
+  if hh-distribution = "normal"
+  [
+    let vlg-sizes determine-village-sizes
+    let counter n-values length vlg-sizes [i -> i] ;so that list has the same length as there are villages
+    foreach counter
+    [
+      let new-hh-proportion (random-normal hh-type-mean hh-type-sd)
+      
+      ;; Check if value is below 0:
+      if (new-hh-proportion < 0) [set new-hh-proportion 0]
+    
+      ;; Check if value is larger than 1:
+      if (new-hh-proportion > 1) [set new-hh-proportion 1]
+      
+      ifelse random-float 1.0 < occ-probability ;             occ-probability: probability that there is an other household type in village
+      [set transmigrant-proportion lput new-hh-proportion transmigrant-proportion]
+      [set transmigrant-proportion lput 0 transmigrant-proportion] 
+    ]
+  
+    ;; Report final list: 
+    report transmigrant-proportion
+  ]
+end

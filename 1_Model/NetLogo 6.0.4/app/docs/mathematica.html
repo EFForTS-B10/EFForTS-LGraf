@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<title>
+  NetLogo 6.0.4 User Manual: Mathematica Link
+</title>
+<link rel="stylesheet" href="netlogo.css" type="text/css">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<h1><a href="#mathematica-link" id="mathematica-link" class="section-anchor">Mathematica Link</a></h1>
+<div class="version">
+  NetLogo 6.0.4 User Manual
+</div>
+<p>The NetLogo-Mathematica link provides modelers with an easy to use, real-time
+link between NetLogo and Mathematica. Together, these tools can provide users
+with a highly interactive, self-documenting work flow that neither can provide
+alone.</p>
+<p>Mathematica includes many of the tools that agent-based modelers rely on
+throughout the research process: advanced import capabilities, statistical
+functions, data visualization, and document creation. With the
+NetLogo-Mathematica link, you can run all of these tools side-by-side with
+NetLogo.</p>
+<p>Because all Mathematica documents, or notebooks, contain comments, code, images,
+annotations, and interactive objects, the integration of NetLogo and Mathematica
+provides a more complete solution for complex model exploration for students and
+researchers alike.</p>
+<p>The basic functionality of the link is much like the NetLogo Controlling API:
+you can load models, execute commands, and report back data from NetLogo. Unlike
+the Controlling API, which is based on Java, all interactions with the link are
+interpreted, making it ideal not only for rapidly designing custom
+BehaviorSpace-like experiments, but also as a companion to NetLogo in debugging
+your model.</p>
+<p>For more information about Mathematica, please visit the
+<a href="http://www.wolfram.com/" target="_blank">Wolfram Research web site</a>.</p>
+<ul>
+<li><a href="#what-can-i-do-with-it">What can I do with it?</a></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#known-issues">Known Issues</a></li>
+<li><a href="#source-code">Source code</a></li>
+<li><a href="#credits">Credits</a></li>
+</ul>
+<h2><a href="#what-can-i-do-with-it" id="what-can-i-do-with-it" class="section-anchor">What can I do with it?</a></h2>
+<p>Here are a few examples of what you can do with the Mathematica-NetLogo link.</p>
+<ul>
+<li>Analyze your model in real-time with seamless two-way data conversion</li>
+<li>Develop high quality, custom visualizations of model data</li>
+<li>Collect detailed simulation data across large multi-dimensional parameter
+spaces</li>
+<li>Rapidly develop interactive interfaces for exploring model behavior</li>
+<li>Have direct access to patches and network data with built-in functions</li>
+</ul>
+<h2><a href="#installation" id="installation" class="section-anchor">Installation</a></h2>
+<p>The NetLogo-Mathematica link supports Mathematica 10 or greater. To install the
+NetLogo-Mathematica link:</p>
+<ol>
+<li>Go to the menu bar in Mathematica</li>
+<li>Click on File and select Install&hellip;</li>
+<li>In the Install Mathematica Item dialog</li>
+<li>Select Package for Type of item to install</li>
+<li>Click Source, and select From file&hellip;</li>
+<li>In the file browser, go to the location of your NetLogo installation,</li>
+<li>click on the Mathematica Link subfolder, and select NetLogo.m.</li>
+<li>For Install Name, enter NetLogo.</li>
+</ol>
+<p>You can either install the NetLogo link in your user base directory or in the
+system-wide directory. If the NetLogo link is installed in the user base
+directory, other users on the system must also go through the
+NetLogo-Mathematica link installation process to use it. This option might be
+preferable if you do not have permission to modify files outside of your home
+directory. Otherwise, you can install NetLogo-Mathematica link in the
+system-wide Mathematica base directory.</p>
+<h2><a href="#usage" id="usage" class="section-anchor">Usage</a></h2>
+<p>This section will very briefly introduce how to use the
+NetLogo-Mathematica Link. It will show you how to load the
+NetLogo-Mathematica Link package, start NetLogo, execute commands, and retrieve
+data from NetLogo.</p>
+<p><strong>Loading the package:</strong> Once the NetLogo-Mathematica link is installed, you can
+load the package by entering the following into your Mathematica notebook:</p>
+<blockquote>
+<p><code>&lt;&lt;NetLogo`</code></p>
+</blockquote>
+<p><strong>Launching NetLogo from Mathematica:</strong> To begin your NetLogo session in
+Mathematica, type the following into your notebook:</p>
+<blockquote>
+<p><code>NLStart[&ldquo;<i>your netlogo path</i>&rdquo;];</code></p>
+</blockquote>
+<p>where <em>your netlogo path</em> is the directory that netlogo is located in.
+Typically on a Mac this will be &ldquo;/Applications/NetLogo 6.0.4/&rdquo;</p>
+<p><strong>Loading a model:</strong> To load a model, you must specify the full path of the
+model. In this example we will load the Forest Fire model, and the path will be
+given using the typical Mac install location.</p>
+<blockquote>
+<p><code>NLLoadModel[&quot;/Applications/NetLogo 6.0.4/models/Sample Models/Earth Science/Fire.nlogo&quot;];</code></p>
+</blockquote>
+<p><strong>Executing a NetLogo command:</strong> Commands can be executed by passing a string of
+commands to <code>NLCommand[]</code>. The <code>NLCommand[]</code> function automatically splices
+common Mathematica data types into strings suitable for NetLogo. The following
+commands set the density using a single string, or set the density using a
+Mathematica defined variable, <code>myDensity</code>.</p>
+<blockquote>
+<p><code>NLCommand[&quot;set density 50&quot;];</code><br />
+<code>myDensity = 60;</code><br />
+<code>NLCommand[&quot;set density&quot;, myDensity];</code></p>
+</blockquote>
+<p><strong>Reporting information from NetLogo:</strong> NetLogo data can be reported back to
+Mathematica using <code>NLReport[]</code>. This includes numbers, strings, boolean values,
+and lists.</p>
+<blockquote>
+<p><code>NLReport[&quot;count turtles&quot;];</code><br />
+<code>NLReport[&quot;[(list pxcor pycor)] of n-of 10 patches&quot;]</code></p>
+</blockquote>
+<p>For more information, see the NetLogo-Mathematica Tutorial notebook included
+with NetLogo. The notebook walks you through the process of using the link, with
+many examples along the way. If you do not have Mathematica, but are considering
+using the link, you can find a PDF of the notebook included with NetLogo in the
+&ldquo;Mathematica Link&rdquo; directory.</p>
+<h2><a href="#known-issues" id="known-issues" class="section-anchor">Known Issues</a></h2>
+<ul>
+<li>A NetLogo session cannot be quit without exiting J/Link (the Java-Mathematica
+link) entirely. This may disrupt other packages that make use of J/Link.</li>
+<li>If a model loaded with the NetLogo-Mathematica link uses a NetLogo extension,
+the extension must be located in the same directory as the model itself. If
+the extension is located in NetLogo&rsquo;s application-wide extensions directory,
+it will not be found.</li>
+<li>Calls to NetLogo, such as <code>NLCommand[]</code> and <code>NLReport[]</code>, cannot be aborted.</li>
+</ul>
+<h2><a href="#source-code" id="source-code" class="section-anchor">Source code</a></h2>
+<p>The source code for the NetLogo-Mathematica link is in the public domain. It is
+hosted on line at <a href="https://github.com/NetLogo/Mathematica-Link" target="_blank">https://github.com/NetLogo/Mathematica-Link</a>.</p>
+<h2><a href="#credits" id="credits" class="section-anchor">Credits</a></h2>
+<p>The primary developer of the NetLogo-Mathematica link was Eytan Bakshy.</p>
+<p>To refer to this package in academic publications, please use:
+Bakshy, E., Wilensky, U. (2007). NetLogo-Mathematica Link.
+<a href="http://ccl.northwestern.edu/netlogo/mathematica.html" target="_blank">http://ccl.northwestern.edu/netlogo/mathematica.html</a>. Center for
+Connected Learning and Computer-Based Modeling, Northwestern
+University, Evanston, IL.</p>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<title>
+  NetLogo 6.0.4 User Manual: Tutorial #2: Commands
+</title>
+<link rel="stylesheet" href="netlogo.css" type="text/css">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<h1><a href="#tutorial-2-commands" id="tutorial-2-commands" class="section-anchor">Tutorial #2: Commands</a></h1>
+<div class="version">
+  NetLogo 6.0.4 User Manual
+</div>
+<p>So far you&rsquo;ve successfully navigated your way through opening and running
+models, pressing buttons, changing sliders and switches, and gathering
+information from a model using plots and monitors.</p>
+<p>In this section, the focus will start to shift from observing models to
+manipulating models. You will start to see the inner workings of the models and
+be able to change how they look.</p>
+<ul>
+<li><a href="#sample-model-traffic-basic">Sample Model: Traffic Basic</a></li>
+<li><a href="#command-center">Command Center</a></li>
+<li><a href="#working-with-colors">Working with colors</a></li>
+<li><a href="#agent-monitors-and-agent-commanders">Agent Monitors and Agent Commanders</a></li>
+<li><a href="#whats-next">What&rsquo;s Next?</a></li>
+</ul>
+<h2><a href="#sample-model-traffic-basic" id="sample-model-traffic-basic" class="section-anchor">Sample Model: Traffic Basic</a></h2>
+<blockquote>
+<ul>
+<li>Open the Models Library (from the File menu).</li>
+<li>Open Traffic Basic, found in the &ldquo;Social Science&rdquo;
+section.</li>
+<li>Run the model for a while to get a feel for it.</li>
+<li>Consult the Info tab for any questions you may have.</li>
+</ul>
+</blockquote>
+<p>In this model, you will notice one red car in a stream of blue cars. The stream
+of cars are all moving in the same direction. Every so often they &ldquo;pile up&rdquo; and
+stop moving. This is modeling how traffic jams can form without a specific cause
+like an accident.</p>
+<p>You may alter the settings and observe a few runs to get a fuller understanding
+of the model.</p>
+<blockquote>
+<p class="question">As you are using the Traffic Basic model, have you noticed any
+additions you would like to make to the model?</p>
+</blockquote>
+<p>Looking at the Traffic Basic model, you may notice the environment is fairly
+simple; a black background with a white street and number of blue cars and one
+red car. Changes that could be made to the model include: changing the color and
+shape of the cars, adding a house or street light, creating a stop light, or
+even creating another lane of traffic. Some of these suggested changes are
+visual, to enhance the look of the model, while others are more behavioral. We
+will be focusing more on the simpler or cosmetic changes throughout most of this
+tutorial. (<a href="tutorial3.html">Tutorial #3</a> will go into greater detail about
+behavioral changes, which require changing the Code tab.)</p>
+<p>To make these simple changes we will be using the Command Center.</p>
+<h2><a href="#command-center" id="command-center" class="section-anchor">Command Center</a></h2>
+<p>The Command Center is found in the Interface tab. It allows you to enter
+commands or directions to a model. Commands are instructions you can give to
+NetLogo&rsquo;s agents: turtles, patches, links, and the observer.</p>
+<blockquote>
+<p>In Traffic Basic:</p>
+<ul>
+<li>Press the &ldquo;setup&rdquo; button.</li>
+<li>Locate the Command Center.</li>
+<li>Click the mouse in the white box at the bottom of the Command Center.</li>
+<li>Type the text shown here:</li>
+</ul>
+<p><img src="images/tutorial2/cc-set-patches-yellow.gif" alt="Screenshot" class="screenshot" /></p>
+<ul>
+<li>Press the return key.</li>
+</ul>
+<p class="question">What happened to the View?</p>
+<p>You may have noticed the background of the View has turned all yellow and the
+street has disappeared.</p>
+<p class="question">Why didn&rsquo;t the cars turn yellow too?</p>
+<p>Looking back at the command that was written, we asked only the patches to
+change their color. In this model, the cars are represented by a different
+kind of agent, called &ldquo;turtles&rdquo;. Therefore, the cars did not receive these
+instructions and thus did not change.</p>
+<p class="question">What happened in the Command Center?</p>
+<p>You may have noticed that the command you just typed is now displayed in the
+Command Center as shown below:
+<img src="images/tutorial2/commandcenterhistory.gif" alt="Screenshot" class="screenshot" /></p>
+<ul>
+<li>Type in the bottom of the Command Center the text shown below:</li>
+</ul>
+<p><img src="images/tutorial2/cc-set-turtles-brown.gif" alt="Screenshot" class="screenshot" /></p>
+<p class="question">Was the result what you expected?</p>
+<p>The view should have a yellow background with a line of brown cars in the
+middle:</p>
+<p class="screenshot">
+  <img alt="screen shot" width="90%" src="images/tutorial2/export-view-brown-cars-on-yellow.gif">
+</blockquote>
+<p>The NetLogo world is a two dimensional world that is made up of turtles,
+patches, links, and an observer. The patches are the ground over which the
+turtles move. Links are connections between turtles. And the observer is a being
+that oversees everything that is going on. (For more specifics, refer to the
+<a href="programming.html">NetLogo Programming Guide</a>.)</p>
+<p>In the Command Center you can give commands to any of these types of agents. You
+choose which type to talk to by using the popup menu located in the bottom left
+corner. You can also use the tab key on your keyboard to cycle through the
+different types.</p>
+<blockquote>
+<ul>
+<li>In the Command Center, click on the &ldquo;observer&gt;&rdquo; in the bottom left corner:</li>
+</ul>
+<p><img src="images/tutorial2/cc-context-menu.gif" alt="Screenshot" class="screenshot" /></p>
+<ul>
+<li>Choose &ldquo;turtles&rdquo; from the popup menu.</li>
+<li>Type <code>set color pink</code> and press return.</li>
+<li>Press the tab key until you see &ldquo;patches&gt;&rdquo; in the bottom left corner.</li>
+<li>Type <code>set pcolor white</code> and press return.</li>
+</ul>
+<p class="question">What does the View look like now?</p><p class="question">Do you notice any differences between these two commands and the
+observer commands from earlier?</p>
+</blockquote>
+<p>The observer oversees the world and therefore can give a command to the patches
+or turtles using <a href="dictionary.html#ask"><code>ask</code></a>. Like in the first example (observer&gt;
+<code>ask patches [set pcolor yellow]</code>), the observer has to ask the patches to set
+their pcolor to yellow. But when a command is directly given to a group of
+agents like in the second example (patches&gt; <code>set pcolor white</code>), you only have
+to give the command itself.</p>
+<blockquote>
+<ul>
+<li>Press &ldquo;setup&rdquo;.</li>
+</ul>
+<p class="question">What happened?</p>
+</blockquote>
+<p>Why did the View revert back to the old version, with the black background and
+white road? Upon pressing the &ldquo;setup&rdquo; button, the model will reconfigure itself
+back to the settings outlined in the Code tab. The Command Center doesn&rsquo;t
+permanently change the model. It allows you to manipulate the NetLogo world
+directly to further answer those &ldquo;What if&rdquo; questions that pop up as you are
+investigating the models. (The Code tab is explained in the next tutorial, and
+in the <a href="programming.html">Programming Guide</a>.)</p>
+<p>Now that we have familiarized ourselves with the Command Center, let&rsquo;s look at
+some more details about how colors work in NetLogo.</p>
+<h2><a href="#working-with-colors" id="working-with-colors" class="section-anchor">Working with colors</a></h2>
+<p>You may have noticed in the previous section that we used two different words
+for changing color: <a href="dictionary.html#color"><code>color</code></a> and <a href="dictionary.html#pcolor"><code>pcolor</code></a>.</p>
+<blockquote>
+<p class="question">What is the difference between color and pcolor?</p>
+<ul>
+<li>Choose &ldquo;turtles&rdquo; from the popup menu in the Command Center (or use the tab
+key).</li>
+<li>Type <code>set color blue</code> and press return.</li>
+</ul>
+<p class="question">What happened to the cars?</p>
+<p>Think about what you did to make the cars turn blue, and try to make the
+patches turn red.</p>
+<p>If you try to ask the patches to <code>set color red</code>, an error message occurs:
+<img src="images/tutorial2/cc-error-patch-color.gif" alt="Screenshot" class="screenshot" /></p>
+<ul>
+<li>Type <code>set pcolor red</code> instead and press return.</li>
+</ul>
+</blockquote>
+<p>We call <a href="dictionary.html#color"><code>color</code></a> and <a href="dictionary.html#pcolor"><code>pcolor</code></a> &ldquo;variables&rdquo;. Some commands and variables are
+specific to turtles and some are specific to patches. For example, the <a href="dictionary.html#color"><code>color</code></a>
+variable is a turtle variable, while the <a href="dictionary.html#pcolor"><code>pcolor</code></a> variable is a patch
+variable.</p>
+<p>Go ahead and practice altering the colors of the turtles and patches using the
+<a href="dictionary.html#set"><code>set</code></a> command and these two variables.</p>
+<p>To be able to make more changes to the colors of turtles and patches, or shall
+we say cars and backgrounds, we need to gain a little insight into how NetLogo
+deals with colors.</p>
+<p>In NetLogo, colors have a numeric value. In all of the exercises we have been
+using the name of the color. This is because NetLogo recognizes 16 different
+color names. This does not mean that NetLogo only recognizes 16 colors. There
+are many shades in between these colors that can be used too. Here&rsquo;s a chart
+that shows the whole NetLogo color space:
+<img src="images/colors.jpg" alt="color chart" class="screenshot" /></p>
+<p>To get an intermediate shade, you refer to it by a number instead, or by adding
+or subtracting a number from a name. For example, when you type
+<code>set color red</code>, this does the same thing as if you had typed <code>set color 15</code>.
+And you can get a lighter or darker version of the same color by using a number
+that is a little larger or a little smaller, as follows.</p>
+<blockquote>
+<ul>
+<li>Choose &ldquo;patches&rdquo; from the popup menu in the Command Center (or use the tab
+key).</li>
+<li>Type <code>set pcolor red - 2</code> (The spacing around the &ldquo;-&rdquo; is important.)</li>
+</ul>
+<p>By subtracting from red, you make it darker.</p>
+<ul>
+<li>Type <code>set pcolor red + 2</code></li>
+</ul>
+<p>By adding to red, you make it lighter.</p>
+</blockquote>
+<p>You can use this technique on any of the colors listed in the chart.</p>
+<h2><a href="#agent-monitors-and-agent-commanders" id="agent-monitors-and-agent-commanders" class="section-anchor">Agent Monitors and Agent Commanders</a></h2>
+<p>In the previous activity, we used the <code>set</code> command to change the colors of all
+the cars. But if you recall, the original model contained one red car amongst a
+group of blue cars. Let&rsquo;s look at how to change only one car&rsquo;s color.</p>
+<blockquote>
+<ul>
+<li>Press &ldquo;setup&rdquo; to get the red car to reappear.</li>
+<li>Right-click on the red car.</li>
+<li>If there is another turtle close to the red turtle you&rsquo;ll see more than one
+turtle listed at the bottom of the menu. Move your mouse over the turtle
+selections, notice when your mouse highlights a turtle menu item that turtle
+is highlighted in the view. Select &ldquo;inspect turtle&rdquo; from the sub-menu for
+the red turtle.</li>
+</ul>
+<p>A turtle monitor for that car will appear:
+<img src="images/tutorial2/car-inspector.png" alt="Screenshot" class="screenshot" /></p>
+</blockquote>
+<p>The mini-view at the top of the agent monitor will always stay centered on this
+agent. You can zoom the view in and out using the slider below the view and you
+can watch this turtle in the main view by pressing the &ldquo;watch-me&rdquo; button.</p>
+<p>Taking a closer look at this turtle monitor, we can see all of the variables
+that belong to the red car. A variable is a location that holds a value.</p>
+<p>Let&rsquo;s take a closer look at the turtle monitor:</p>
+<blockquote>
+<p class="question">What is this turtle&rsquo;s who number?</p><p class="question">What color is this turtle?</p><p class="question">What shape is this turtle?</p>
+</blockquote>
+<p>This turtle monitor is showing a turtle who that has a who number of 0, a color
+of 15 (red &ndash; see chart above), and the shape of a car.</p>
+<p>There are two other ways to open a turtle monitor besides right-clicking. One
+way is to choose &ldquo;Turtle Monitor&rdquo; from the Tools menu, then type the who number
+of the turtle you want to inspect into the &ldquo;who&rdquo; field and press return. The
+other way is to type <code>inspect turtle 0</code> (or other who number) into the
+Command Center.</p>
+<p>You close a turtle monitor by clicking the close box in the upper left hand
+corner (Mac) or upper right hand corner (other operating systems).</p>
+<p>Now that we know more about Agent Monitors, we have three ways to change an
+individual turtle&rsquo;s color.</p>
+<p>One way is to use the box called an Agent Commander found at the bottom of an
+Agent Monitor. You type commands here, just like in the Command Center, but the
+commands you type here are only done by this particular turtle.</p>
+<blockquote>
+<ul>
+<li>In the Agent Commander of the Turtle Monitor for turtle 0, type
+<code>set color pink</code>.</li>
+</ul>
+<p class="question">What happens in the View?</p><p class="question">Did anything change in the Turtle Monitor?</p>
+</blockquote>
+<p>A second way to change one turtle&rsquo;s color is to go directly to the color
+variable in the Turtle Monitor and change the value.</p>
+<blockquote>
+<ul>
+<li>Select the text to the right of &ldquo;color&rdquo; in the Turtle Monitor.</li>
+<li>Type in a new color such as <code>green + 2</code>.</li>
+</ul>
+<p class="question">What happened?</p>
+</blockquote>
+<p>The third way to change an individual turtle&rsquo;s or patch&rsquo;s color is to use the
+observer. Since, the observer oversees the NetLogo world, it can give commands
+that affect individual turtles, as well as groups of turtles.</p>
+<blockquote>
+<ul>
+<li>In the Command Center, select &ldquo;observer&rdquo; from the popup menu (or use the tab
+key).</li>
+<li>Type <code>ask turtle 0 [set color blue]</code> and press return.</li>
+</ul>
+<p class="question">What happens?</p>
+<p>Just as there are Turtle Monitors, there are also Patch Monitors, which work
+very similarly.</p>
+<p class="question">Can you make a patch monitor and use it to change the color of a single
+patch?</p>
+</blockquote>
+<p>If you try to have the observer <code>ask patch 0 [set pcolor blue]</code>, you&rsquo;ll get an
+error message:
+<img src="images/tutorial2/cc-error-expected-number.gif" alt="Screenshot" class="screenshot" /></p>
+<p>To ask an individual turtle to do something, we use its who number. But patches
+don&rsquo;t have who numbers, therefore we need to refer to them some other way.</p>
+<p>Remember, patches are arranged on a coordinate system. Two numbers are needed to
+plot a point on a graph: an x-axis value and a y-axis value. Patch locations are
+designated in the same way as plotting a point.</p>
+<blockquote>
+<ul>
+<li>Open a patch monitor for any patch.</li>
+</ul>
+<p><img src="images/tutorial2/patch-inspector.png" alt="Screenshot" class="screenshot" /></p>
+<p>The monitor shows that for the patch in the picture, its
+<a href="dictionary.html#pcor">pxcor</a> variable is -19 and its
+<a href="dictionary.html#pcor">pycor</a> variable is 0. If we go back to the analogy of
+the coordinate plane and wanted to plot this point, the point would be found
+on the x axis left of the origin, where x=-19 and y=0.</p>
+<p>To tell this particular patch to change color:</p>
+<ul>
+<li>In the bottom of the patch monitor, enter <code>set pcolor blue</code> and press
+return.</li>
+</ul>
+<p>Typing a command in a turtle or patch monitor addresses only that turtle or
+patch.</p>
+<p>You can also talk to a single patch from the Command Center:</p>
+<ul>
+<li>In the Command Center, enter <code>ask patch -19 0 [set pcolor green]</code> and press
+return.</li>
+</ul>
+</blockquote>
+<h2><a href="#whats-next" id="whats-next" class="section-anchor">What&rsquo;s Next?</a></h2>
+<p>At this point, you may want to take some time to try out the techniques you&rsquo;ve
+learned on some of the other models in the Models Library.</p>
+<p>In <a href="tutorial3.html">Tutorial #3: Procedures</a> you can learn how to alter and
+extend existing models and build your own models.</p>

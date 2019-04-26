@@ -1,0 +1,251 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Large scale plantations
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+To create-inaccessible-area
+  ;function puts the big plantations in the landscape, before creating the houehold homebases. Homebases are not supposed to be located in big plantations.
+  ;plantation sizes follow a normal distribution
+  ;if roads are created simultaneously or with a real road map, big plantations can be connected to roads (option road-connected) or randomly located in the landscape
+  ;if roads are created sequentially, only random big plantation locations are possible, as otherwise it is difficult to avoid households in plantations
+  
+  ;inputs: area of landscape covered with big plantations (%)
+  ;mean area and sd of big plantation (assuming normal distribution)
+  
+
+  let road-patches patches with [p_road = 1]
+  
+  let expected-plantation-area inaccessible-area-fraction * total-number-of-cells * cell-size ; plantation area in ha 
+  
+  ;print word "expected big plantation area: " expected-plantation-area
+  
+  let number-of-trials 0 ; in too many trials are needed, the function is discontinued 
+  let established-plantation-area 0
+ 
+  while[established-plantation-area < expected-plantation-area and number-of-trials < 1000]
+  [ 
+    set number-of-trials number-of-trials + 1
+    let this-plantation-size 0
+    while[this-plantation-size < cell-size] ;draw a radom plantation size from the normal distribution; minimum plantation size is 1 cell
+    [
+      if (inaccessible-area-distribution = "normal")
+      [
+        set this-plantation-size random-normal inacc-area-mean inacc-area-sd
+      ]
+      if (inaccessible-area-distribution = "constant")
+      [
+        set this-plantation-size inacc-area-mean
+      ]
+      if (inaccessible-area-distribution = "uniform")
+      [
+        let uniform-min inacc-area-mean - inacc-area-sd
+        let uniform-max inacc-area-mean + inacc-area-sd
+        let uniform-diff uniform-max - uniform-min
+        set this-plantation-size (random (round uniform-diff)) + uniform-min
+      ]
+      
+    ]
+    
+    ;print "this plantation"
+    ;print this-plantation-size
+    ;print "establishhed-plantation-area"
+    ;print established-plantation-area
+    
+    if this-plantation-size + established-plantation-area > expected-plantation-area  ;adjust planation area if the total area would exceed the expected area
+    [
+      set this-plantation-size expected-plantation-area - established-plantation-area 
+    ]
+    
+    ;print "this plantation size"
+    ;print this-plantation-size
+    
+    let this-plantation-size-cell round(this-plantation-size * conversion-ha-cell)
+    
+    ;print "cells"
+    ;print this-plantation-size-cell
+     
+    let start-patch patch 0 0 ;select start patch for the plantation
+    
+    if inaccessible-area-location = "random"
+    [
+      set start-patch one-of patches
+    ]
+     
+    if inaccessible-area-location = "road-connected" ;plantation should start just next to the road
+    [
+      set start-patch one-of road-patches  
+    ]
+    
+     
+     
+    create-turtles 1 
+    [ 
+      let direction random 4  ;choose direction in which plantation expands
+      if direction = 0 [facexy 0 1] ;upwards
+      if direction = 1 [facexy 0 -1] ;downwards
+      if direction = 2 [facexy 1 0] ;right
+      if direction = 3 [facexy -1 0] ;left
+      
+      setxy ([pxcor] of start-patch) ([pycor] of start-patch) ;put turtle in start patch
+      
+      let square-size floor sqrt this-plantation-size-cell ;size of square part of the plantation
+      let number-of-lines ceiling (this-plantation-size-cell / square-size) ;number of lines turtle needs to go up and down 
+      
+      let distance-to-border 0 ;queck, if the plantation would reach beyond the world border
+      if direction = 0 [set distance-to-border max-pycor - [pycor] of start-patch + 1]
+      if direction = 1 [set distance-to-border [pycor] of start-patch + 1]
+      if direction = 2 [set distance-to-border max-pxcor - [pxcor] of start-patch + 1]
+      if direction = 3 [set distance-to-border [pxcor] of start-patch + 1]
+      
+      ;print "pycor"
+      ;print [pycor] of start-patch
+      ;print "square-size"
+      ;print square-size
+      
+     ; print "distance-to-border"
+     ; print distance-to-border
+      
+      if distance-to-border < square-size ; plantation reaches border
+      [
+        set square-size distance-to-border ;reduce length of the square, otherwise turtle trieds to go fd outside which is not possible
+      ]
+      
+      ;print "square-size"
+      ;print square-size
+      ;print "cell number"
+      ;print this-plantation-size-cell
+     
+      let cells-so-far 0
+      let line-counter 0
+      
+      while[cells-so-far < this-plantation-size-cell and line-counter <= number-of-lines]
+      [ 
+        let counter 0
+        while [counter < square-size and cells-so-far < this-plantation-size-cell] ;go forward one line
+        [
+          ask patch-here
+          [   
+            set p_landuse 1000; only temporary number
+            set p_inaccessable_id [who] of myself
+            ; set pcolor blue
+            set cells-so-far cells-so-far + 1
+          ] 
+         
+          if counter < square-size - 1 ;go one forward unless its the last step in this line
+          [ 
+            fd 1
+          ]
+          set counter counter + 1 
+        ]
+        
+        set line-counter line-counter + 1
+        
+        rt 90 ;change position and heading to the next line
+        fd 1 
+        rt 90
+        
+        set counter 0
+        while [counter < square-size and cells-so-far < this-plantation-size-cell]
+        [
+          ask patch-here
+          [   
+            set p_landuse 1000; only temporary number   
+            set p_inaccessable_id [who] of myself
+            ;set pcolor blue
+            set cells-so-far cells-so-far + 1
+          ] 
+         
+          if counter < square-size - 1
+          [
+            fd 1
+          ]
+          set counter counter + 1 
+        ]
+        
+        set line-counter line-counter + 1
+        
+        lt 90 ;change position and heading to the next line
+        fd 1 
+        lt 90       
+      ] 
+     
+      die
+    ]
+    
+    set established-plantation-area (count patches with [p_landuse = 1000] * cell-size)
+    ; print "established plantation area"
+    ; print established-plantation-area 
+  ] 
+  
+  if number-of-trials = 1000
+  [
+    if print-messages?
+    [
+      print "Impossible to put so much plantation area along roads! Try random option for big plantation location"
+    ]
+    set log-list-setup lput "It is impossible to put so much plantation area along roads! Try random option for big plantation location." log-list-setup
+   stop   
+  ]
+
+ 
+  ;print word "established big plantation area: " established-plantation-area
+
+  if (established-plantation-area > 0)
+  [ 
+    calculate-actual_freq-of-plantation-sizes
+  ]
+  
+End  
+
+
+
+To calculate-actual_freq-of-plantation-sizes
+ ;calculates the frequency distribution of plantation sizes
+ ;writes frequencies into actual-freq-of-plantation-sizes
+ ;paints the frequency distribution into the plot Plantation size distribution
+ 
+  ;first make an array where in each item the size of the plantation with this id is stored
+  ;how many plantations are there?
+  
+  let max_plantation_id max [p_inaccessable_id] of patches ;each plantation has an identity number p_plantation_id
+  
+  set list-of-plantation-sizes n-values (max_plantation_id + 1) [0]
+   
+  ;go through all patches and count size of each field, i.e. how often do i find one patch_id?
+  ask patches
+  [
+    if p_inaccessable_id >= 0 
+    [
+      set list-of-plantation-sizes replace-item p_inaccessable_id list-of-plantation-sizes (item p_inaccessable_id list-of-plantation-sizes + 1) 
+    ]
+  ]  
+    
+  ;print "list-of-field-sizes"
+  ;print list-of-field-sizes
+  
+  ;what is the actual maximum field size?
+  let max-plantation-size max list-of-plantation-sizes
+  
+  ;print "max-field-size"
+  ;print max-field-size
+
+  let actual-freq-of-plantation-sizes n-values max-plantation-size [0]
+ 
+  ;now fill the list with frequencies
+  let counter 1
+  while [counter <= max-plantation-size]
+  [
+    let number-of-plantations length (filter [i -> i = counter] list-of-plantation-sizes) 
+    set actual-freq-of-plantation-sizes replace-item (counter - 1) actual-freq-of-plantation-sizes number-of-plantations
+    set counter counter + 1
+  ]  
+  ;print "actual-freq-of-field-sizes" 
+  ;print actual-freq-of-field-sizes
+  
+  plot-inaccessible-area-distribution actual-freq-of-plantation-sizes
+ ; plot-expected-inaccessible-areas 
+  
+   print word "Plantation freqs: " actual-freq-of-plantation-sizes
+   
+   
+   
+End  

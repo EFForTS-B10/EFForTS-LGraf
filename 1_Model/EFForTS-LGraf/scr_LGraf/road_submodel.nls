@@ -1,0 +1,748 @@
+
+
+;###################################################################################
+; Road setup main procedures
+;###################################################################################
+
+to create.road.artificial.graffe
+  
+  ;first create all roads
+  ;then large scale plantations
+  ;then create all households
+  while[cummulative-road-length < total-road-length]
+  [ 
+    set cummulative-road-length count patches with [p_road = 1]
+    let road-length create-one-road
+    if (road-length > 0) 
+    [
+      set number-of-roads number-of-roads + 1
+    ]
+  ]
+
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+to create.road.artificial.perlin
+  
+  roads-load-elevation
+  go-roads
+  
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+to create.road.real.shapefile
+  
+  map-road-patches
+  gis:set-drawing-color black
+  gis:draw road-shapefile 1
+
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+to calculate-total-road-length
+  set cummulative-road-length count patches with [p_road = 1]
+end
+
+;###################################################################################
+; GRAFFE Algorithm - Road setup
+;###################################################################################
+
+
+To road.init.road.builder.turtle [random-side random-direction]
+  
+  ;; Set color of turtles
+  set color black
+  set hidden? false
+  pd
+  
+  ;; Set angle of turtles
+  if random-side = 0
+  [
+    set heading ifelse-value (random-direction = 0) [90][ifelse-value (random-direction = 1) [45][135]] 
+  ]
+  if random-side = 1
+  [
+    set heading ifelse-value (random-direction = 0) [0][ifelse-value (random-direction = 1) [45][315]]
+  ]
+  
+end
+ 
+
+To-report create-one-road
+  
+  ;creates one road in the landscape
+  ;respects minimum distance between parallel roads
+  ;reports the length of the road
+ 
+  ;select starting point for road along the lower or the left edge of the landscape
+  ;starting point should respect a minimum distance to the next road which is in the same direction
+  ;therefore one potentially needs to repeat selecting starting points and directions until a viable option is found
+  
+  ;; Initialize parameter
+  let success 0
+  let random-side -1
+  let random-position -1
+  let random-direction -1
+  let number-of-trys 0
+  let random-startpatch nobody
+  
+  ;; Determine start patch randomly
+  while[success = 0 and number-of-trys < 100]
+  [ 
+    set random-side random 2; 0: left edge, 1: lower edge
+    set random-position ifelse-value (random-side = 0) [random-pycor][random-pxcor]
+    set random-startpatch ifelse-value (random-side = 0) [patch 0 random-position][patch random-position 0]
+    set random-direction random 3
+    set success ifelse-value (is-minimum-distance-respected random-side random-position random-direction = 1) [1][0]
+    set number-of-trys number-of-trys + 1
+  ]
+  
+  let road-length determine-road-length
+  let realized-road-length 0
+  let road-number (number-of-roads + 1)
+  ifelse success = 1
+  [
+    ;; Initialize roadbuilder:
+    ask random-startpatch
+    [
+      sprout 1
+      [
+        road.init.road.builder.turtle random-side random-direction
+      ]
+    ]
+    
+    ;; Build a road:
+    ask turtles
+    [
+      while [can-move? 1 and realized-road-length < road-length]
+      [
+        fd 0.2
+        ask patch-here
+        [
+          ;; Mark as road and write new road nr, if it hasnt already a road number from a previous road
+          set p_road 1 
+          if (p_road_nr = 0) [set p_road_nr road-number]
+          
+          ;; Count current road patches:
+          let realized-road-cells count patches with [p_road = 1]
+          if (realized-road-cells mod 500 = 0)
+          [
+            print (word realized-road-cells " road cells have been created")
+          ]
+        ]
+        ;; Count current road patches:
+        set realized-road-length count patches with [p_road = 1 and p_road_nr = road-number]
+      ]
+     
+      die
+    ]
+  ]
+  [
+    if print-messages?
+    [
+      print "Sorry, can't produce so many roads with the required minimum distance! Either reduce road length or minimum distance between roads."
+    ]
+   set log-list-setup lput "The model cannot produce so many roads with the required minimum distance! Either reduce road length or minimum distance between roads." log-list-setup
+  ]
+ 
+ report realized-road-length 
+    
+end
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To-report determine-road-length
+  ;reports a random road length between 1 and diagonal length of landscape which respects the total road length
+  
+  let realized-road-length 0
+ 
+  let road-length random floor(sqrt((max-pxcor + 1)^ 2 + (max-pycor + 1)^ 2)) + 1  ;road length varies uniformly between 1 and the diagonal length of the landscape  
+    
+  let cum-road-length count patches with [p_road = 1]
+    
+  if cum-road-length + road-length > total-road-length
+  [
+    set road-length total-road-length - cum-road-length 
+  ]
+  
+  report road-length
+End
+  
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To-report is-minimum-distance-respected[side rposition direction]
+  ;checks if the minimum distance between parallel roads is respected, if the newly proposed road is built
+  ;minimum distance of 0 means that two parallel roads can be in directly neighboring cells
+  ;input: location and direction of the road that should be constructed next
+  ;reports 1 if minimum distance is respected, otherwise 
+  
+
+  ;print "min-dist"
+  ;print min-dist-roads
+  ;set min-dist-roads 40
+  
+  let success 1
+  let counter 0
+  while[counter < min-dist-roads + 1]  
+  [
+   if side = 0 ;left edge
+   [ 
+     if rposition + counter <= max-pycor ;check for roads above the proposed road
+     [
+       if [p_road] of patch 0 (rposition + counter) = 1
+       [ 
+         ;check if the direction of this road is the same as the proposed direction
+         if direction = 0 ;horizontal
+         [
+            ;check second cell of the road, is this road also horizontal?
+            if [p_road] of patch 1 (rposition + counter) = 1
+            [
+              set success 0 
+            ]      
+         ]
+         if direction = 1  ;diagonally upwards
+         [
+           ;check second cell of the road, is this road also diagonally upwards?
+           if (rposition + counter + 1) <= max-pycor
+           [ 
+             if [p_road] of patch 1 (rposition + counter + 1) = 1
+             [
+               set success 0 
+             ]  
+           ]
+         ]
+         if direction = 2  ;diagonally downwards
+         [
+           if (rposition + counter - 1) >= 0 and (rposition + counter - 1) <= max-pycor 
+           [
+             if [p_road] of patch 1 (rposition + counter - 1) = 1
+             [
+               set success 0  
+             ]  
+           ]
+         ]
+         
+        ;set success 0 ;first only check for starting point not yet for direction
+       ] ;if [p_road] of patch 0 (rposition + counter) = 1
+     ]  
+     
+     ifelse rposition - counter >= 0 ;check for roads below the proposed road
+     [
+       if [p_road] of patch 0 (rposition - counter) = 1
+       [ 
+        
+         ;check if the direction of this road is the same as the proposed direction
+         if direction = 0 ;horizontal
+         [
+            ;check second cell of the road, is this road also horizontal?
+            if [p_road] of patch 1 (rposition - counter) = 1
+            [
+              set success 0 
+            ]     
+         ]
+         if direction = 1  ;diagonally upwards
+         [
+           ;check second cell of the road, is this road also diagonally upwards?
+           if (rposition - counter + 1) <= max-pycor
+           [ 
+             if [p_road] of patch 1 (rposition - counter + 1) = 1
+             [
+               set success 0 
+             ]  
+           ]
+         ]
+         if direction = 2  ;diagonally downwards
+         [
+           if (rposition - counter - 1) >= 0 and (rposition - counter - 1) <= max-pycor 
+           [
+             if [p_road] of patch 1 (rposition - counter - 1) = 1
+             [
+               set success 0 
+             
+             ]  
+           ]
+         ]
+       ]
+     ]  
+     [ ; go around the corner
+       let rest counter - rposition
+       if [p_road] of patch rest 0 = 1
+       [
+         
+        ;check if the direction of this road is the same as the proposed direction
+        ;careful now, directions mean something different as we are on the lower side of the landscape
+        ;one only needs to check directions 1 and 2 as horizontal with directions 0 cannot start from the lower edge of the landscape
+         if direction = 1  ;diagonally upwards
+         [
+           ;check second cell of the road, is this road also diagonally upwards?
+           if (rest + 1) <= max-pxcor
+           [ 
+             if [p_road] of patch (rest + 1) 1 = 1
+             [ 
+               set success 0 
+             ]  
+           ]
+         ]  
+         
+         if direction = 2  ;diagonally downwards
+         [
+           if (rest - 1) >= 0 and (rest - 1) <= max-pxcor 
+           [
+             if [p_road] of patch (rest - 1) 1 = 1
+             [
+               set success 0 
+             
+             ]  
+           ]
+         ]
+       ] 
+     ] 
+          
+   ]
+   
+   
+    
+   if side = 1 ; lower edge
+   [ 
+     if rposition + counter <= max-pycor ;check for roads right to the proposed road
+     [
+       if [p_road] of patch (rposition + counter) 0 = 1
+       [
+         ;check if the direction of this road is the same as the proposed direction
+         if direction = 0 ; vertical
+         [
+            ;check second cell of the road, is this road also vertical?
+            if [p_road] of patch (rposition + counter) 1 = 1
+            [
+              set success 0 
+            ]      
+         ]
+         if direction = 1  ;diagonally right
+         [
+           ;check second cell of the road, is this road also diagonally upwards?
+           if (rposition + counter + 1) <= max-pxcor
+           [ 
+             if [p_road] of patch (rposition + counter + 1) 1 = 1
+             [
+               set success 0 
+             ]  
+           ]
+         ]
+         if direction = 2  ;diagonally left
+         [
+           if (rposition + counter - 1) >= 0 and (rposition + counter - 1) <= max-pxcor 
+           [
+             if [p_road] of patch (rposition + counter - 1) 1 = 1
+             [
+               set success 0  
+             ]  
+           ]
+         ]
+       ]
+     ]  
+     
+     ifelse rposition - counter >= 0 ;check for roads left to the proposed road
+     [
+       if [p_road] of patch (rposition - counter) 0 = 1
+       [
+          ;check if the direction of this road is the same as the proposed direction
+         if direction = 0 ;horizontal
+         [
+            ;check second cell of the road, is this road also horizontal?
+            if [p_road] of patch (rposition - counter) 1 = 1
+            [
+              set success 0 
+            ]     
+         ]
+         if direction = 1  ;diagonally right
+         [
+           ;check second cell of the road, is this road also diagonally upwards?
+           if (rposition - counter + 1) <= max-pxcor
+           [ 
+             if [p_road] of patch (rposition - counter + 1) 1 = 1
+             [
+               set success 0 
+             ]  
+           ]
+         ]
+         if direction = 2  ;diagonally left
+         [
+           if (rposition - counter - 1) >= 0 and (rposition - counter - 1) <= max-pxcor 
+           [
+             if [p_road] of patch (rposition - counter - 1) 1 = 1
+             [
+               set success 0 
+             
+             ]  
+           ]
+         ]
+       ]
+     ]  
+     [ ; go around the corner
+       let rest counter - rposition
+       if [p_road] of patch 0 rest = 1
+       [
+        ;check if the direction of this road is the same as the proposed direction
+        ;careful now, directions mean something different as we are on the lower side of the landscape
+        ;one only needs to check directions 1 and 2 as vertical roads with directions 0 cannot start from the left edge of the landscape
+         if direction = 1  ;diagonally upwards to the right
+         [
+           ;check second cell of the road, is this road also diagonally upwards to the right?
+           if (rest + 1) <= max-pycor
+           [ 
+             if [p_road] of patch 1 (rest + 1)  = 1
+             [ 
+               set success 0 
+             ]  
+           ]
+         ]  
+         
+         if direction = 2  ;diagonally upwards to the right
+         [
+           if (rest - 1) >= 0 and (rest - 1) <= max-pycor 
+           [
+             if [p_road] of patch 1 (rest - 1) = 2
+             [
+               set success 0 
+             
+             ]  
+           ]
+         ]
+       ]
+     ] 
+   ]
+       
+   set counter counter + 1 
+  ]
+   
+;   print "side"
+;   print side 
+;   print "rposition"
+;   print rposition
+;   print "counter"
+;   print counter
+;   print "success"
+;   print success
+  
+  report success  
+End
+    
+
+
+
+;###################################################################################
+; PERLIN Algorithm - Road setup
+;###################################################################################
+;; NEW ROAD ALGORITHM 2018
+;; This algorithm first creates an elevation model by using perlin noise
+;; Afterwards roads are created along elevation gradients (least-cost-roads)
+
+to roads-load-elevation
+  create-perlin-noise
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+to create-perlin-noise
+  
+  ;; Initialize patches:
+  ask patches 
+  [
+    set p_elevation_octaves [] 
+    set p_elevation random-float 1
+  ]
+  
+  ;; Create multiple noise grids: 
+  let i 0
+  
+  while [i < perlin-octaves]
+  [
+    create-noise i
+    set i (i + 1)
+  ]
+  
+  ;; Blend noise together:
+  let amplitude 1
+  let totalAmplitude 0
+  
+  let k (perlin-octaves - 1) ;;while Counter
+  while [k >= 0]
+  [
+    set amplitude (amplitude * perlin-persistence)
+ ;   print (word "for k = " k " the amplitude is " amplitude)
+    set totalAmplitude (totalAmplitude + amplitude)
+  
+    set i 0  
+    while [i < world-width]
+    [
+      let j 0
+      while [j < world-height]
+      [
+        ask patch i j
+        [
+          set p_elevation (p_elevation + ((item k p_elevation_octaves) * amplitude))
+        ]
+        
+        set j (j + 1)
+      ]
+      set i (i + 1)
+    ]
+    set k (k - 1)
+  ]
+  
+  ask patches
+  [
+    set p_elevation (p_elevation / totalAmplitude)
+  ]
+  
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+to create-noise [octave]
+
+  let samplePeriod floor(1 * 2 ^ octave)  ;;originally left-shift by octave:  "1 << octave"  (bit shift)
+  let sampleFrequency (1.0 / samplePeriod)
+  
+  let i 0
+  while [i < world-width]
+  [
+    let sample_i0 (floor(i / samplePeriod)) * samplePeriod
+    let sample_i1 floor((sample_i0 + samplePeriod) mod world-width)    
+    let horizontal_blend ((i - sample_i0) * sampleFrequency)
+    
+    let j 0
+    while [j < world-height]
+    [
+      let sample_j0 (floor(j / samplePeriod)) * samplePeriod
+      let sample_j1 floor((sample_j0 + samplePeriod) mod world-height)   
+      let vertical_blend ((j - sample_j0) * sampleFrequency)
+         
+      let baseNoise0 [p_elevation] of patch sample_i0 sample_j0
+      let baseNoise1 [p_elevation] of patch sample_i1 sample_j0      
+      let top (interpolate baseNoise0 baseNoise1 horizontal_blend)
+      
+      set baseNoise0 [p_elevation] of patch sample_i0 sample_j1
+      set baseNoise1 [p_elevation] of patch sample_i1 sample_j1     
+      let bottom (interpolate baseNoise0 baseNoise1 horizontal_blend)
+        
+      let final (interpolate top bottom vertical_blend)
+      
+      ask patch i j [set p_elevation_octaves lput final p_elevation_octaves]    
+      set j (j + 1)
+    ]  
+    set j 0
+    set i (i + 1)
+  ]
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+to-report interpolate [x0 x1 alpha] 
+ report (x0 * (1 - alpha) + alpha * x1)    
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+to go-roads
+
+  ;; Initialize the road creation algorithm
+  init-roads
+  
+  ;; Create roads while total road length has not been reached
+  while [count patches with [p_road = 1] < total-road-length]
+  [
+    add-one-road
+  ]
+
+  ;; Clean up
+  ask turtles [die]
+
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+to init-roads
+  ;; Reset old roads (if procedure is called again)
+  ask patches [set p_road 0 set p_road_nr 0]
+  set number-of-roads 1
+  clear-drawing
+
+  ;; Create starting-point
+  set p_r0 one-of patches with [pxcor = max-pxcor or pxcor = min-pxcor or pycor = max-pycor or pycor = min-pycor]
+  ask p_r0 [set p_road 1 set p_road_nr number-of-roads set pcolor blue]
+
+  ;; Create road building turtle
+  create-turtles 1
+  [
+    move-to p_r0
+    set color black
+    pd
+  ]
+  
+  ;; Set the current road radius, that is used for determining destinations of the first road
+  set current_road_radius min-dist-roads
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+to add-one-road
+  define-destination
+  create-road
+  set number-of-roads (number-of-roads + 1)
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+to define-destination
+  ;; Clear the old destination and reset the minimum road distance radius
+  set p_r1 nobody
+  ; let road-radius min-dist-roads
+  ;; Search for a patch that is not a road and has no roads within the defined radius
+  ;; If the search does not succeed, the radius where road patches are allowed is reduced
+  while [p_r1 = nobody]
+  [
+    
+    set p_r1 one-of patches with [p_road = 0 and not any? patches with [p_road = 1] in-radius current_road_radius]
+    if (p_r1 = nobody)
+    [
+      set current_road_radius current_road_radius - 1
+      set warning-road 1
+    ]
+    
+    if (current_road_radius <= 0)
+    [
+      if print-messages?
+      [
+        print "STOP"
+      ]
+      stop
+    ]
+  ]
+  
+  ask p_r1 [set pcolor red]
+  
+  
+  ;; Move the road building turtle to the closest road patch from the destination
+  ask turtles
+  [
+    pu
+    move-to min-one-of patches with [p_road = 1] [distance p_r1]
+    pd
+  ]
+    
+end
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+to create-road
+
+;; Loop until the road is finished
+loop
+ [
+  set stopper 0
+
+  ask turtles
+  [
+    let dest-heading towards p_r1
+    
+    set heading towards p_r1
+    
+    let mypatch patch-here
+    let myelev [p_elevation] of mypatch
+
+    ;; Create sorted list of patches in vision cone by distance to destination
+    let cone-patches patches with [self != mypatch and p_road = 0] in-cone 1.5 cone-angle
+    let next-patch ifelse-value (random-float 1 < dist-weight) [first sort-on [abs(distance p_r1)] cone-patches][first sort-on [abs(p_elevation - myelev)] cone-patches]
+
+    ;; If p_r1 is already on neighbor go there instead:
+    ifelse (member? p_r1 neighbors)
+    [
+      move-to p_r1
+      set stopper 1
+    ]
+    [
+      move-to next-patch
+    ]
+
+    ask patch-here
+    [
+      set p_road 1
+      set p_road_nr number-of-roads
+    ]
+  ]
+
+  if (stopper = 1) [stop]
+ ]
+
+end
+
+;###################################################################################
+; REAL SHAPEFILE - Road setup
+;###################################################################################
+
+To load-roadmap-shapefile
+  ;loads shapefile and coordinate system and sets gis:envelope
+  ;resizes the world size to fit the map extent and matches the gis:envelope to the world transformation 
+  ;performs setup for initialization (necessary after resizing the world)
+  
+  let road.projection (word "input/LGraf_roadmaps/" road-map-id "_road.prj") 
+  let road.map (word "input/LGraf_roadmaps/" road-map-id "_road.shp")
+  let road.area (word "input/LGraf_roadmaps/" road-map-id "_area.shp")
+  
+  ;; Check if files exist:
+  if (not file-exists? road.projection) [user-message (word "File " road.projection " does not exist!")]
+  if (not file-exists? road.map) [user-message (word "File " road.map " does not exist!")]
+  if (not file-exists? road.area) [user-message (word "File " road.area " does not exist!")]
+  
+  gis:load-coordinate-system road.projection
+  set road-shapefile gis:load-dataset road.map
+  set map-frame-shapefile gis:load-dataset road.area
+ 
+  set envelope gis:envelope-of map-frame-shapefile
+  print gis:envelope-of map-frame-shapefile
+ 
+  set x-extent (item 1 envelope - item 0 envelope) ;map extent in x-direction in meter ?
+  set y-extent (item 3 envelope - item 2 envelope) ;map extent in y-direction in meter
+ 
+  ;the global variable cell-length is already set in set-world-dimensions in init.nls
+  ;set cell-length 50  ;if one chooses e.g. a smaller cell-length here, the world will contain more cells but the map always covers the whole world
+  
+  set number-of-cells-x round (x-extent / cell-length-meter) ;number of cells that will be needed if cell-lenght is 50m
+  set number-of-cells-y round (y-extent / cell-length-meter)
+
+  resize-world 0 (number-of-cells-x - 1) 0 (number-of-cells-y - 1)
+
+  gis:set-transformation envelope (list 0 max-pxcor 0 max-pycor) ; defines mapping between GIS coodinates and NetLogo coordinates
+ 
+  ;this is to make the output maps in exactly the "right" resolution of 50x50 m. 
+  ; i.e. if the road shapefile-dimensions are not dividable by 50, the shapefile is slightly distorted
+ 
+  let x-range number-of-cells-x * cell-length-meter ;extent of the map in meter in x-direction 
+  print x-range
+  let y-range number-of-cells-y * cell-length-meter ;extent of the map in y-direction
+  let default-envelope (list item 0 envelope (item 0 envelope + x-range) item 2 envelope (item 2 envelope + y-range))
+  gis:set-world-envelope default-envelope
+ 
+End  
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To map-road-patches
+  ;All patches which have a road intersecting are defined as road patches
+  ask patches gis:intersecting road-shapefile
+  [
+    set p_road 1  
+  ]
+ 
+End  
+  
+
+
+
+
+
+
+
+  

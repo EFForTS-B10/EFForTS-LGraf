@@ -1,0 +1,298 @@
+
+;###################################################################################
+; ASSIGN LANDUSE TYPES TO ESTABLISHED FIELDS
+;###################################################################################
+
+To init-assign-landuse
+ ;initializes the assignment of land-use types
+  ;; Read patch-id from backup:
+  ask patches 
+  [
+    set p_id p_id_backup
+    set p_landuse-type 0
+  ]
+  
+; Clear lists for expected and realized LUT cells
+  set LUT-expected-cells [ ]
+  set LUT-realized-cells [ ]
+  set LUT-realized-fractions [ ]
+  set LUT-realized-fractions-specialist [ ]
+ 
+ ;; Reset households:
+ ask turtles
+ [
+   set household-LUT-patches n-values length LUT-fractions-list [0]
+   set household-number-of-land-use-types 0
+ ]
+ 
+  ; Read parameters from interface:     
+  ;; Calculate sum of defined LUT fractions
+  let LUT-fractions-sum (sum (list LUT-1-fraction LUT-2-fraction LUT-3-fraction LUT-4-fraction LUT-5-fraction))
+  
+  ;; If defined fractions are bigger than one stop!
+  if (LUT-fractions-sum > 1)
+  [
+    if print-messages?
+    [
+      print "LUT fractions sum must be 1 or lower!"
+    ]
+    set log-list-fields lput "LUT fractions sum must be 1 or lower." log-list-fields
+    stop
+  ]
+  
+  ;; If defined fractions are less than one fill up:
+  if (LUT-fractions-sum < 1)
+  [
+    ;; Fill up with selected LUT:
+    let missing-fraction (1 - LUT-fractions-sum) 
+    let command (word "set " LUT-fill-up " " LUT-fill-up " + " missing-fraction)
+    run command 
+  ]   
+   
+  ; Read fractions lists from interface:
+  set LUT-names-list (list LUT-1-name LUT-2-name LUT-3-name LUT-4-name LUT-5-name)
+  set LUT-fractions-list (list LUT-1-fraction LUT-2-fraction LUT-3-fraction LUT-4-fraction LUT-5-fraction)
+  set LUT-specialize-list (list LUT-1-specialize LUT-2-specialize LUT-3-specialize LUT-4-specialize LUT-5-specialize)
+  
+  if precision (sum LUT-fractions-list) 3 != 1
+  [
+    user-message "Sorry, land-use type fractions do not add up to 1. Please press halt, adjust values and repeat the setup." 
+  ] 
+  
+  if land-use-types = "landscape-level-fraction"
+  [ 
+    let LUT-specialize-list-length length LUT-specialize-list 
+    set LUT-specialize-list n-values LUT-specialize-list-length [0]
+  ]
+     
+End
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+to calculate-land-use-lists
+  
+  set land-use-list [] ;list will shrink once all area of specialist is fullfilled for one land-use type
+  set expected-cells [] ;must be calculated like in calculate-expected-area-of-land-uses, but now on the basis of the realized-total-household-area, as this is what needs to be assigned to land-uses
+  set land-use-list-specialists []
+  set expected-cells-specialists []
+  
+  let i 1
+  foreach LUT-fractions-list
+  [
+    lut ->
+    let cells-of-actual-land-use count patches with [p_landuse-type = i]
+    let exp-cells (round(realized-total-household-area * lut) - cells-of-actual-land-use)
+  
+    if (exp-cells > 0)
+    [
+      set expected-cells lput exp-cells expected-cells
+      set land-use-list lput i land-use-list
+    ]
+    
+    let exp-cells-specialist round(item (i - 1) LUT-specialize-list * exp-cells)
+    
+    if (exp-cells-specialist > 0)
+    [
+      set expected-cells-specialists lput exp-cells-specialist expected-cells-specialists
+      set land-use-list-specialists lput i land-use-list-specialists
+    ]
+   
+    set i i + 1
+  ]
+  
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+to assign-land-use-types
+    
+  ;; Now we have to draw Housholds to reach the specialist area sizes:
+  let i 1
+  while [length land-use-list-specialists > 0 and (count patches with [p_landuse = 3 and p_landuse-type = 0] > 0)]  ;;stop the loop if either all specialists have been distributed or if no remaining patches are left
+  [
+    distribute-land-use-specialists i    
+    set i i + 1
+  ]
+
+  ;; Now distribute the remaining patches:
+  ;; Calculate the land use lists
+  calculate-land-use-lists
+    
+  ;; Get the ids of the remaining patches  
+  let patch_number max [p_id] of patches ;number of agricultural fields
+ 
+  ;to go through the patches in a random order, make a list containint 0,..., patch-number,
+  ;select a random item of this list, determine the land-use type of the according patch, remove the item from the list,
+  ;continue until the list is empty
+  
+  ;make a list with entries 0,...patch_number
+  let list-patch-ids []
+  let counter 0
+  while[counter <= patch_number]
+  [
+    ;; If the patch with current counter id has no landuse, put the patch in the patchlist
+    if ([p_landuse-type] of one-of patches with [p_id = counter] = 0)
+    [  
+      set list-patch-ids lput counter list-patch-ids 
+    ]
+    set counter counter + 1
+  ]
+   
+  ;; Distribute the remaining patches
+  while[not empty? list-patch-ids]
+  [  
+    let random-patch-id one-of list-patch-ids                ;choose random patch-id
+    set list-patch-ids remove random-patch-id list-patch-ids ;remove this patch-id from the list
+    
+    ;choose random land-use from list-land-uses that have not enough area yet  (alternatively one could also choose land-use type with probability of fraction)
+    let random_land-use-type-index random length land-use-list ;random index of the list of land-uses
+    let random-land-use item random_land-use-type-index land-use-list ;according land-use of that index    
+    let owner [p_owner] of one-of patches with [p_id = random-patch-id]
+    let field-size-count count patches with [p_id = random-patch-id]
+  
+    ask patches with [p_id = random-patch-id] 
+    [      
+      set p_landuse-type  random-land-use  ;set the land-use-type
+    ]
+    
+    ask turtle owner
+    [ ;increase number of patches with the respective land use
+      let LUT-list-position random-land-use - 1
+      let new-value (item LUT-list-position household-LUT-patches + 1)
+      set household-LUT-patches replace-item LUT-list-position household-LUT-patches new-value
+    ] 
+  
+    ;reduce number of expected cells of this land-use type in the expected-cells list by field-size count 
+    ;if the item is <= 0, remove it from the expected-cells list and remove the land-use type from the list-land-uses
+    set expected-cells replace-item (random_land-use-type-index) expected-cells (item (random_land-use-type-index) expected-cells - field-size-count)
+    if item random_land-use-type-index expected-cells <= 0 
+    [
+      set expected-cells remove-item random_land-use-type-index expected-cells 
+      set land-use-list remove-item random_land-use-type-index land-use-list ;remove that land use from the choices for further fields 
+    ]
+    
+    set counter counter + 1 
+  ]
+  
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 
+to distribute-land-use-specialists [nr-patches]
+  
+  ;; ask households with 1 patch:
+  ask turtles with [length household-patch-id-list = nr-patches and household-number-of-land-use-types = 0]
+  [
+    if (length land-use-list-specialists > 0)
+    [
+      ;; Store patch-id of patches:
+      let my-patch-ids household-patch-id-list
+    
+      ;; Field-size of the patch
+      let field-size-count count patches with [member? p_id my-patch-ids = TRUE]
+
+      ;; Randomly choose specialization:
+      let spec-position random length land-use-list-specialists
+    
+      ;; Assign land-use
+      ask patches with [member? p_id my-patch-ids = TRUE]
+      [
+        set p_landuse-type item spec-position land-use-list-specialists
+      ]
+      
+      ;; Update owner variable
+      let LUT-list-position (item spec-position land-use-list-specialists) - 1
+      let new-value (item LUT-list-position household-LUT-patches + 1)
+      set household-LUT-patches replace-item LUT-list-position household-LUT-patches new-value
+    
+      ;;Recalculate the lists:
+      set expected-cells-specialists replace-item (spec-position) expected-cells-specialists (item (spec-position) expected-cells-specialists - field-size-count)
+      ;; Remove if < 0
+      if (item spec-position expected-cells-specialists <= 0)
+      [
+        set expected-cells-specialists remove-item spec-position expected-cells-specialists
+        set land-use-list-specialists remove-item spec-position land-use-list-specialists
+      ]   
+    ;  print word "Remaining specialist area: " expected-cells-specialists
+    ;  print word "Remaining area: " count patches with [p_landuse = 3 and p_land-use-type = 0]
+    ]
+  ]
+
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To calculate-realized-land-uses
+  ;calculates the fractions of the different land uses
+  let i 1
+  
+  repeat length LUT-fractions-list
+  [
+    let realized-cells (count patches with [p_landuse-type = i])
+    let realized-fractions precision (realized-cells / realized-total-household-area) 3
+ 
+    set LUT-realized-cells lput realized-cells LUT-realized-cells
+    set LUT-realized-fractions lput realized-fractions LUT-realized-fractions
+    set i i + 1
+  ]
+  
+End
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To calculate-realized-area-of-specialists
+;calculates the fraction of the total area of land-uses that are farmed by specialist households, i.e. households that have only this land-use  
+ 
+  ask turtles
+  [
+    let number-of-lu-types 0
+    
+    foreach household-LUT-patches
+    [
+      lut ->
+      if lut > 0 [set number-of-lu-types number-of-lu-types + 1] 
+    ]
+        
+    set household-number-of-land-use-types number-of-lu-types
+  ]
+    
+  let realized-area-of-specialists n-values length LUT-fractions-list [0]
+  
+  let applied-lu 0
+  ask turtles with [household-number-of-land-use-types = 1]
+  [ 
+    ;which is the land-use this household applies
+    let i 1
+    foreach household-LUT-patches
+    [
+      lut ->
+      if lut > 0 [set applied-lu (i)]
+      set i (i + 1)
+    ]
+   
+    ;add household-area-realized to the according entry in realized-area-of-specialists
+    set realized-area-of-specialists replace-item (applied-lu - 1) realized-area-of-specialists (item (applied-lu - 1) realized-area-of-specialists + household-area-realized) 
+  ]
+  
+  ;print "realized-area-of-specialists"
+  ;print realized-area-of-specialists
+  
+   print word "LUT-realized" LUT-realized-cells
+  
+  ;what is the fraction of specialized land-uses (to compare with the input)
+  let i 0
+  foreach LUT-realized-cells
+  [
+    lut ->
+    ifelse lut > 0
+    [
+      set LUT-realized-fractions-specialist lput precision (item i realized-area-of-specialists / lut) 3 LUT-realized-fractions-specialist
+    ]
+    [
+      set LUT-realized-fractions-specialist lput 0 LUT-realized-fractions-specialist
+    ]
+    set i (i + 1)
+  ]
+      
+End  
+

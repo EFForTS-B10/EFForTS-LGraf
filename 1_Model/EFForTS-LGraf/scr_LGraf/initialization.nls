@@ -1,0 +1,264 @@
+
+;###################################################################################
+; Main initialization procedure
+;###################################################################################
+to initialize
+  ;; Check random seed
+  control-random-seed
+
+  ;; Load world dimensions
+  set-world-dimensions
+  
+  ;; Initialize patches 
+  set-patch-variables
+  
+  set-global-variables
+  set-field-size-parameters
+  set-field-strategies
+  
+ set-gui-output
+end
+
+to initialize-nr-hh
+  determine-household-sizes ; draws number-of-households from household size distribution; uses the distribution directly
+  determine-village-sizes
+  determine-expected-field-sizes
+end
+
+to initialize-nr-vlg 
+  determine-village-sizes
+  
+  determine-household-sizes ; draws number-of-households from household size distribution; uses the distribution directly
+  
+  determine-expected-field-sizes  
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To control-random-seed
+  ;if random-seed is on, in each setup, a new random seed is chosen and stored in model-output/random-seed.txt
+  ;if random-seed is off, the stored random seed from the last run is always taken as a random seed.
+   
+  ifelse reproducable?
+  [ 
+    random-seed rnd-seed
+  ]
+  [
+    set rnd-seed new-seed
+    random-seed rnd-seed
+  ]
+  ;print "random-seed"
+  ;print rand-seed
+End
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To set-world-dimensions
+  
+  ;; Check which road mode is selected on the interface
+  ;; If artificial roads are used, create world based on the defined interface parameters
+  ;; If a shapefile is loaded, create the world based on the shapefile extent
+ 
+  set-patch-size zoom 
+  
+  ifelse (road.algorithm = "real.shapefile")
+  [
+    load-roadmap-shapefile 
+  ]
+  [
+    resize-world 0 (width - 1) 0 (height - 1) ;default world size: 100 x 100 cells -- we use width/height - 1 because we start at 0
+    
+    let x-range 100 * cell-length-meter ;extent of the map in meter in x-direction
+    let y-range 100 * cell-length-meter ;extent of the map in y-direction
+  
+    let default-envelope (list 0 x-range 0 y-range)
+    gis:set-world-envelope default-envelope 
+  ]
+  
+End 
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To set-patch-variables
+  ;initialize all patch variables
+  ask patches 
+  [
+    set pcolor 5
+    set p_landuse 1
+    set p_road 0
+    set p_owner -1
+    set p_id -1
+    ;set p_homebase 0 
+    set p_homebase [0 0 0] 
+    set p_homebase_id n-values households-per-cell [-1]
+    set p_landuse-type 0 
+    set p_forestcluster_id -1 
+    set p_inaccessable_id -1
+  ]  
+ 
+End
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To set-global-variables
+  ;set initial values for global variables
+                     
+  set current-patch-id 0
+  set cell-size cell-length-meter ^ 2 / 10000 ;0.25 ; one cell is 0.25 ha
+
+  ;set cell-size 0.25 ; one cell is 0.25 ha
+  set conversion-ha-cell 1 / cell-size ; one ha is 4 cells
+  set total-number-of-cells (max-pxcor + 1) * (max-pycor + 1) 
+  set number-of-roads 0
+  set log-list-setup [] 
+  set log-list-households []
+  set log-list-fields []
+  set local []
+  set transmigrant [] 
+  set real-proportion [] 
+  set vlg-areas []  
+  set vlg-sizes [] 
+  set household-sizes [] 
+  set real-vlg-areas []  
+  
+  calculate-forest-cover   
+    
+  ;## Initialize LUT fractions list
+  let n-LUT 5
+  set LUT-fractions-list n-values n-LUT [0]
+  set LUT-realized-fractions n-values n-LUT [0]
+  
+  set households-per-cell floor(households-per-cell)
+                             
+End
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To set-field-strategies
+  
+  let strategies-logic (list TRUE TRUE TRUE TRUE)
+  
+  if (set-field-strategies-by-id?)
+  [ 
+    ;; Strategy 4 (avoid) is always in, because it is the "exite" strategy that should always work
+    ;; Group 1: Homebase = TRUE
+    if (field-strategies-id = 1) [set strategies-logic (list TRUE TRUE TRUE TRUE)]
+    if (field-strategies-id = 2) [set strategies-logic (list TRUE FALSE TRUE TRUE)]
+    if (field-strategies-id = 3) [set strategies-logic (list TRUE TRUE FALSE TRUE)]
+    if (field-strategies-id = 4) [set strategies-logic (list TRUE FALSE FALSE TRUE)]
+    ;; Group 2: Homebase = FALSE
+    if (field-strategies-id = 5) [set strategies-logic (list FALSE TRUE TRUE TRUE)]
+    if (field-strategies-id = 6) [set strategies-logic (list FALSE FALSE TRUE TRUE)]
+    if (field-strategies-id = 7) [set strategies-logic (list FALSE TRUE FALSE TRUE)]
+    
+    ;; Group 3: All False
+    if (field-strategies-id = 8) [set strategies-logic (list FALSE FALSE FALSE TRUE)]  
+  
+    set s1.homebase item 0 strategies-logic 
+    set s2.fields item 1 strategies-logic
+    set s3.nearby item 2 strategies-logic
+    set s4.avoid item 3 strategies-logic
+        
+  ]
+  
+End
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To set-field-size-parameters
+  
+  if (use-field-size-percentage?)
+  [
+    set field-size-mean-ha precision (hh-area-mean-ha * field-size-percentage) 3
+    
+    ;; Check for minimum field size (0.25)
+    if (field-size-mean-ha < 0.25) [set field-size-mean-ha 0.25]
+  ]
+  
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To set-gui-output
+  ;writes initial output into the GUI and sets x-y-ranges for plots
+   
+  if hh-area-distribution = "constant"  [set most-common-hh-size hh-area-mean-ha]
+  if hh-area-distribution = "normal"  [set most-common-hh-size hh-area-mean-ha]
+  if hh-area-distribution = "log-normal"  [set most-common-hh-size exp(hh-area-mean-ha - hh-area-sd-ha ^ 2) ]
+   
+  if field-size-distribution = "constant"  [set most-common-field-size field-size-mean-ha]
+  if field-size-distribution = "uniform"  [set most-common-field-size "NA"]
+  if field-size-distribution = "normal"  [set most-common-field-size field-size-mean-ha]
+  if field-size-distribution = "log-normal"  [set most-common-field-size exp(field-size-mean-ha - field-size-sd-ha ^ 2) ]
+  
+  set-current-plot "Household area distribution"
+  set-plot-x-range 0 0.00000001
+  set-plot-y-range 0 0.00000001
+  auto-plot-on  
+ 
+  set-current-plot "Field size distribution"
+  set-plot-x-range 0 0.00000001
+  set-plot-y-range 0 0.00000001
+  auto-plot-on
+  
+  set-current-plot "Inaccessible area distribution"
+  set-plot-x-range 0 0.00000001
+  set-plot-y-range 0 0.00000001
+  auto-plot-on
+  
+   set-current-plot "Village area distribution"
+  set-plot-x-range 0 0.00000001
+  set-plot-y-range 0 0.00000001
+  auto-plot-on
+  
+    set-current-plot "Forest Patches"
+  set-plot-x-range 0 0.00000001
+  set-plot-y-range 0 0.00000001
+  auto-plot-on
+  
+End
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To calculate-expected-forest-cover
+  ;calculates the expected forest cover [0,1] in the set up precedure by substracting expected total agricultural area and big plantation area from the whole area
+  
+  let big-plantation-cells count patches with [p_landuse = 1000]
+  ; print "bip pl patches"
+  ; print big-plantation-cells
+  
+  set expected-forest-cover (total-number-of-cells - expected-total-household-area - big-plantation-cells) / total-number-of-cells  ;ToDo what should home base cells be counted as? as forest??
+  
+End  
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To initialize-search-strategies
+  
+;  set search-strat 1 
+  set strategies-pattern []
+  
+  if (s1.homebase = TRUE) [set strategies-pattern lput "s1" strategies-pattern]
+  if (s2.fields = TRUE) [set strategies-pattern lput "s2" strategies-pattern]
+  if (s3.nearby = TRUE) [set strategies-pattern lput "s3" strategies-pattern]
+  if (s4.avoid = TRUE) [set strategies-pattern lput "s4" strategies-pattern]
+  
+  if (length strategies-pattern <= 0)
+  [
+    if print-messages?
+    [
+      print "WARNING: at least one search strategy has to be activated! We suggest to activate at least one of the two, more restrictive strategies (s1, s2) and one of the other two (s3, s4)! s1 and s4 will be auto-activated now!"
+    ]
+    set log-list-fields lput "No search strategy was activated. S1 and s4 were auto-activated." log-list-fields
+    set s1.homebase TRUE
+    set s4.avoid TRUE
+    initialize-search-strategies
+  ]
+  
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+

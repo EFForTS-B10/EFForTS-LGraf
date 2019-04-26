@@ -1,0 +1,330 @@
+
+
+### Try optimization nlrx optimization approach:
+
+## Create 3 samples from the land-use map
+nsamples <- 3
+sampleseed <- 446 #2358
+lu_harapan_sample <- sampleLandscapes(lu_harapan, sampleseed, nsamples, 50, 1:nsamples)
+
+## For each sample create a similar map:
+plan(multisession)
+nl_samples <- furrr::future_map(seq(nsamples), function(h)
+{
+  library(raster)
+  ## Select basemap for  which we want to generate a similar map:
+  basemap <- lu_harapan_sample %>% dplyr::filter(metric %in% select.metrics) %>% 
+    dplyr::filter(id == h) %>% 
+    dplyr::select(-'id') %>% 
+    spread(metric, value)
+  
+  ## Agri area:
+  agriproportion <- (basemap$agri.area / 10000)
+  
+  # Local for testing:
+  nl <- nl(nlversion = "6.0.3",
+           nlpath = "C:/Program Files/NetLogo 6.0.3/",
+           modelpath = "LGraf_Jana/EFForTS-LGraf_new_GUI.nlogo",
+           jvmmem = 2024)
+  
+  nl@experiment <- experiment(expname="LGraf",
+                              outpath="C:/out/",
+                              repetition=1,
+                              tickmetrics="false",
+                              idrunnum="foldername",
+                              idsetup=c("setup"),
+                              idgo=c("establish_fields", "assign-land-uses", "write-status-hpc"),
+                              idfinal=NA_character_,
+                              metrics.turtles=c("who", "pxcor", "pycor"),
+                              metrics.patches=c("pxcor", "pycor", "p_landuse-type"),
+                              variables = list("households-per-cell" = list(qfun="qunif", min = 3, max = 5),
+                                               "min-distance" = list(qfun="qunif", min=1, max=10),
+                                               "dist-weight" = list(qfun="qunif", min = 0, max = 1),
+                                               "total-road-length" = list(qfun="qunif", min = 500, max = 1000),
+                                               "hh-area-mean-ha" = list(qfun="qunif", min = 0.25, max = 3),
+                                               "hh-area-sd-ha" = list(qfun="qunif", min = 0.25, max = 1),
+                                               "vlg-area-mean" = list(qfun="qunif", min = 1, max = 10),   ##default 15
+                                               "vlg-area-sd" = list(qfun="qunif", min = 1, max = 3),     ## default 6
+                                               "field-size-percentage" = list(qfun="qunif", min = 0.1, max = 0.9),
+                                               "field-size-sd-ha" = list(qfun="qunif", min = 0.25, max = 2),
+                                               "field-strategies-id" = list(qfun="qunif", min = 1, max = 8),
+                                               "change-strategy" = list(qfun="qunif", min = 1, max = 10),
+                                               "field.shape.factor" = list(qfun="qunif", min = 0.7, max = 1.5)),
+                              constants = list("proportion-agricultural-area" = agriproportion,
+                                               "reproducable?" = "FALSE",   ## random seed is set via nlrx
+                                               "write.param.file?" = "TRUE", ## useful for debugging
+                                               "print-messages?" = "FALSE",
+                                               "setup-model" = "\"agricultural-area\"",
+                                               "width" = 100,
+                                               "height" = 100,
+                                               "cell-length-meter" = 50,
+                                               "road.algorithm" = "\"artificial.perlin\"",
+                                               "perlin-octaves" = 2,
+                                               "perlin-persistence" = 0.1,
+                                               "cone-angle" = 120,
+                                               "min-dist-roads" = 5,
+                                               "hh-area-distribution" = "\"log-normal\"",
+                                               "vlg-area-distribution" = "\"lognormal\"",
+                                               "field-size-distribution" = "\"log-normal\"",
+                                               "use-field-size-percentage?" = "TRUE",
+                                               "occ-probability" = 0,
+                                               "inaccessible-area-fraction" = 0,
+                                               "set-field-strategies-by-id?" = "TRUE",
+                                               "LUT-1-fraction" = 1,
+                                               "LUT-2-fraction" = 0,
+                                               "LUT-3-fraction" = 0,
+                                               "LUT-4-fraction" = 0,
+                                               "LUT-5-fraction" = 0,
+                                               "LUT-1-specialize" = 0,
+                                               "LUT-2-specialize" = 0,
+                                               "LUT-3-specialize" = 0,
+                                               "LUT-4-specialize" = 0,
+                                               "LUT-5-specialize" = 0,
+                                               "LUT-fill-up" = "\"LUT-2-fraction\"",
+                                               "land-use-types" = "\"landscape-level-fraction\"",
+                                               "default.maps" = "\"landuse-type\"",
+                                               "write-household-ids" = "\"only-first-households\""))
+  
+  genalg.popsize <- 50  # 100
+  genalg.iters <- 25 
+  
+  nl@simdesign <- simdesign_GenAlg(nl, popSize = genalg.popsize, iters=genalg.iters, nseeds=1)
+  
+  ## Run optimization for current map:
+  results <- run_nl_dyn_mod(nl, seed=getsim(nl, "simseeds")[1], basemap = basemap)
+  
+  fitness <- data.frame(generation=seq(1:length(results$mean)), evaluation=results$mean)
+  
+  fitness.plot <- ggplot(fitness, aes(x=generation, y=evaluation)) +
+    geom_line(size=1) +
+    theme_minimal() +
+    theme(axis.text=element_text(size=14),
+          axis.title=element_text(size=14))
+  
+  ggsave(plot=fitness.plot, paste0("mapsample_", h, "_fitness.png"), width = 6.0, height = 6.0, dpi=300)
+  
+  ## Extract variable values:
+  results.summary <- strsplit(summary(results), " ")
+  results.summary.varend <- (length(results.summary[[1]]) - 1)
+  results.summary.varstart <- (results.summary.varend - length(nl@experiment@variables) + 1)
+  
+  results.summary <- setNames(as.list(as.numeric(results.summary[[1]][results.summary.varstart:results.summary.varend])), names(nl@experiment@variables))
+  
+  fitness.best.table <- tableGrob(tibble(var=names(results.summary), value=unlist(results.summary)), rows=rep("",length(results.summary)))
+  ggsave(plot=grid.arrange(fitness.best.table), paste0("mapsample_", h, "_bestparam.png"), width = 3.5, height = 5.0, dpi=300)
+  
+  
+  # Store best parameterization together with remaining constants as constants list
+  all.constants <- c(nl@experiment@constants, results.summary)
+  
+  ## Do run with this parameterisation:
+  nl <- nl(nlversion = "6.0.3",
+           nlpath = "C:/Program Files/NetLogo 6.0.3/",
+           modelpath = "LGraf_Jana/EFForTS-LGraf_new_GUI.nlogo",
+           jvmmem = 2024)
+  
+  nl@experiment <- experiment(expname="LGraf",
+                              outpath="C:/out/",
+                              repetition=1,
+                              tickmetrics="false",
+                              idrunnum="foldername",
+                              idsetup=c("setup"),
+                              idgo=c("establish_fields", "assign-land-uses"),
+                              idfinal=NA_character_,
+                              metrics.turtles=c("who", "pxcor", "pycor"),
+                              metrics.patches=c("pxcor", "pycor", "p_landuse-type"),
+                              constants = all.constants)
+  
+  nl@simdesign <- simdesign_simple(nl, nseeds=5)
+  
+  res_final <- run_nl_all(nl)
+  setsim(nl, "simoutput") <- res_final
+  
+  
+  return(nl)
+})
+
+## Store nlsamples as rds:
+saveRDS(nl_samples, file="LGraf_validation_genAlg.rds")
+
+
+## Postprocessing:
+
+
+mapdev.all <- NULL
+for (i in 1:length(nl_samples))
+{
+  nl <- nl_samples[[i]]
+  
+  basemap <- lu_harapan_sample %>% dplyr::filter(metric %in% select.metrics) %>% 
+    dplyr::filter(id == i) %>% 
+    dplyr::select(-'id') %>% 
+    spread(metric, value)
+  
+  res_final_sp <- get_nl_spatial(nl, turtles = TRUE, patches = TRUE, format = "spatial")
+  
+  ## Define metrics
+  select.metrics <- c("cs.0.landscape.shape.index",
+                      "cs.0.largest.patch.index",
+                      "cs.0.mean.patch.area",
+                      "cs.0.n.patches",
+                      "cs.0.patch.cohesion.index",
+                      "cs.1.landscape.shape.index",
+                      "cs.1.largest.patch.index",
+                      "cs.1.mean.patch.area",
+                      "cs.1.n.patches",
+                      "cs.1.patch.cohesion.index")
+  
+
+  ## Calculate landscape metrics for all rasters:
+  lgraf_metrics <- rasterToMetrics(res_final_sp$metrics.patches, select.metrics)
+  lgraf_metrics <- nl@simdesign@simoutput %>% dplyr::select('proportion-agricultural-area') %>% bind_cols(lgraf_metrics)
+  lgraf_metrics <- lgraf_metrics %>% dplyr::select(c('proportion-agricultural-area', select.metrics))
+  lgraf_metrics$agri.area <- 10000 * lgraf_metrics$`proportion-agricultural-area`
+  lgraf_metrics$forest.area <- 10000 - lgraf_metrics$agri.area
+  lgraf_metrics <- lgraf_metrics %>% dplyr::select(-'proportion-agricultural-area') %>% 
+    dplyr::select(forest.area, agri.area, everything())
+  
+  
+  mapdevs <- NULL
+  
+  ## Plot raster map for each generated map and calculate metrics deviance:
+  for (k in 1:nrow(res_final_sp))
+  {
+    ## Calculate deviances:
+    mapdev <- (basemap - lgraf_metrics[k,]) / basemap
+    mapdev$sum <- sum(abs(mapdev))
+    mapdev$sampleid <- i
+    mapdev$lgrafid <- k
+    mapdevs <- rbind(mapdevs, mapdev)
+    
+    ## Convert raster to DF and create nice plot of harapan raster:
+    res_final_sp.df <- data.frame(rasterToPoints(res_final_sp$metrics.patches[[k]]))
+    names(res_final_sp.df) <- c("x", "y", "z")
+    
+    cols <- c("0"="#8D8D8D", "1"="#fde725ff")
+    ggplot(res_final_sp.df, aes(x=x, y=y, fill=factor(z))) +
+      geom_raster() +
+      coord_equal() +
+      scale_fill_manual(values = cols) +
+      guides(fill=FALSE) +
+      theme_void() + 
+      scale_x_continuous(expand=c(0,0)) +
+      scale_y_continuous(expand=c(0,0)) +
+      labs(x = NULL, y = NULL)
+    
+    ggsave(paste0("mapsample_", i, "_lgrafsample_", k, ".png"), width = 6.0, height = 6.0, dpi=300)
+  }
+  
+  ## Convert to long format
+  mapdevs <- mapdevs %>% gather(metric, value, 1:12)
+  ## Add labels
+  mapdevs$lu <- ifelse(substr(mapdevs$metric, 4, 4) == 0, "matrix", "fields")
+  mapdevs$metric <- ifelse(mapdevs$metric %in% c("forest.area", "agri.area"), mapdevs$metric, substr(mapdevs$metric, 6, nchar(mapdevs$metric)))
+  mapdevs$metric <- ifelse(mapdevs$metric == "landscape.shape.index", "LSI",
+                                ifelse(mapdevs$metric == "largest.patch.index", "LPI",
+                                       ifelse(mapdevs$metric == "patch.cohesion.index", "PCI", mapdevs$metric)))
+  
+  
+  mapdev.all <- rbind(mapdev.all, mapdevs)
+  
+}
+
+
+
+### Mapdevs plot:
+library(ggpubr)
+ggplot(mapdevs, aes(x=metric, y=value, fill=lu)) +
+  #coord_flip() +
+  geom_hline(yintercept = 0) +
+  geom_boxplot() +
+  theme_classic2()
+
+
+## Plot deviations:
+
+library(extrafont)
+extrafont::loadfonts()
+library(ggsci)
+library(hrbrthemes)
+mapdevs.agg <- mapdevs %>% group_by(lu, metric) %>% 
+  summarize(value.mu = mean(value), value.sd = sd(value))
+mapdevs.agg[2,1] <- "matrix"
+mapdevs.agg[1,2] <- "total.area"
+mapdevs.agg[2,2] <- "total.area"
+cols <- c("matrix"="#8D8D8D", "fields"="#fdd610ff")
+
+tiff("plot_output/validation_devs.tiff", width=17.5, height=10, units="cm", res=300)
+ggplot(mapdevs.agg, aes(x=metric, y=value.mu, color=lu)) +
+  geom_pointrange(aes(ymin=value.mu - value.sd, ymax=value.mu + value.sd), position = position_dodge(width=0.5), fatten=3, size=1) +
+  guides(color="none") +
+  xlab("Landscape metric") +
+  ylab("Percentage deviance") +
+  theme_ipsum(base_size=12, axis_title_size = 12, axis_title_just = "m") +
+  scale_color_manual(values = cols)
+dev.off()
+
+
+## Multiplot with maps:
+
+library(png)
+library(ggplot2)
+library(tidyverse)
+library(ggpubr)
+
+sample1 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_1.png"))
+sample2 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_2.png"))
+sample3 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_3.png"))
+
+lgraf11 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_1_lgrafsample_1.png"))
+lgraf12 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_1_lgrafsample_2.png"))
+lgraf13 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_1_lgrafsample_3.png"))
+lgraf14 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_1_lgrafsample_4.png"))
+lgraf21 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_2_lgrafsample_1.png"))
+lgraf22 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_2_lgrafsample_2.png"))
+lgraf23 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_2_lgrafsample_3.png"))
+lgraf24 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_2_lgrafsample_4.png"))
+lgraf31 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_3_lgrafsample_1.png"))
+lgraf32 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_3_lgrafsample_2.png"))
+lgraf33 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_3_lgrafsample_3.png"))
+lgraf34 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_3_lgrafsample_4.png"))
+
+# Store sample pngs as plots with border and margin:
+mg <- 2
+s1 <- ggarrange(sample1, ncol=1, nrow=1)+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black"))
+s2 <- ggarrange(sample2, ncol=1, nrow=1)+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black")) 
+s3 <- ggarrange(sample3, ncol=1, nrow=1)+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black")) 
+
+# Create subplots from lgraf samples with border without margin:
+mg <- 0.1
+lg11 <- ggarrange(lgraf11, ncol=1, nrow=1)+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black"))
+lg12 <- ggarrange(lgraf12, ncol=1, nrow=1)+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black"))
+lg13 <- ggarrange(lgraf13, ncol=1, nrow=1)+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black"))
+lg14 <- ggarrange(lgraf14, ncol=1, nrow=1)+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black"))
+lg21 <- ggarrange(lgraf21, ncol=1, nrow=1)+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black"))
+lg22 <- ggarrange(lgraf22, ncol=1, nrow=1)+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black"))
+lg23 <- ggarrange(lgraf23, ncol=1, nrow=1)+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black"))
+lg24 <- ggarrange(lgraf24, ncol=1, nrow=1)+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black"))
+lg31 <- ggarrange(lgraf31, ncol=1, nrow=1)+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black"))
+lg32 <- ggarrange(lgraf32, ncol=1, nrow=1)+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black"))
+lg33 <- ggarrange(lgraf33, ncol=1, nrow=1)+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black"))
+lg34 <- ggarrange(lgraf34, ncol=1, nrow=1)+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black"))
+
+# Create subpanels for lgraf with margin:
+mg <- 2
+lg1 <- ggarrange(lg11, lg12, lg13, lg14, ncol=2, nrow=2)+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black"))
+lg2 <- ggarrange(lg21, lg22, lg23, lg24, ncol=2, nrow=2)+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black"))
+lg3 <- ggarrange(lg31, lg32, lg33, lg34, ncol=2, nrow=2)+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black"))
+
+# Final plot:
+tiff("plot_output/validation_maps.tiff", width=18, height=12, units="cm", res=300)
+ggarrange(s1, s2, s3, lg1, lg2, lg3,
+          ncol=3, nrow=2, 
+          labels=c("Sample 1", "Sample 2", "Sample 3", "LGraf 1", "LGraf 2", "LGraf 3"),
+          label.x = 0,
+          align = "hv",
+          font.label = list(size=11, face="plain"))
+
+
+dev.off()
+
