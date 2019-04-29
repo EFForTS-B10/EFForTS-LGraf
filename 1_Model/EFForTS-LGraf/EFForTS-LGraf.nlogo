@@ -393,7 +393,7 @@ INPUTBOX
 360
 375
 number-of-households
-34.0
+245.0
 1
 0
 Number
@@ -588,7 +588,7 @@ CHOOSER
 road.algorithm
 road.algorithm
 "artificial.graffe" "artificial.perlin" "real.shapefile"
-2
+1
 
 INPUTBOX
 540
@@ -1110,16 +1110,6 @@ change-strategy
 0
 Number
 
-TEXTBOX
-620
-955
-735
-1040
-defaults house/fields:\nhh_size_m 1.02\nhh_size_sd 0.91\nfield_size_m 0.49\nfield_size_sd 0.77
-11
-0.0
-1
-
 BUTTON
 965
 415
@@ -1368,7 +1358,7 @@ proportion-agricultural-area
 proportion-agricultural-area
 0
 1
-0.0411
+0.3
 0.01
 1
 NIL
@@ -1680,7 +1670,7 @@ CHOOSER
 setup-model
 setup-model
 "number-of-households" "number-of-villages" "agricultural-area"
-1
+2
 
 TEXTBOX
 25
@@ -1730,7 +1720,7 @@ INPUTBOX
 460
 375
 number-of-villages
-2.0
+16.0
 1
 0
 Number
@@ -2275,7 +2265,6 @@ This work is licensed under a Creative Commons Attribution-NonCommercial-NoDeriv
 http://creativecommons.org/licenses/by-nc-nd/4.0/
 
 Contact jsaleck(at)gwdg.de for license related questions.
-
 
 
 @#$#@#$#@

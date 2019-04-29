@@ -1,9 +1,222 @@
+######################################################################################
+# EFForTS-LGraf: Genetic algorithm validation                                    
+######################################################################################
+#
+# Rebuild sample landscapes from landuse map with genetic algorithm
+#
+######################################################################################
+
+######################################################################################
+# Step 1: Globals
+######################################################################################
+
+# Load packages:
+library(nlrx)
+library(tidyverse)
+library(raster)
+library(SDMTools)
+library(future)
+
+# Set R random seed:
+set.seed(6784557)
+
+## Postprocessing function for genetic algorithm:
+galg_postpro <- function(nl, results, basemap) {
+  
+  
+  ## Define metrics
+  select.metrics <- c("cs.0.landscape.shape.index",
+                      "cs.0.largest.patch.index",
+                      "cs.0.mean.patch.area",
+                      "cs.0.n.patches",
+                      "cs.0.patch.cohesion.index",
+                      "cs.1.landscape.shape.index",
+                      "cs.1.largest.patch.index",
+                      "cs.1.mean.patch.area",
+                      "cs.1.n.patches",
+                      "cs.1.patch.cohesion.index")
+  
+  
+  ## Calculate metrics for current map:
+  ## Postprocessing:
+  setsim(nl, "simoutput") <- results
+  
+  lgraf_metrics <- purrr::map_dfr(nl@simdesign@simoutput$metrics.patches, function(x) {
+    # Convert to landuse raster:
+    x <- x %>% dplyr::select(pxcor, pycor, `p_landuse-type`)
+    x <- raster::rasterFromXYZ(x)
+    
+    # Calculate patch and class statistics
+    map.ps <- PatchStat(x)
+    map.cs <- ClassStat(x)
+    
+    ## We have multiple classes but we need one row of observations for each run -> convert to wide format:
+    map.ps.wide <- map.ps %>%
+      gather(key, val, 2:12) %>%
+      mutate(stat="ps") %>% 
+      unite(key2, stat, patchID, key, sep = ".") %>%
+      spread(key2, val) 
+    map.cs.wide <- map.cs %>%
+      gather(key, val, 2:38) %>%
+      mutate(stat="cs") %>% 
+      unite(key2, stat, class, key, sep = ".") %>%
+      spread(key2, val)
+    
+    map.pscs.wide <- cbind(map.ps.wide, map.cs.wide)
+  })
+  
+  # Bind to results:
+  lgraf_metrics <- results %>% dplyr::select('proportion-agricultural-area') %>% bind_cols(lgraf_metrics)
+  lgraf_metrics <- lgraf_metrics %>% dplyr::select(c('proportion-agricultural-area', select.metrics))
+  lgraf_metrics$agri.area <- 10000 * lgraf_metrics$`proportion-agricultural-area`
+  lgraf_metrics$forest.area <- 10000 - lgraf_metrics$agri.area
+  lgraf_metrics <- lgraf_metrics %>% dplyr::select(-'proportion-agricultural-area') %>% 
+    dplyr::select(forest.area, agri.area, everything())
+  
+  
+  mapdev <- (abs(basemap - lgraf_metrics)) / basemap
+  #mapdev <- mapdev %>% mutate_all(funs(ifelse(. < 5, TRUE, FALSE)))
+  #mapmatch <- length(mapdev[mapdev==TRUE]) / length(mapdev)
+  mapmatch <- sum(mapdev)
+  
+  
+  return(as.numeric(mapmatch))
+}
+
+### Modified run_nl_dyn function to allow postprocessing:
+run_nl_dyn_mod <- function(nl,
+                           seed,
+                           cleanup.csv = TRUE,
+                           cleanup.xml = TRUE,
+                           cleanup.bat = TRUE,
+                           silent = TRUE,
+                           basemap=NA) {
+  nl_results <- NULL
+  
+  if (getsim(nl, "simmethod") == "GenAlg") {
+    nl_results <- util_run_nl_dyn_GenAlg_mod(
+      nl = nl,
+      seed = seed,
+      cleanup.csv = cleanup.csv,
+      cleanup.xml = cleanup.xml,
+      cleanup.bat = cleanup.bat,
+      silent = silent,
+      basemap = basemap
+    )
+  }
+  
+  
+  return(nl_results)
+}
+
+util_run_nl_dyn_GenAlg_mod <- function(nl,
+                                       seed,
+                                       cleanup.csv,
+                                       cleanup.xml,
+                                       cleanup.bat,
+                                       silent,
+                                       basemap) {
+  
+  # Get GenSA object from simdesign:
+  galg <- getsim(nl, "simobject")
+  
+  # Call the GenSA function from the GenSA package:
+  results <- genalg::rbga(
+    stringMin = galg$lower,
+    stringMax = galg$upper,
+    popSize = galg$popSize,
+    iters = galg$iters,
+    elitism = galg$elitism,
+    mutationChance = galg$mutationChance,
+    evalFunc = function(par, ...) {
+      util_run_nl_dyn_GenAlg_fn_mod(
+        param = par,
+        nl = nl,
+        evalcrit = galg$evalcrit,
+        seed = seed,
+        cleanup.csv = cleanup.csv,
+        cleanup.xml = cleanup.xml,
+        cleanup.bat = cleanup.bat,
+        silent = silent,
+        basemap = basemap,
+        ...
+      )
+    }
+  )
+  
+  return(results)
+}
+
+util_run_nl_dyn_GenAlg_fn_mod <- function(param,
+                                          nl,
+                                          evalcrit,
+                                          seed,
+                                          cleanup.csv,
+                                          cleanup.xml,
+                                          cleanup.bat,
+                                          silent,
+                                          basemap) {
+  
+  # Generate a parameterset:
+  names(param) <- names(getexp(nl, "variables"))
+  
+  ## Generate parameterset
+  gensa_param <- tibble::as.tibble(t(param))
+  
+  ## Add constants if any:
+  if(length(getexp(nl, "constants")) > 0)
+  {
+    gensa_param <- tibble::as.tibble(cbind(gensa_param,
+                                           getexp(nl, "constants"),
+                                           stringsAsFactors = FALSE))
+    
+  }
+  
+  # Attach current parameterisation to nl object:
+  setsim(nl, "siminput") <- gensa_param
+  # Call netlogo:
+  results <- run_nl_one(
+    nl = nl,
+    siminputrow = 1,
+    seed = seed,
+    cleanup.csv = cleanup.csv,
+    cleanup.xml = cleanup.xml,
+    cleanup.bat = cleanup.bat,
+    silent = silent
+  )
+  
+  # Select metric for gensa:
+  results <- galg_postpro(nl, results, basemap = basemap)
+  # Calc mean and convert to numeric:
+  if (length(results) > 1) {
+    results <- mean(results)
+  }
+  results <- as.numeric(results)
+  
+  return(results)
+}
 
 
-### Try optimization nlrx optimization approach:
+
+######################################################################################
+# Step 2: Use nlrx to run simulations
+######################################################################################
 
 ## Load harapan sample
 lu_harapan_sample <- readRDS("3_Data/lu_harapan_sample_genalg.rds")
+nsamples <- max(lu_harapan_sample$id)
+
+# Which landscape metrics do we want to calculate?
+select.metrics <- c("cs.0.landscape.shape.index",
+                    "cs.0.largest.patch.index",
+                    "cs.0.mean.patch.area",
+                    "cs.0.n.patches",
+                    "cs.0.patch.cohesion.index",
+                    "cs.1.landscape.shape.index",
+                    "cs.1.largest.patch.index",
+                    "cs.1.mean.patch.area",
+                    "cs.1.n.patches",
+                    "cs.1.patch.cohesion.index")
 
 ## For each sample create a similar map:
 plan(multisession)
@@ -19,21 +232,19 @@ nl_samples <- furrr::future_map(seq(nsamples), function(h)
   ## Agri area:
   agriproportion <- (basemap$agri.area / 10000)
   
-  # Local for testing:
-  nl <- nl(nlversion = "6.0.3",
-           nlpath = "C:/Program Files/NetLogo 6.0.3/",
-           modelpath = "LGraf_Jana/EFForTS-LGraf_new_GUI.nlogo",
+  
+  nl <- nl(nlversion = "6.0.4",
+           nlpath = file.path("1_Model/NetLogo 6.0.4/"),
+           modelpath = file.path("1_Model/EFForTS-LGraf/EFForTS-LGraf.nlogo"),
            jvmmem = 2024)
   
   nl@experiment <- experiment(expname="LGraf",
-                              outpath="C:/out/",
+                              outpath=file.path("3_Data"),
                               repetition=1,
                               tickmetrics="false",
                               idrunnum="foldername",
                               idsetup=c("setup"),
-                              idgo=c("establish_fields", "assign-land-uses", "write-status-hpc"),
-                              idfinal=NA_character_,
-                              metrics.turtles=c("who", "pxcor", "pycor"),
+                              idgo=c("establish_fields", "assign-land-uses"),
                               metrics.patches=c("pxcor", "pycor", "p_landuse-type"),
                               variables = list("households-per-cell" = list(qfun="qunif", min = 3, max = 5),
                                                "min-distance" = list(qfun="qunif", min=1, max=10),
@@ -50,7 +261,7 @@ nl_samples <- furrr::future_map(seq(nsamples), function(h)
                                                "field.shape.factor" = list(qfun="qunif", min = 0.7, max = 1.5)),
                               constants = list("proportion-agricultural-area" = agriproportion,
                                                "reproducable?" = "FALSE",   ## random seed is set via nlrx
-                                               "write.param.file?" = "TRUE", ## useful for debugging
+                                               "write.param.file?" = "FALSE", ## useful for debugging
                                                "print-messages?" = "FALSE",
                                                "setup-model" = "\"agricultural-area\"",
                                                "width" = 100,
@@ -82,7 +293,7 @@ nl_samples <- furrr::future_map(seq(nsamples), function(h)
                                                "land-use-types" = "\"landscape-level-fraction\"",
                                                "default.maps" = "\"landuse-type\"",
                                                "write-household-ids" = "\"only-first-households\""))
-  
+  # Genetic algorithm parameters:
   genalg.popsize <- 50  # 100
   genalg.iters <- 25 
   
@@ -99,7 +310,7 @@ nl_samples <- furrr::future_map(seq(nsamples), function(h)
     theme(axis.text=element_text(size=14),
           axis.title=element_text(size=14))
   
-  ggsave(plot=fitness.plot, paste0("mapsample_", h, "_fitness.png"), width = 6.0, height = 6.0, dpi=300)
+  ggsave(plot=fitness.plot, paste0("4_Plots/mapsample_", h, "_fitness.png"), width = 6.0, height = 6.0, dpi=300)
   
   ## Extract variable values:
   results.summary <- strsplit(summary(results), " ")
@@ -109,27 +320,25 @@ nl_samples <- furrr::future_map(seq(nsamples), function(h)
   results.summary <- setNames(as.list(as.numeric(results.summary[[1]][results.summary.varstart:results.summary.varend])), names(nl@experiment@variables))
   
   fitness.best.table <- tableGrob(tibble(var=names(results.summary), value=unlist(results.summary)), rows=rep("",length(results.summary)))
-  ggsave(plot=grid.arrange(fitness.best.table), paste0("mapsample_", h, "_bestparam.png"), width = 3.5, height = 5.0, dpi=300)
+  ggsave(plot=grid.arrange(fitness.best.table), paste0("4_Plots/mapsample_", h, "_bestparam.png"), width = 3.5, height = 5.0, dpi=300)
   
   
   # Store best parameterization together with remaining constants as constants list
   all.constants <- c(nl@experiment@constants, results.summary)
   
   ## Do run with this parameterisation:
-  nl <- nl(nlversion = "6.0.3",
-           nlpath = "C:/Program Files/NetLogo 6.0.3/",
-           modelpath = "LGraf_Jana/EFForTS-LGraf_new_GUI.nlogo",
+  nl <- nl(nlversion = "6.0.4",
+           nlpath = file.path("1_Model/NetLogo 6.0.4/"),
+           modelpath = file.path("1_Model/EFForTS-LGraf/EFForTS-LGraf.nlogo"),
            jvmmem = 2024)
   
   nl@experiment <- experiment(expname="LGraf",
-                              outpath="C:/out/",
+                              outpath=file.path("3_Data"),
                               repetition=1,
                               tickmetrics="false",
                               idrunnum="foldername",
                               idsetup=c("setup"),
                               idgo=c("establish_fields", "assign-land-uses"),
-                              idfinal=NA_character_,
-                              metrics.turtles=c("who", "pxcor", "pycor"),
                               metrics.patches=c("pxcor", "pycor", "p_landuse-type"),
                               constants = all.constants)
   
@@ -143,7 +352,7 @@ nl_samples <- furrr::future_map(seq(nsamples), function(h)
 })
 
 ## Store nlsamples as rds:
-saveRDS(nl_samples, file="LGraf_validation_genAlg.rds")
+saveRDS(nl_samples, file="3_Data/Validation_genAlg_nl.rds")
 
 
 ## Postprocessing:

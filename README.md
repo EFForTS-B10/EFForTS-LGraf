@@ -28,6 +28,8 @@ The contents of this repository are structured as follows:
 
 EFForTS-LGraf is structured in three submodels. First, the landscape and households are created. Second, fields are established by the households. Third, crop types are distributed to these fields. Finally, maps can be stored as ascii files. All parameters on the graphical user interface are numbered and guide you trough parameterization of the model.
 
+<img src="1_Model/EFForTS-LGraf/EFForTS-LGraf_interface.png" align="center" width="100%"/>
+
 #### 1. Setup landscape and households
 
 * 1.1) First define if a randomly drawn seed will be used or set a specific seed to make map generation reproducible
@@ -58,7 +60,7 @@ During the field establishment procedure, households will realize this household
 
 * 2.1) Define the field size distribution for the field establishment procedure.
 * 2.2) Instead of defining a soecific mean value for the field size distribution, you can use the field-size-percentage slider to calculate the mean depending on the mean value of the household area distribution.
-* 2.3) The field shape factor allows you to define if fields should be mostly quadratic (value = 1) or narrow (values > 1 and values < 1)
+* 2.3) The field shape factor allows you to define if fields should be mostly quadratic (value = 1) or narrow (values &gt; 1 and values &lt; 1)
 * 2.4) Select a set of field establishment strategies. Four strategies are currently implemented. Pred-defined combinations of these strategies can also be selected using parameters of 2.5). A household will try to establish a field under the current strategy for a specified number of tries (as defined in 2.6). If a household does not succeed with the current strategy, it will switch to the next strategy in numeric order (e.g. if all strategies are available and the current strategy is s1.homebase, it will switch to s2.fields).
   * s1.homebase - Households will search for empty cells around their homebase to establish fields
   * s2.fields - Households will search for empty cells around already established fields to establish new fields
@@ -100,11 +102,11 @@ EFForTS-LGraf provides several ways to investigate model output:
 
 Instead of generating roads, EFForTS-LGraf is able to use an existing roadmap shapefile as input by selecting "real.shapefile" from the dropdown menu under 1.3). These shapefiles are loaded from the folder "LGraf_roadmaps" within the input folder of the model directory.
 Own shapefiles can be added here. Please note, own shapefiles need to follow a specified filename format as shown below. At least three files need to be available to load a roadmap shapefile:
-* <roadmapid>_road.prj - the projection file of the roadmap
-* <roadmapid>_road.shp - the actual shapefile containing road polylines
-* <roadmapid>_area.shp - a shapefile with a framing box of the road shapefile which is used to set the dimensions of the landscape
+* &lt;roadmapid&gt;_road.prj - the projection file of the roadmap
+* &lt;roadmapid&gt;_road.shp - the actual shapefile containing road polylines
+* &lt;roadmapid&gt;_area.shp - a shapefile with a framing box of the road shapefile which is used to set the dimensions of the landscape
 
-You can replace <roadmapid> with any string, which can then be entered in the input field "road-map-id" under 1.3.1) to load the shapefile. For example, a valid fileset could be named mymap1_road.prj, mymap1_road.shp, mymap1_area.shp. This fileset can then be loaded by selecting "real.shapefile" under 1.3) and entering mymap1 into the input field under 1.3.1).
+You can replace &lt;roadmapid&gt; with any string, which can then be entered in the input field "road-map-id" under 1.3.1) to load the shapefile. For example, a valid fileset could be named mymap1_road.prj, mymap1_road.shp, mymap1_area.shp. This fileset can then be loaded by selecting "real.shapefile" under 1.3) and entering mymap1 into the input field under 1.3.1).
 
 Five roadmap shapefiles from Jambi, Indonesia are already included in EFForTS-LGraf. These shapefiles can be loaded by entering jambi1, jambi2, jambi3, jambi4 or jambi5 under 1.3.1).
 
