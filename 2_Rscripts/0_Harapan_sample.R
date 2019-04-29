@@ -195,5 +195,5 @@ lu_harapan_sample <- sampleLandscapes(lu_harapan, 2358, 5, 50, NA)
 saveRDS(lu_harapan_sample, file.path("3_Data/lu_harapan_sample_sobol.rds"))
 
 ## Sample landscapes for genetic algorithm validation (3 samples) from the harapan map:
-lu_harapan_sample <- sampleLandscapes(lu_harapan, 2358, 3, 50, 1:3)
+lu_harapan_sample <- sampleLandscapes(lu_harapan, 446, 3, 50, 1:3)
 saveRDS(lu_harapan_sample, file.path("3_Data/lu_harapan_sample_genalg.rds"))
