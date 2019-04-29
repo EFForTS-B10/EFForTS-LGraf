@@ -39,7 +39,6 @@ nl@experiment <- experiment(expname="LGraf",
                             idsetup=c("setup"),
                             idgo=c("establish_fields", "assign-land-uses"),
                             idfinal=NA_character_,
-                            metrics.turtles=list("turtles" = c("who", "pxcor", "pycor")),
                             metrics.patches=c("pxcor", "pycor", "p_landuse-type"),
                             variables = list("perlin-octaves" = list(qfun="qunif", min = 2,  max = 12),
                                              "perlin-persistence" = list(qfun="qunif", min = 0.1, max = 0.9),
@@ -113,15 +112,14 @@ LGraf_sim <- run_nl_all(nl, split=ncores)
 setsim(nl, "simoutput") <- LGraf_sim
 # Store nl object as rds file
 saveRDS(nl, file.path("3_Data/Sobol_nl.rds"))
-# Store raw data as rds file
-saveRDS(LGraf_sim, file.path("3_Data/Sobol_raw.rds"))
 
 ######################################################################################
 # Step 3: Output post processing to calculate sensitivity indices
 ######################################################################################
 
-# Convert metrics.patches to raster data
-LGraf_sim_sp <- nl_to_raster(nl)
+## Restore data from file:
+nl <- readRDS(file.path("3_Data/Sobol_nl.rds"))
+LGraf_sim <- nl@simdesign@simoutput
 
 # Which landscape metrics do we want to calculate?
 select.metrics <- c("cs.0.landscape.shape.index",
@@ -137,7 +135,11 @@ select.metrics <- c("cs.0.landscape.shape.index",
 
 
 # Calculate landscape metrics for all rasters:
-LGraf_sim_sp_lm <- purrr::map_dfr(LGraf_sim_sp$spatial.raster, function(x) {
+LGraf_sim_lm <- purrr::map_dfr(LGraf_sim$metrics.patches, function(x) {
+  # Convert to landuse raster:
+  x <- x %>% dplyr::select(pxcor, pycor, `p_landuse-type`)
+  x <- raster::rasterFromXYZ(x)
+  
   # Calculate patch and class statistics
   map.ps <- PatchStat(x)
   map.cs <- ClassStat(x)
@@ -158,15 +160,17 @@ LGraf_sim_sp_lm <- purrr::map_dfr(LGraf_sim_sp$spatial.raster, function(x) {
 })
 
 # Filter table and keep only selected metrics:
-LGraf_sim_sp_lm <- LGraf_sim_sp_lm %>% dplyr::select(select.metrics)
+LGraf_sim_lm <- LGraf_sim_lm %>% dplyr::select(select.metrics)
 
 # Attach metrics as output to the current simoutput table and remove turtle.metrics and patch.metrics
-LGraf_sim_lm <- LGraf_sim %>% dplyr::select(-metrics.turtles, -metrics.patches) %>% bind_cols(LGraf_sim_sp_lm)
+LGraf_sim_lm <- LGraf_sim %>% dplyr::select(-metrics.patches) %>% bind_cols(LGraf_sim_lm)
 
 # Attach to nl to calculate sensitivity indices:
 saveRDS(LGraf_sim_lm, file.path("3_Data/Sobol_lm.rds"))
 setsim(nl, "simoutput") <- LGraf_sim_lm
-#sa_index <- sobolIndices(nl, select.metrics)
+
+## update metrics slot:
+nl@experiment@metrics <- select.metrics
 
 sa_index <- analyze_nl(nl)
 
@@ -185,8 +189,7 @@ sa_index$landscapeMetric <- ifelse(sa_index$landscapeMetric == "landscape.shape.
                                           ifelse(sa_index$landscapeMetric == "mean.patch.area", "mean patch area",
                                                  ifelse(sa_index$landscapeMetric == "n.patches", "n patches", "PCI"))))
 
-# only keep means of indices:
-sa_index <- sa_index %>% filter(landscapeMetricType=="ean")
+# Split first and total:
 sa_index_total <- sa_index %>% filter(index=="total")
 sa_index_first <- sa_index %>% filter(index=="first-order")
 
@@ -205,12 +208,15 @@ ggplot(sa_index_total) +
         axis.title=element_text(size=fontsize),
         panel.spacing=unit(0, "lines"))
 
-ggsave(file.path("4_Plots/sobol_effects.triff"), width = 7.5, height = 4.5, dpi=300)
+ggsave(file.path("4_Plots/sobol_effects.tiff"), width = 7.5, height = 4.5, dpi=300)
 
 
 ######################################################################################
 # Step 4: Compare maps with classified land-use map
 ######################################################################################
+
+# Load harapan sample:
+lu_harapan_sample <- readRDS("3_Data/lu_harapan_sample_sobol.rds")
 
 # Convert the metrics from LGraf to long format:
 metrics.LG <- LGraf_sim_lm %>% dplyr::select(c('proportion-agricultural-area', select.metrics))
@@ -243,7 +249,19 @@ allplots <- purrr::map(seq_along(plotmetrics[[1]]), function(x) {
   ## Subset data:
   plotdata <- metrics.plot %>% filter(metric==plotmetrics[[1]][[x]] & lu==plotmetrics[[2]][[x]])
   ## Plot
-  p1 <- plotOneIndex(plotdata)
+  p1 <- ggplot(plotdata, aes(x=forest.area, y=value)) +
+    scale_fill_gradient(high="black", low="white", na.value="white") +
+    stat_density_2d(data=plotdata %>% filter(source=="EFForTS-LGraf"), geom = "raster", aes(fill = sqrt(stat(density))), contour = FALSE) +
+    geom_point(data=plotdata %>% filter(source=="Land-use-map"), aes(color=lu), pch=21, fill=NA, size=1, stroke=0.5) +
+    scale_color_manual(values=c("fields"="#EBBD28", "matrix"="#41A355")) +
+    guides(fill="none", color="none") +
+    scale_y_continuous(labels = function(x) format(x, width = 5)) +
+    xlab("") +
+    ylab("") +
+    theme_classic() +
+    theme(axis.text=element_text(size=11),
+          axis.title=element_text(size=11),
+          plot.margin=unit(c(0,0,0,0),"pt"))
   return(p1)
 })
 
