@@ -275,7 +275,7 @@ pall <- grid.arrange(arrangeGrob(allplots[[1]], top="LSI", left="index value mat
                      arrangeGrob(allplots[[5]], top="PCI"),
                      arrangeGrob(allplots[[6]], bottom="", left="index value fields"),
                      arrangeGrob(allplots[[7]], bottom=""),
-                     arrangeGrob(allplots[[8]], bottom="matrix area [1000 cells]"),
+                     arrangeGrob(allplots[[8]], bottom="'others' area [1000 cells]"),
                      arrangeGrob(allplots[[9]], bottom=""),
                      arrangeGrob(allplots[[10]], bottom=""),
                      layout_matrix=lay)
