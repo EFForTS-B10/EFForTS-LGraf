@@ -261,14 +261,14 @@ allplots <- purrr::map(seq_along(plotmetrics[[1]]), function(x) {
     theme_classic() +
     theme(axis.text=element_text(size=11),
           axis.title=element_text(size=11),
-          plot.margin=unit(c(0,0,0,0),"pt"))
+          plot.margin=unit(c(2,5,2,2),"pt"))
   return(p1)
 })
 
 lay <- rbind(c(1,2,3,4,5),
              c(6,7,8,9,10)) 
 
-pall <- grid.arrange(arrangeGrob(allplots[[1]], top="LSI", left="index value matrix"),
+pall <- grid.arrange(arrangeGrob(allplots[[1]], top="LSI", left="index value 'others'"),
                      arrangeGrob(allplots[[2]], top="LPI"),
                      arrangeGrob(allplots[[3]], top="mean.patch.area"),
                      arrangeGrob(allplots[[4]], top="n.patches"),

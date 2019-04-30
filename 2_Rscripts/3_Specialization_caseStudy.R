@@ -106,9 +106,7 @@ saveRDS(nl, file.path("3_Data/Specialization_nl.rds"))
 
 ## Load output from file:
 nl <- readRDS(file.path("3_Data/Specialization_nl.rds"))
-
-## Convert data to spatial data (raster)
-#spec_sim_sp <- get_nl_spatial_noTurtles(nl)
+spec_sim <- nl@simdesign@simoutput
 
 ## Calculate landscape metrics for all rasters:
 select.metrics <- c("cs.0.landscape.shape.index",
@@ -160,7 +158,7 @@ spec_sim_lm <- spec_sim_lm %>% dplyr::select(`hh-area-mean-ha`, `LUT-1-specializ
   gather(metric, value, -1, -2)
 
 ## Add landuse id:
-spec_sim_lm$lu <- ifelse(substr(spec_sim_lm$metric, 4, 4) == 0, "matrix", ifelse(substr(spec_sim_lm$metric, 4, 4) == 1, "oilpalm", "rubber"))
+spec_sim_lm$lu <- ifelse(substr(spec_sim_lm$metric, 4, 4) == 0, "others", ifelse(substr(spec_sim_lm$metric, 4, 4) == 1, "oilpalm", "rubber"))
 spec_sim_lm$metric <- substr(spec_sim_lm$metric, 6, nchar(spec_sim_lm$metric))
 
 ## HH size group:
@@ -196,27 +194,34 @@ grid.text("LPI", x = unit(0.33, "npc"), y = unit(0.95, "npc"), gp=gpar(fontsize=
 grid.text("mean patch area", x = unit(0.52, "npc"), y = unit(0.95, "npc"), gp=gpar(fontsize=11))
 grid.text("n patches", x = unit(0.71, "npc"), y = unit(0.95, "npc"), gp=gpar(fontsize=11))
 grid.text("PCI", x = unit(0.9, "npc"), y = unit(0.95, "npc"), gp=gpar(fontsize=11))
-grid.text("index value\nmatrix", x = unit(0.025, "npc"), y = unit(0.77, "npc"), rot=90, gp=gpar(fontsize=11))
+grid.text("index value\n'others'", x = unit(0.025, "npc"), y = unit(0.77, "npc"), rot=90, gp=gpar(fontsize=11))
 grid.text("index value\noilpalm", x = unit(0.025, "npc"), y = unit(0.5, "npc"), rot=90, gp=gpar(fontsize=11))
 grid.text("index value\nrubber", x = unit(0.025, "npc"), y = unit(0.2, "npc"), rot=90, gp=gpar(fontsize=11))
 
 dev.off()
 
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+## REPAIR DOWNWARDS!!!:
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 
 #### Calculate models from raw data:
 
-spec_sim_sp_lm <- rasterToMetrics(spec_sim_sp[[2]], select.metrics)
+#spec_sim_sp_lm <- rasterToMetrics(spec_sim_sp[[2]], select.metrics)
 
 ## Attach metrics as output to the current simoutput table and remove turtle.metrics and patch.metrics
-spec_sim_lm <- spec_sim %>% dplyr::select(-metrics.patches) %>% bind_cols(spec_sim_sp_lm)
+#spec_sim_lm <- spec_sim %>% dplyr::select(-metrics.patches) %>% bind_cols(spec_sim_sp_lm)
 
 ## Remove all parameters that we dont need:
-spec_sim_lm <- spec_sim_lm %>% dplyr::select(`hh-area-mean-ha`, `LUT-1-specialize`, select.metrics) %>% 
-  gather(metric, value, -1, -2)
+#spec_sim_lm <- spec_sim_lm %>% dplyr::select(`hh-area-mean-ha`, `LUT-1-specialize`, select.metrics) %>% 
+#  gather(metric, value, -1, -2)
 
 ## Add landuse id:
-spec_sim_lm$lu <- ifelse(substr(spec_sim_lm$metric, 4, 4) == 0, "others", ifelse(substr(spec_sim_lm$metric, 4, 4) == 1, "oilpalm", "rubber"))
-spec_sim_lm$metric <- substr(spec_sim_lm$metric, 6, nchar(spec_sim_lm$metric))
+#spec_sim_lm$lu <- ifelse(substr(spec_sim_lm$metric, 4, 4) == 0, "others", ifelse(substr(spec_sim_lm$metric, 4, 4) == 1, "oilpalm", "rubber"))
+#spec_sim_lm$metric <- substr(spec_sim_lm$metric, 6, nchar(spec_sim_lm$metric))
 
 ## Calculate standardized regression coefficients (SRC)
 spec_sim_lm_models <- NULL
@@ -269,11 +274,13 @@ spec_sim_lm_models$lu <- factor(spec_sim_lm_models$lu, levels=c("oilpalm", "rubb
 ## Filte rout unsignificant bars:
 spec_sim_lm_models <- spec_sim_lm_models %>% dplyr::filter(sig == "*")
 
-saveRDS(spec_sim_lm_models, "data_output/specialization_models.rds")
+saveRDS(spec_sim_lm_models, "3_Data/Specialization_models.rds")
 
+
+## Plotting:
 library(ggsci)
 
-tiff("plot_output/specialization.tiff", width=16, height=12, units="cm", res=300)
+tiff("4_Plots/Specialization_models.tiff", width=16, height=12, units="cm", res=300)
 ggplot(spec_sim_lm_models, aes(x=lu, y=coeff, fill=var)) +
   facet_wrap(~metric, ncol=3) +
   geom_bar(stat="identity") +
