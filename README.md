@@ -168,8 +168,8 @@ Here we show a simple example for creating maps along a gradient of road length,
 nlrx uses nl object to store bacis information of NetLogo paths, model file path, ...
 
 ``` r
+
 library(nlrx)
-# Windows default NetLogo installation path (adjust to your needs!):
 netlogopath <- file.path("1_Model/NetLogo 6.0.4/")
 modelpath <- file.path("1_Model/EFForTS-LGraf/EFForTS-LGraf.nlogo")
 
@@ -177,6 +177,7 @@ nl <- nl(nlversion = "6.0.4",
          nlpath = netlogopath,
          modelpath = modelpath,
          jvmmem = 2024)
+
 ```
 #### Step 2: attach an experiment
 
@@ -189,22 +190,25 @@ nl@experiment <- experiment(expname="LGraf",
                             idrunnum="foldername",
                             idsetup=c("setup"),
                             idgo=c("establish_fields", "assign-land-uses"),
-                            idfinal=c("write-output"),
-                            metrics.patches=c("pxcor", "pycor", "p_landuse-type"),
-                            variables = list("hh-area-mean-ha" = list(min=1, max=3, step=0.1, qfun="qunif"),
-                                             "LUT-1-specialize" = list(min=0, max=1, step=0.1, qfun="qunif")),
+                            metrics.patches=c("pxcor", "pycor", "p_landuse-type", "p_road"),
+                            variables = list("proportion-agricultural-area" = list(values=c(0.1, 0.4, 0.7)),
+                                             "total-road-length" = list(values=c(200, 400, 600)),
+                                             "LUT-1-fraction" = list(values=c(0.1, 0.4, 0.7))),
                             constants = list("households-per-cell" = 1,
                                              "setup-model" = "\"agricultural-area\"",
-                                             "proportion-agricultural-area" = 0.5,
                                              "reproducable?" = "FALSE",   ## random seed is set via nlrx
                                              "write.param.file?" = "FALSE", ## useful for debugging
                                              "width" = 100,
                                              "height" = 100,
                                              "cell-length-meter" = 50,
-                                             "road.algorithm" = "\"real.shapefile\"",
-                                             "road-map-id" = "\"jambi3\"",
-                                             "occ-probability" = 0,
+                                             "road.algorithm" = "\"artificial.perlin\"",
                                              "min-dist-roads" = 5,
+                                             "perlin-octaves" = 2,
+                                             "perlin-persistence" = 0.1,
+                                             "cone-angle" = 90,
+                                             "dist-weight" = 0.5,
+                                             "occ-probability" = 0,
+                                             "hh-area-mean-ha" = 1,
                                              "hh-area-sd-ha" = 0.91,
                                              "hh-area-distribution" = "\"log-normal\"",
                                              "vlg-area-distribution" = "\"uniform\"",
@@ -223,11 +227,11 @@ nl@experiment <- experiment(expname="LGraf",
                                              "inaccessible-area-fraction" = 0,
                                              "LUT-1-name" = "\"oilpalm\"",
                                              "LUT-2-name" = "\"rubber\"",
-                                             "LUT-1-fraction" = 0.5,
-                                             "LUT-2-fraction" = 0.5,
+                                             "LUT-2-fraction" = 0,
                                              "LUT-3-fraction" = 0,
                                              "LUT-4-fraction" = 0,
                                              "LUT-5-fraction" = 0,
+                                             "LUT-1-specialize" = 0,
                                              "LUT-2-specialize" = 0,
                                              "LUT-3-specialize" = 0,
                                              "LUT-4-specialize" = 0,
@@ -244,13 +248,16 @@ nl@experiment <- experiment(expname="LGraf",
 
 
 ``` r
-nl@simdesign <- simdesign_distinct(nl=nl, nseeds=3)
+# Add a distinct simdesign
+nl@simdesign <- simdesign_distinct(nl=nl, nseeds=1)
+
 ```
 
 #### Step 4: Execute simulations
 
 
 ``` r
+# Run all three simulations
 results <- run_nl_all(nl)
 ```
 
@@ -260,9 +267,23 @@ results <- run_nl_all(nl)
 # Attach results to nl object:
 setsim(nl, "simoutput") <- results
 
-# Write output to outpath of experiment within nl
-write_simoutput(nl)
+# Convert spatial data to raster stacks
+nl_sp <- nl_to_raster(nl)
 
-# Do further analysis:
-analyze_nl(nl)
+# Combine roads and landuse raster and plot:
+library(raster)
+tiff("4_Plots/readme_example_nlrx.tiff", width=20, height=8, units="cm", res=300)
+par(mfrow=c(1,3))
+nl_sp_plot <- purrr::map(nl_sp$spatial.raster, function(x) {
+  t1 <- x[[1]]
+  t2 <- x[[2]]
+  rst1_mod <- overlay(t1, t2, fun = function(x, y) {
+    x[(y[] == 1)] <- NA
+    return(x)
+  })
+  plot(rst1_mod, colNA="black")  
+})
+dev.off()
+
 ```
+<img src="4_Plots/readme_example_nlrx.tiff" align="center" width="100%"/>
