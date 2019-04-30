@@ -286,4 +286,4 @@ nl_sp_plot <- purrr::map(nl_sp$spatial.raster, function(x) {
 dev.off()
 
 ```
-<img src="4_Plots/readme_example_nlrx.tiff" align="center" width="100%"/>
+<img src="4_Plots/readme_example_nlrx.png" align="center" width="100%"/>
