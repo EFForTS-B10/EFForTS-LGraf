@@ -26,11 +26,13 @@ The contents of this repository are structured as follows:
 
 ## How to use EFForTS-LGraf as a standalone tool
 
-EFForTS-LGraf is structured in three submodels. First, the landscape and households are created. Second, fields are established by the households. Third, crop types are distributed to these fields. Finally, maps can be stored as ascii files. All parameters on the graphical user interface are numbered and guide you trough parameterization of the model.
-
 <img src="1_Model/EFForTS-LGraf/EFForTS-LGraf_interface.png" align="center" width="100%"/>
 
+EFForTS-LGraf is structured in three submodels. First, the landscape and households are created. Second, fields are established by the households. Third, crop types are distributed to these fields. Finally, maps can be stored as ascii files. All parameters on the graphical user interface are numbered and guide you trough parameterization of the model.
+
 #### 1. Setup landscape and households
+
+<img src="1_Model/EFForTS-LGraf/EFForTS-LGraf_interface_I.png" align="center" width="100%"/>
 
 * 1.1) First define if a randomly drawn seed will be used or set a specific seed to make map generation reproducible
 * 1.2) Set the dimesnions of the landscape in cells, and the corresponding cell resolution in meter (used for area calculations)
@@ -58,6 +60,8 @@ This procedure will setup the initial landscape with roads, villages, households
 During model initialization, households have been created with a specific household area, drawn from the household area distribution.
 During the field establishment procedure, households will realize this household area by establishing fields. Each time a household establishes a field, a field size will be drawn from the defined distribution. More details on field establishment can be found in the accompanying publication.
 
+<img src="1_Model/EFForTS-LGraf/EFForTS-LGraf_interface_II.png" align="center" width="100%"/>
+
 * 2.1) Define the field size distribution for the field establishment procedure.
 * 2.2) Instead of defining a soecific mean value for the field size distribution, you can use the field-size-percentage slider to calculate the mean depending on the mean value of the household area distribution.
 * 2.3) The field shape factor allows you to define if fields should be mostly quadratic (value = 1) or narrow (values &gt; 1 and values &lt; 1)
@@ -70,6 +74,8 @@ During the field establishment procedure, households will realize this household
 Once all these parameters are porperly defined, press the button "II. Establish fields" to execute field establishment.
 
 #### 3. Distribute crops
+
+<img src="1_Model/EFForTS-LGraf/EFForTS-LGraf_interface_III.png" align="center" width="100%"/>
 
 * 3.1) Optionally, define names for up to five different crop types
 * 3.2) Define fractions of each cropt type. The sum of these fractions must add up to one

@@ -355,7 +355,12 @@ nl_samples <- furrr::future_map(seq(nsamples), function(h)
 saveRDS(nl_samples, file="3_Data/Validation_genAlg_nl.rds")
 
 
-## Postprocessing:
+######################################################################################
+# Step 3: Analyze results
+######################################################################################
+
+## Restore data from file:
+nl_samples <- readRDS("3_Data/Validation_genAlg_nl.rds")
 
 
 mapdev.all <- NULL
@@ -368,7 +373,8 @@ for (i in 1:length(nl_samples))
     dplyr::select(-'id') %>% 
     spread(metric, value)
   
-  res_final_sp <- get_nl_spatial(nl, turtles = TRUE, patches = TRUE, format = "spatial")
+ # res_final_sp <- get_nl_spatial(nl, turtles = TRUE, patches = TRUE, format = "spatial")
+  res_final_sp <- nl@simdesign@simoutput
   
   ## Define metrics
   select.metrics <- c("cs.0.landscape.shape.index",
@@ -382,9 +388,31 @@ for (i in 1:length(nl_samples))
                       "cs.1.n.patches",
                       "cs.1.patch.cohesion.index")
   
+  # Calculate landscape metrics for all rasters:
+  lgraf_metrics <- purrr::map_dfr(res_final_sp$metrics.patches, function(x) {
+    # Convert to landuse raster:
+    x <- x %>% dplyr::select(pxcor, pycor, `p_landuse-type`)
+    x <- raster::rasterFromXYZ(x)
+    
+    # Calculate patch and class statistics
+    map.ps <- PatchStat(x)
+    map.cs <- ClassStat(x)
+    
+    ## We have multiple classes but we need one row of observations for each run -> convert to wide format:
+    map.ps.wide <- map.ps %>%
+      gather(key, val, 2:12) %>%
+      mutate(stat="ps") %>% 
+      unite(key2, stat, patchID, key, sep = ".") %>%
+      spread(key2, val) 
+    map.cs.wide <- map.cs %>%
+      gather(key, val, 2:38) %>%
+      mutate(stat="cs") %>% 
+      unite(key2, stat, class, key, sep = ".") %>%
+      spread(key2, val)
+    
+    map.pscs.wide <- cbind(map.ps.wide, map.cs.wide)
+  })
   
-  ## Calculate landscape metrics for all rasters:
-  lgraf_metrics <- rasterToMetrics(res_final_sp$metrics.patches, select.metrics)
   lgraf_metrics <- nl@simdesign@simoutput %>% dplyr::select('proportion-agricultural-area') %>% bind_cols(lgraf_metrics)
   lgraf_metrics <- lgraf_metrics %>% dplyr::select(c('proportion-agricultural-area', select.metrics))
   lgraf_metrics$agri.area <- 10000 * lgraf_metrics$`proportion-agricultural-area`
@@ -406,7 +434,7 @@ for (i in 1:length(nl_samples))
     mapdevs <- rbind(mapdevs, mapdev)
     
     ## Convert raster to DF and create nice plot of harapan raster:
-    res_final_sp.df <- data.frame(rasterToPoints(res_final_sp$metrics.patches[[k]]))
+    res_final_sp.df <- res_final_sp$metrics.patches[[k]] %>% dplyr::select(pxcor, pycor, `p_landuse-type`)
     names(res_final_sp.df) <- c("x", "y", "z")
     
     cols <- c("0"="#8D8D8D", "1"="#fde725ff")
@@ -420,7 +448,7 @@ for (i in 1:length(nl_samples))
       scale_y_continuous(expand=c(0,0)) +
       labs(x = NULL, y = NULL)
     
-    ggsave(paste0("mapsample_", i, "_lgrafsample_", k, ".png"), width = 6.0, height = 6.0, dpi=300)
+    ggsave(paste0("4_Plots/mapsample_", i, "_lgrafsample_", k, ".png"), width = 6.0, height = 6.0, dpi=300)
   }
   
   ## Convert to long format
@@ -437,19 +465,7 @@ for (i in 1:length(nl_samples))
   
 }
 
-
-
-### Mapdevs plot:
-library(ggpubr)
-ggplot(mapdevs, aes(x=metric, y=value, fill=lu)) +
-  #coord_flip() +
-  geom_hline(yintercept = 0) +
-  geom_boxplot() +
-  theme_classic2()
-
-
 ## Plot deviations:
-
 library(extrafont)
 extrafont::loadfonts()
 library(ggsci)
@@ -461,7 +477,7 @@ mapdevs.agg[1,2] <- "total.area"
 mapdevs.agg[2,2] <- "total.area"
 cols <- c("matrix"="#8D8D8D", "fields"="#fdd610ff")
 
-tiff("plot_output/validation_devs.tiff", width=17.5, height=10, units="cm", res=300)
+tiff("4_Plots/Genalg_validation_devs.tiff", width=17.5, height=10, units="cm", res=300)
 ggplot(mapdevs.agg, aes(x=metric, y=value.mu, color=lu)) +
   geom_pointrange(aes(ymin=value.mu - value.sd, ymax=value.mu + value.sd), position = position_dodge(width=0.5), fatten=3, size=1) +
   guides(color="none") +
@@ -479,22 +495,22 @@ library(ggplot2)
 library(tidyverse)
 library(ggpubr)
 
-sample1 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_1.png"))
-sample2 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_2.png"))
-sample3 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_3.png"))
+sample1 <- grid::rasterGrob(readPNG("4_Plots/mapsample_1.png"))
+sample2 <- grid::rasterGrob(readPNG("4_Plots/mapsample_2.png"))
+sample3 <- grid::rasterGrob(readPNG("4_Plots/mapsample_3.png"))
 
-lgraf11 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_1_lgrafsample_1.png"))
-lgraf12 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_1_lgrafsample_2.png"))
-lgraf13 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_1_lgrafsample_3.png"))
-lgraf14 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_1_lgrafsample_4.png"))
-lgraf21 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_2_lgrafsample_1.png"))
-lgraf22 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_2_lgrafsample_2.png"))
-lgraf23 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_2_lgrafsample_3.png"))
-lgraf24 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_2_lgrafsample_4.png"))
-lgraf31 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_3_lgrafsample_1.png"))
-lgraf32 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_3_lgrafsample_2.png"))
-lgraf33 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_3_lgrafsample_3.png"))
-lgraf34 <- grid::rasterGrob(readPNG("D:/owncloud/CRC/00_Manuscripts/EFForTS-LGraf/LGrafAnalysisFinal_v1/mapsample_3_lgrafsample_4.png"))
+lgraf11 <- grid::rasterGrob(readPNG("4_Plots/mapsample_1_lgrafsample_1.png"))
+lgraf12 <- grid::rasterGrob(readPNG("4_Plots/mapsample_1_lgrafsample_2.png"))
+lgraf13 <- grid::rasterGrob(readPNG("4_Plots/mapsample_1_lgrafsample_3.png"))
+lgraf14 <- grid::rasterGrob(readPNG("4_Plots/mapsample_1_lgrafsample_4.png"))
+lgraf21 <- grid::rasterGrob(readPNG("4_Plots/mapsample_2_lgrafsample_1.png"))
+lgraf22 <- grid::rasterGrob(readPNG("4_Plots/mapsample_2_lgrafsample_2.png"))
+lgraf23 <- grid::rasterGrob(readPNG("4_Plots/mapsample_2_lgrafsample_3.png"))
+lgraf24 <- grid::rasterGrob(readPNG("4_Plots/mapsample_2_lgrafsample_4.png"))
+lgraf31 <- grid::rasterGrob(readPNG("4_Plots/mapsample_3_lgrafsample_1.png"))
+lgraf32 <- grid::rasterGrob(readPNG("4_Plots/mapsample_3_lgrafsample_2.png"))
+lgraf33 <- grid::rasterGrob(readPNG("4_Plots/mapsample_3_lgrafsample_3.png"))
+lgraf34 <- grid::rasterGrob(readPNG("4_Plots/mapsample_3_lgrafsample_4.png"))
 
 # Store sample pngs as plots with border and margin:
 mg <- 2
@@ -519,16 +535,16 @@ lg34 <- ggarrange(lgraf34, ncol=1, nrow=1)+ theme(plot.margin = margin(rep(mg, 4
 
 # Create subpanels for lgraf with margin:
 mg <- 2
-lg1 <- ggarrange(lg11, lg12, lg13, lg14, ncol=2, nrow=2)+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black"))
-lg2 <- ggarrange(lg21, lg22, lg23, lg24, ncol=2, nrow=2)+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black"))
-lg3 <- ggarrange(lg31, lg32, lg33, lg34, ncol=2, nrow=2)+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black"))
+lg1 <- ggarrange(lg11, lg12, lg13, lg14, ncol=2, nrow=2, labels=c("A.1", "A.2", "A.3", "A.4"), label.x = 0, align = "hv", font.label = list(size=11, face="plain"))+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black"))
+lg2 <- ggarrange(lg21, lg22, lg23, lg24, ncol=2, nrow=2, labels=c("B.1", "B.2", "B.3", "B.4"), label.x = 0, align = "hv", font.label = list(size=11, face="plain"))+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black"))
+lg3 <- ggarrange(lg31, lg32, lg33, lg34, ncol=2, nrow=2, labels=c("C.1", "C.2", "C.3", "C.4"), label.x = 0, align = "hv", font.label = list(size=11, face="plain"))+ theme(plot.margin = margin(rep(mg, 4)), plot.background = element_rect(color = "black"))
 
 # Final plot:
-tiff("plot_output/validation_maps.tiff", width=18, height=12, units="cm", res=300)
+tiff("4_Plots/Genalg_validation_maps.tiff", width=18, height=12, units="cm", res=300)
 ggarrange(s1, s2, s3, lg1, lg2, lg3,
           ncol=3, nrow=2, 
-          labels=c("Sample 1", "Sample 2", "Sample 3", "LGraf 1", "LGraf 2", "LGraf 3"),
-          label.x = 0,
+          labels=c("A", "B", "C", "", "", ""),
+          label.x = 0.05,
           align = "hv",
           font.label = list(size=11, face="plain"))
 

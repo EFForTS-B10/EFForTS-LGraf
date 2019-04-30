@@ -60,7 +60,7 @@ loadHarapan <- function(rasterlocation, rasterout, reclassmatrix, plotout)
 }
 
 # Function to create samples from raster:
-sampleLandscapes <- function(x, seed, nsamples, cutoff, plotIDs)
+sampleLandscapes <- function(x, seed, nsamples, cutoff, plotIDs, allow.overlap)
 {
   
   
@@ -106,8 +106,12 @@ sampleLandscapes <- function(x, seed, nsamples, cutoff, plotIDs)
     {
       ## Store selected sample locations
       rndCells <- rbind(rndCells, rndCell)
-      ## Set the cropped values in the original ratser to NA to prevent them from be drawing again
-      x[rndCrop] <- NA
+      
+      if(allow.overlap == FALSE)
+      {
+        ## Set the cropped values in the original ratser to NA to prevent them from be drawing again
+        x[rndCrop] <- NA
+      }
       
       ## Calculate patch statistics and write output
       rndCrop.ps <- PatchStat(rndCrop)
@@ -191,9 +195,9 @@ lu_harapan <- loadHarapan(rasterlocation='D:/ownCloud/CRC/10_Geodata/GIS/_2013_h
                           plotout="4_Plots/lu_map_raster.tiff")
 
 ## Sample landscapes for sensitivity analysis comparison (5 samples) from the harapan map:
-lu_harapan_sample <- sampleLandscapes(lu_harapan, 2358, 5, 50, NA)
+lu_harapan_sample <- sampleLandscapes(lu_harapan, 2358, 100, 50, NA, allow.overlap = TRUE)
 saveRDS(lu_harapan_sample, file.path("3_Data/lu_harapan_sample_sobol.rds"))
 
 ## Sample landscapes for genetic algorithm validation (3 samples) from the harapan map:
-lu_harapan_sample <- sampleLandscapes(lu_harapan, 446, 3, 50, 1:3)
+lu_harapan_sample <- sampleLandscapes(lu_harapan, 446, 3, 50, 1:3, allow.overlap = FALSE)
 saveRDS(lu_harapan_sample, file.path("3_Data/lu_harapan_sample_genalg.rds"))
