@@ -272,7 +272,7 @@ nl_sp <- nl_to_raster(nl)
 
 # Combine roads and landuse raster and plot:
 library(raster)
-tiff("4_Plots/readme_example_nlrx.tiff", width=20, height=8, units="cm", res=300)
+png("4_Plots/readme_example_nlrx.png", width=16, height=6, units="cm", res=300)
 par(mfrow=c(1,3))
 nl_sp_plot <- purrr::map(nl_sp$spatial.raster, function(x) {
   t1 <- x[[1]]
