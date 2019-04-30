@@ -80,7 +80,7 @@ nl@experiment <- experiment(expname="LGraf",
                                              "LUT-4-specialize" = 0,
                                              "LUT-5-specialize" = 0,
                                              "LUT-fill-up" = "\"LUT-2-fraction\"",
-                                             "land-use-assignment" = "\"household-level-specialization\"",
+                                             "land-use-types" = "\"household-level-specialization\"",
                                              "default.maps" = "\"landuse-type\"",
                                              "write-household-ids" = "\"only-first-households\""))
 
@@ -151,8 +151,6 @@ spec_sim_lm <- purrr::map_dfr(nl@simdesign@simoutput$metrics.patches, function(x
   
   map.pscs.wide <- cbind(map.ps.wide, map.cs.wide)
 })
-
-#spec_sim_sp_lm <- rasterToMetrics(spec_sim_sp[[2]], select.metrics)
 
 ## Attach metrics as output to the current simoutput table and remove turtle.metrics and patch.metrics
 spec_sim_lm <- spec_sim %>% dplyr::select(-metrics.patches) %>% bind_cols(spec_sim_lm)
