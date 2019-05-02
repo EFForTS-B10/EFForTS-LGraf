@@ -53,10 +53,10 @@ EFForTS-LGraf is structured in three submodels. First, the landscape and househo
 | 1.3.3 | If artifical.perlin has been chosen in 1.3 define the parameters for the perlin noise algorithm |
 | 1.4 | Set the maximum number of trials for loops. Depending on the parameterization, a low value may result in landscapes that do not represent the specified needs accurately. Larger numbers may increase simulation time. |
 | 1.5 | Define the number of households that are allowed to have a homebase on the same cell |
-| 1.6 | Choose a setup type:
-  * number-of-households: Define a total number of households in 1.7
-  * number-of-villages: Define a total number of villages in 1.7
-  * proportion-agriculture: Define the final proportion of fields in the landscape in 1.7 |
+| 1.6 | Choose a setup type: <ul>
+  <li>number-of-households: Define a total number of households in 1.7</li>
+  <li>number-of-villages: Define a total number of villages in 1.7</li>
+  <li>proportion-agriculture: Define the final proportion of fields in the landscape in 1.7</li></ul> |
 | 1.8 | Define household parameters. Here you can define the area distribution of households in the landscape. You can define the type of distribution from which household areas are drawn during initialization. You can also define the parameters of these distributions. |
 | 1.9 | Define village parameters. Here you can define the area distribution of villages (accumulation of households) in the landscape. You can define the type of distribution from which village areas are drawn during initialization. You can also define the parameters of these distributions. |
 | 1.10 | Define the minimum distance between villages in cells. For certain parameterizations, this distance might not be realized. In such cases, a warning will appear that distances between villages are lower than specified. |
@@ -66,11 +66,11 @@ EFForTS-LGraf is structured in three submodels. First, the landscape and househo
 | 2.1 | Define the field size distribution for the field establishment procedure. |
 | 2.2 | Instead of defining a soecific mean value for the field size distribution, you can use the field-size-percentage slider to calculate the mean depending on the mean value of the household area distribution. |
 | 2.3 | The field shape factor allows you to define if fields should be mostly quadratic (value = 1) or narrow (values &gt; 1 and values &lt; 1) |
-| 2.4 | Select a set of field establishment strategies. Four strategies are currently implemented. Pred-defined combinations of these strategies can also be selected using parameters of 2.5. A household will try to establish a field under the current strategy for a specified number of tries (as defined in 2.6). If a household does not succeed with the current strategy, it will switch to the next strategy in numeric order (e.g. if all strategies are available and the current strategy is s1.homebase, it will switch to s2.fields).
-  * s1.homebase - Households will search for empty cells around their homebase to establish fields
-  * s2.fields - Households will search for empty cells around already established fields to establish new fields
-  * s3.nearby - Households will search for empty cells in an gradually increasing radius around their homebase
-  * s4.avoid - Households will search for empty cells around their homebase, that are only surrounded by empty cells |
+| 2.4 | Select a set of field establishment strategies. Four strategies are currently implemented. Pred-defined combinations of these strategies can also be selected using parameters of 2.5. A household will try to establish a field under the current strategy for a specified number of tries (as defined in 2.6). If a household does not succeed with the current strategy, it will switch to the next strategy in numeric order (e.g. if all strategies are available and the current strategy is s1.homebase, it will switch to s2.fields).<ul>
+  <li>s1.homebase - Households will search for empty cells around their homebase to establish fields</li>
+  <li>s2.fields - Households will search for empty cells around already established fields to establish new fields</li>
+  <li>s3.nearby - Households will search for empty cells in an gradually increasing radius around their homebase</li>
+  <li>s4.avoid - Households will search for empty cells around their homebase, that are only surrounded by empty cells</li></ul> |
 | 3.1 | Optionally, define names for up to five different crop types |
 | 3.2 | Define fractions of each cropt type. The sum of these fractions must add up to one |
 | 3.3 | Optionally, for each crop type define the fraction of households that only culativates this crop type. For example, if specialization of crop type 1 is set to 1, each household which cultivates crop type 1, will only cultviate this land-use type (these fractions are only used, if 3.5) land-use-types is set to "household-level-specialization") |
