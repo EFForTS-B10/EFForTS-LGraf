@@ -53,10 +53,7 @@ EFForTS-LGraf is structured in three submodels. First, the landscape and househo
 | 1.3.3 | If artifical.perlin has been chosen in 1.3 define the parameters for the perlin noise algorithm |
 | 1.4 | Set the maximum number of trials for loops. Depending on the parameterization, a low value may result in landscapes that do not represent the specified needs accurately. Larger numbers may increase simulation time. |
 | 1.5 | Define the number of households that are allowed to have a homebase on the same cell |
-| 1.6 | Choose a setup type: <ul>
-  <li>number-of-households: Define a total number of households in 1.7</li>
-  <li>number-of-villages: Define a total number of villages in 1.7</li>
-  <li>proportion-agriculture: Define the final proportion of fields in the landscape in 1.7</li></ul> |
+| 1.6 | Choose a setup type: <ul><li>number-of-households: Define a total number of households in 1.7</li><li>number-of-villages: Define a total number of villages in 1.7</li><li>proportion-agriculture: Define the final proportion of fields in the landscape in 1.7</li></ul> |
 | 1.8 | Define household parameters. Here you can define the area distribution of households in the landscape. You can define the type of distribution from which household areas are drawn during initialization. You can also define the parameters of these distributions. |
 | 1.9 | Define village parameters. Here you can define the area distribution of villages (accumulation of households) in the landscape. You can define the type of distribution from which village areas are drawn during initialization. You can also define the parameters of these distributions. |
 | 1.10 | Define the minimum distance between villages in cells. For certain parameterizations, this distance might not be realized. In such cases, a warning will appear that distances between villages are lower than specified. |
