@@ -9,6 +9,7 @@ This repository contains accompanying model files, data and analysis scripts for
 Salecker et al. (in revision). EFForTS-LGraf: A Landscape Generator for Creating Smallholder-Driven Land-Use Mosaics.
 
 This repository can be referenced via zenodo:
+
 [![DOI](https://zenodo.org/badge/183651584.svg)](https://zenodo.org/badge/latestdoi/183651584)
 
 
