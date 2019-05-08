@@ -23,14 +23,18 @@ The contents of this repository are structured as follows:
 * 4_Plots
   * Figures that are described in the accompanying publication.
 
+## Prerequisites
+
+In order to run EFForTS-LGraf, [NetLogo 6](http://ccl.northwestern.edu/netlogo/download.shtml) needs to be installed. We provide a portable version of NetLogo 6 within the repository. Because NetLogo is executed in a Java virtual machine, Java needs to be installed on the system as well. We recommend the [Oracle Java SE Development Kit 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html). 
+R and the R package [nlrx, version 0.2.0](https://github.com/ropensci/nlrx) are needed in order to reproduce model analyses. While the nlrx package might work without setting the Java system path explicitly, we recommend to make sure that JAVA_HOME points to the correct Java installation of the system.
+
 ## How to reproduce model analyses
 
-This repository contains files to reproduce model analyses from the accompanying paper.
+This repository contains R scripts to reproduce model analyses from the accompanying paper.
 However, due to copyright reasons we do not provide the land-use map raster, that has been used vor validation.
-We only include the calculated landscape metrics of the samples from this map that were used for validation purposes.
-
-Because we were interested in underlying mechanics and validity we had to simulate thousands of maps.
+We only include the calculated landscape metrics of the samples from this map that were used for validation purposes. Because we were interested in underlying mechanics and validity we had to simulate thousands of maps.
 These simulations might take a long time, depending on your machine. Thus, we provide .rds files with simulation results for all aproaches. 
+
 For all three aproaches, you can skip 'Step 2: Use nlrx to run simulations' and continue with restoring the simulations results from file in 'step 3' and only execute the postprocessing code sections.
 See sections below, for general application of EFForTS-LGraf, including two more general use cases that can be adapted to your needs more easily.
 
