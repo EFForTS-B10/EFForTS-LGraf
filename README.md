@@ -12,6 +12,7 @@ This repository can be referenced via zenodo:
 
 [![DOI](https://zenodo.org/badge/183651584.svg)](https://zenodo.org/badge/latestdoi/183651584)
 
+EFForTS-LGraf and further contents of this repository are published under the GNU General Public License v3.0. Detailed license information can be found in the LICENSE file.
 
 ## Content of repository
 

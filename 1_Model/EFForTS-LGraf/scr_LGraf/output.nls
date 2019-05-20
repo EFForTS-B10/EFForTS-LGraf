@@ -386,7 +386,8 @@ To write-road-shapefile
  ; Create shapefile:
  let roadlines gis:link-dataset links
  let output-filename (word foldername "/roads_polyline_layer")
-  
+ 
+ gis:load-coordinate-system "output/road-raster.prj"
  gis:store-dataset roadlines output-filename
   
 end
