@@ -110,7 +110,7 @@ The main output function of EFForTS-LGraf is executed by pressing the "Write out
 The output files are written to the specified subfolder/path `foldername`. In order to write output, the specified folder/path need to exist.
 
 The NetLogo GIS extension allows to map the NetLogo coordinates to a specified envelope of GIS coordinates.
-This can be done by activating the `apply-gis-envelope?` switch and specifying the boundary coordinates of the GIS envelope. Additionally, spatial output can be created with a specified projection system. In order to set the projection, activate the switch `apply-gis-projection?` and specify a "*.prj" file with projection definitions (see [NetLogo user manual](https://ccl.northwestern.edu/netlogo/docs/gis.html#gis:load-coordinate-system) for more information).
+This can be done by activating the `apply-gis-envelope?` switch and specifying the boundary coordinates of the GIS envelope. These coordinates are specified as a list (`[minimum-x maximum-x minimum-y maximum-y]`) in the input field `gis-envelope`. Additionally, spatial output can be created with a specified projection system. In order to set the projection, activate the switch `apply-gis-projection?` and specify a "*.prj" file with projection definitions in the input field `gis-projection` (see [NetLogo user manual](https://ccl.northwestern.edu/netlogo/docs/gis.html#gis:load-coordinate-system) for more information).
 
 
 ### Application example 1: Standalone
