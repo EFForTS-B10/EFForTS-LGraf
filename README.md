@@ -203,6 +203,7 @@ ggplot() +
   theme_nlm()
 
 ```
+<img src="4_Plots/readme_example_standalone.png" align="center" width="100%"/>
 
 ### Application example 2: nlrx
 
