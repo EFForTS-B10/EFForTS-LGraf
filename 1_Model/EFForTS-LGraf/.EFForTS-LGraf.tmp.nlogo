@@ -723,10 +723,10 @@ write-household-ids
 0
 
 BUTTON
-965
-510
-1140
-543
+795
+515
+940
+548
 NIL
 create-3D-map
 NIL
@@ -1378,10 +1378,10 @@ Write output files
 1
 
 TEXTBOX
-970
-495
-1055
-513
+800
+500
+885
+518
 Utility functions
 11
 0.0
@@ -1448,10 +1448,10 @@ NIL
 HORIZONTAL
 
 SWITCH
-795
-510
-940
-543
+1530
+605
+1675
+638
 write.param.file?
 write.param.file?
 1
@@ -1544,10 +1544,10 @@ TEXTBOX
 1
 
 TEXTBOX
-800
-480
-930
-510
+1535
+575
+1665
+605
 Create automatic Parameter Output File?
 11
 0.0
@@ -2215,9 +2215,9 @@ String
 
 SWITCH
 960
-285
+280
 1140
-318
+313
 apply-gis-envelope?
 apply-gis-envelope?
 0
@@ -2226,9 +2226,9 @@ apply-gis-envelope?
 
 INPUTBOX
 960
-315
+310
 1140
-375
+370
 gis-envelope
 [238244.58 243244.58 9789775.28 9794775.28]
 1
@@ -2237,9 +2237,9 @@ String
 
 SWITCH
 960
-380
+400
 1140
-413
+433
 apply-projection?
 apply-projection?
 0
@@ -2248,13 +2248,13 @@ apply-projection?
 
 INPUTBOX
 960
-410
+435
 1140
-470
+505
 projection-file
 input/LGraf_roadmaps/jambi1_road.prj
 1
-0
+1
 String
 
 @#$#@#$#@

@@ -2,6 +2,31 @@
 ; OUTPUT FUNCTIONS
 ;###################################################################################
 
+
+To write-output
+  
+  ; Set transformation if provided:
+  set-gis-envelope
+  
+  write-road-file
+  
+  if (write-household-ids = "only-first-households") [write-household-id-file]
+  if (write-household-ids = "layered-files") [write-household-id-file_layered]
+  
+  write-village-file
+  write-local-hh-file
+  write-transmigrant-hh-file
+  write-ownership-file
+  write-land-use-type-file
+  write-patch-id-file
+  write-forest-patch-file
+  write-hh-shapefile
+  write-road-shapefile
+
+End  
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 To write-road-file
   ;produces a raster file with 0 for non-road cells and 1 for road cells 
   
@@ -110,7 +135,7 @@ To write-local-hh-file
   ]
 
 ;  gis:store-dataset new-raster (word "model-output/" foldername "/road-raster.asc")
-  gis:store-dataset new-raster (word foldername "/local-hh-raster.asc")
+  gis:store-dataset new-raster (word foldername "/hh-type-1-raster.asc")
 
 End 
 
@@ -140,7 +165,7 @@ To write-transmigrant-hh-file
   ]
 
 ;  gis:store-dataset new-raster (word "model-output/" foldername "/road-raster.asc")
-  gis:store-dataset new-raster (word foldername "/transmigrant-hh-raster.asc")
+  gis:store-dataset new-raster (word foldername "/hh-type-2-raster.asc")
 
 End 
 
@@ -247,23 +272,6 @@ End
 
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To write-output
-  write-road-file
-  
-  if (write-household-ids = "only-first-households") [write-household-id-file]
-  if (write-household-ids = "layered-files") [write-household-id-file_layered]
-  
-  write-village-file
-  write-local-hh-file
-  write-transmigrant-hh-file
-  write-ownership-file
-  write-land-use-type-file
-  write-patch-id-file
-  write-forest-patch-file
-End  
-
-;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 to write-to-file
   ;examplary other output file which gives a list of turtles, positions and realized household area
   
@@ -350,46 +358,62 @@ End
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To write-road-shapefile
-  ; Kill all turtles:
-  ask turtles [die]
+
   ; Create turtles on all road cells:
-  
- ; List of road ids:
- let roadids remove-duplicates [p_road_nr] of patches with [p_road = 1]
+  ask patches with [p_road = 1] [sprout 1 [set hidden? false set homebase-road-nr "shp"]]
  
- foreach roadids
- [
-   i ->
-   ; Max and min coords:
-   let px0 min-one-of patches with [p_road_nr = i] [pxcor]
-   let px1 max-one-of patches with [p_road_nr = i] [pxcor]
-   let py0 min-one-of patches with [p_road_nr = i] [pycor]
-   let py1 max-one-of patches with [p_road_nr = i] [pycor]
-   
-   let ps (patch-set px0 px1 py0 py1)
-   
-   ask ps
-   [
-     sprout 1
-     [
-       set hidden? true
-     ]
-   ]
- ]
- 
- ; Link each turtle with its neighbor:
- ask turtles
- [
-   create-links-with other turtles-on patches with [p_road_nr = [p_road_nr] of myself]
- ]
+  ; Link each turtle with its neighbor:
+  ask turtles with [homebase-road-nr = "shp"] [create-links-with other turtles-on neighbors with [not member? self [my-out-links] of myself]]
   
- ; Create shapefile:
- let roadlines gis:link-dataset links
- let output-filename (word foldername "/roads_polyline_layer")
- 
- gis:load-coordinate-system "output/road-raster.prj"
- gis:store-dataset roadlines output-filename
+  ; Create shapefile:  
+  let roadlines gis:link-dataset links
+  let output-filename (word foldername "/roads_polyline_layer")
+  gis:store-dataset roadlines output-filename
   
+  ask turtles with [homebase-road-nr = "shp"] [die]
+  ask links[die]
+  
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To write-hh-shapefile
+  
+  ; We need to remove the patchset visited patches in order to write a shapefile:
+  ask turtles 
+  [
+    set visited-patches 0
+    ;set household-lut-patches 0
+    ;set household-patch-id-list 0
+  ]
+  
+  let hhs-shp gis:turtle-dataset turtles
+    
+  let output-filename (word foldername "/hh_points_layer")
+  gis:store-dataset hhs-shp output-filename
+ 
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+To set-gis-envelope
+  
+  ; First check if switch is turned on:
+  if (apply-projection?) 
+  [
+    if (not file-exists? projection-file) [user-message "projection-file does not exist!" stop]
+    gis:load-coordinate-system projection-file
+  ]
+  
+  ; First check if switch is turned on:
+  if (apply-gis-envelope?)
+  [
+    let gis-envelope-list read-from-string gis-envelope
+    
+    if (length gis-envelope-list != 4) [user-message "gis-envelope list needs to have four elements, e.g. [-180 180 -90 90]" stop]
+    
+    gis:set-transformation-ds gis-envelope-list (list min-pxcor max-pxcor min-pycor max-pycor)
+    
+  ]
 end
 
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

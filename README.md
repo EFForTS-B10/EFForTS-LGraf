@@ -88,6 +88,30 @@ You can replace &lt;roadmapid&gt; with any string, which can then be entered in 
 
 Five roadmap shapefiles from Jambi, Indonesia are already included in EFForTS-LGraf. These shapefiles can be loaded by entering `jambi1`, `jambi2`, `jambi3`, `jambi4` or `jambi5` under 1.3.1).
 
+### EFForTS-LGraf output function
+
+The main output function of EFForTS-LGraf is executed by pressing the "Write output" button on the GUI (IV. Paint & Output). This function will write the following spatial information to disk:
+
+| filename | type | content |
+|---|---|---| 
+| forest-patch-raster | ASCII raster | forest patch IDs |
+| hh_points_layer | ESRI Shapefile | Point features generated from household agents |
+| hh-tpye-1-raster | ASCII raster | counts of households with type 1 on each cell |
+| hh-tpye-2-raster | ASCII raster | counts of households with type 2 on each cell |
+| homebase-raster | ASCII raster | Household IDs on homebases of household agents |
+| homebase-raster_layerN | ASCII raster | Optional files for each layer of household homebases. Only relevant if `households-per-cell` > 1 and only created if `write-household-ids` is set to "layered files" |
+| land-use-type-raster | ASCII raster | crop type IDs |
+| ownership-raster | ASCII raster | Ownerhsip household IDs of fields |
+| patch-id-raster | ASCII raster | Patch IDs |
+| road-raster | ASCII raster | Roads cells |
+| roads_polyline_layer | ESRI Shapefile | Road cells as polyline shapefile |
+| village-raster | ASCII raster | Village IDs of homebase cells |
+
+The output files are written to the specified subfolder/path `foldername`. In order to write output, the specified folder/path need to exist.
+
+The NetLogo GIS extension allows to map the NetLogo coordinates to a specified envelope of GIS coordinates.
+This can be done by activating the `apply-gis-envelope?` switch and specifying the boundary coordinates of the GIS envelope. Additionally, spatial output can be created with a specified projection system. In order to set the projection, activate the switch `apply-gis-projection?` and specify a "*.prj" file with projection definitions (see [NetLogo user manual](https://ccl.northwestern.edu/netlogo/docs/gis.html#gis:load-coordinate-system) for more information).
+
 
 ### Application example 1: Standalone
 
@@ -152,9 +176,33 @@ EFForTS-LGraf provides several ways to investigate model output:
 * Plot
   * In box "V. Model output" several plots give you some information about expected and realized size distributions of households, villages, fields and inaccessible areas. You can also check if the defined crop proportions could be realized within the generated landscape.
 * Export
-  * In box "IV. Paint & Output" you can store the current landscape as ascii files by pressing the button `write output`. In order to define a location for output files, you need to enter an already existing subfolder directory in the `foldername` input field.
-  * Generated roads can also be exported as polyline shapefile (`write-road-shapefile`).
-  
+  * In box "IV. Paint & Output" you can store the current landscape as ascii/shp files by pressing the button `write output`. In order to define a location for output files, you need to enter an already existing subfolder directory in the `foldername` input field.
+
+We might want to write our map to disk and load it into R to perform further analysis.
+First, we need to set the projection and gis envelope of the landscape:
+* For example, we want to map the landscape to the envelope of the provided jambi1 road file. Thus, we define `gis-envelope` as `[238244 243244 9789775 9794775]` and activate `apply-gis-envelope?` 
+* Next, we use the projection file of the jambi1 road map to define the projection system. Thus, we define `gis-projection` as `input/LGraf_roadmaps/jambi1_road.prj` and activate `apply-gis-projection?`
+* In order to use the default output folder, we define `foldername` as `output` and press the button `write output`
+
+These files can now be loaded into R as spatial objects:
+
+``` r
+library(sf)
+library(raster)
+library(ggplot2)
+library(landscapetools)
+
+roads <- sf::read_sf("1_Model/EFForTS-LGraf/output/roads_polyline_layer.shp") 
+hhs <- sf::read_sf("1_Model/EFForTS-LGraf/output/hh_points_layer.shp") 
+lut <- as.data.frame(raster("1_Model/EFForTS-LGraf/output/land-use-type-raster.asc"), xy=TRUE)
+
+ggplot() +
+  geom_raster(data=lut, aes(x=x, y=y, fill=land.use.type.raster)) +
+  geom_sf(data=roads, color="white") +
+  geom_sf(data=hhs, color="red") +
+  theme_nlm()
+
+```
 
 ### Application example 2: nlrx
 
