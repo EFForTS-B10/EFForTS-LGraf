@@ -115,6 +115,9 @@ This can be done by activating the `apply-gis-envelope?` switch and specifying t
 
 ### Application example 1: Standalone
 
+
+#### Step 1: Prerequisites
+
 In order to use EFForTS-LGraf as a standalone tool, you only need to adjust the parameters to your needs (also see table above).
 Here we will show you a simple example of how this can be done.
 
@@ -125,6 +128,8 @@ Lets imagine we performed a household survey of smallholder farmers and explicit
 From remote sensing we estimate:
 * road density/road length within study area
 * field area of villages
+
+#### Step 2: Parameterize and execute road and household setup
 
 <img src="1_Model/EFForTS-LGraf/EFForTS-LGraf_interface_I.png" align="center" width="100%"/>
 
@@ -143,6 +148,8 @@ We now want to create maps along an intensity gradient with similar characterist
 Once all these parameters are porperly defined, press the button "I. Setup landscape and households" to execute model initialization.
 This procedure will setup the initial landscape with roads, villages, households and inaccessible areas as specified.
 
+#### Step 3: Parameterize and execute field establishment
+
 <img src="1_Model/EFForTS-LGraf/EFForTS-LGraf_interface_II.png" align="center" width="100%"/>
 
 During model initialization, households have been created with a specific household area, drawn from the household area distribution.
@@ -155,11 +162,15 @@ During the field establishment procedure, households will realize this household
 
 Once all these parameters are porperly defined, press the button "II. Establish fields" to execute field establishment.
 
+#### Step 4: Parameterize and execute crop distribution
+
 <img src="1_Model/EFForTS-LGraf/EFForTS-LGraf_interface_III.png" align="center" width="100%"/>
 
 * Finally, from our survey we estimated a proportion of 50% rubber and 50% oilpalm on fields. We set the parameters accordingly (3.1, 3.2). Because we do not want to consider any specialization, we set the `land-use-types` parameter to `landscape-level-fraction` mode, which just distributes the fractions to the fields as accurately as possible and does not consider any specialization levels.
 
 Once all these parameters are properly defined, press the button "III. Distribute crops" to distribute crops to all fields in the landscape.
+
+#### Step 5: Investigate landscape and output
 
 <img src="1_Model/EFForTS-LGraf/EFForTS-LGraf_interface_output.png" align="center" width="100%"/>
 
@@ -177,6 +188,8 @@ EFForTS-LGraf provides several ways to investigate model output:
   * In box "V. Model output" several plots give you some information about expected and realized size distributions of households, villages, fields and inaccessible areas. You can also check if the defined crop proportions could be realized within the generated landscape.
 * Export
   * In box "IV. Paint & Output" you can store the current landscape as ascii/shp files by pressing the button `write output`. In order to define a location for output files, you need to enter an already existing subfolder directory in the `foldername` input field.
+
+#### Step 6: Export output and load spatial data into R
 
 We might want to write our map to disk and load it into R to perform further analysis.
 First, we need to set the projection and gis envelope of the landscape:
@@ -203,7 +216,7 @@ ggplot() +
   theme_nlm()
 
 ```
-<img src="4_Plots/readme_example_standalone.png" align="center" width="100%"/>
+<img src="4_Plots/readme_example_standalone.png" align="center" width="80%"/>
 
 ### Application example 2: nlrx
 
