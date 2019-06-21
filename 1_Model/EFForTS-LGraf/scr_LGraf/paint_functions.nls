@@ -217,26 +217,30 @@ to create-3D-map
   paint.default.map "landuse-type"
 
  ;;Draw the roadlines:
-  if road.algorithm = "real.shapefile"
-  [
-    gis:set-drawing-color grey
-    gis:draw road-shapefile 1  ;draw the whole road-shapefile in one color
-  ]
+ ; if road.algorithm = "real.shapefile"
+ ; [
+ ;   gis:set-drawing-color grey
+ ;   gis:draw road-shapefile 1  ;draw the whole road-shapefile in one color
+ ; ]
 
   ;p_landuse 1000 --> plantation
   ;p_landuse 1 --> forest
   ;p_landuse 3 --> agriculture
   ;  --> p_land-use-type (1, 2, ..., n)
-  spawn-forests 25
-  spawn-plantations 25
-  spawn-luts 25
+  let nobj 25  ;25
+  spawn-forests nobj
+  spawn-plantations nobj
+  spawn-luts nobj
 
   ;; Remove trees from streets:
-  ask patches with [p_road = 1][ask turtles-here [die]]
+  ask patches with [p_road = 1][ask turtles-here [die] set pcolor grey]
 
-
+  
   spawn-settlements 8
 
+    ask patches [set pcolor 32]
+  clear-drawing
+  
   display
 end
 
@@ -279,44 +283,54 @@ end
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 to spawn-luts [n]
 
-  ask patches with [p_landuse = 3]
+  ;; Go by patch id:
+  let field-ids remove-duplicates [p_id] of patches
+  
+  foreach field-ids
   [
-    if (p_landuse-type = 2) ;;Rubber plantation
+    ? ->
+    let size-mod 0.5 + random-float 1
+    ask patches with [p_id = ? and p_landuse = 3]
     [
-      sprout n
+      if (p_landuse-type = 2) ;;Rubber plantation
       [
-        set shape "lut_ru"
-        get-color-and-size
-        set color 44
+        sprout n
+        [
+          set shape "lut_ru"
+          get-color-and-size
+          set size size * size-mod
+          set color 44
+        ]
+        ;;Distribute the trees systematically:
+        systematic-wiggle
       ]
-      ;;Distribute the trees systematically:
-      systematic-wiggle
-    ]
 
-    if (p_landuse-type = 1) ;;OP Plantation
-    [
-      sprout n
+      if (p_landuse-type = 1) ;;OP Plantation
       [
-        set shape "lut_op"
-        get-color-and-size
-        set color 24
+        sprout n
+        [
+          set shape "lut_op"
+          get-color-and-size
+          set size size * size-mod
+          set color 24
+        ]
+        ;;Distribute the trees systematically:
+        systematic-wiggle
       ]
-      ;;Distribute the trees systematically:
-      systematic-wiggle
-    ]
-
-    if (p_landuse-type = 3) ;; JUngle Rubber
-    [
-      sprout n
+      
+      if (p_landuse-type = 3) ;; JUngle Rubber
       [
-        set shape one-of (list "lut_ru" "lut_forest")
-        get-color-and-size
-        if (shape != "lut_forest") [set color pcolor]
-        random-wiggle
+        sprout n
+        [
+          set shape one-of (list "lut_ru" "lut_forest")
+          get-color-and-size
+          if (shape != "lut_forest") [set color pcolor]
+          random-wiggle
+        ]
       ]
+      
+      set pcolor 33
     ]
-
-    set pcolor 33
   ]
 
 end
@@ -388,4 +402,57 @@ to get-color-and-size
   if (shape = "lut_ru") [set color 55 set size 0.4]
   if (shape = "lut_settlement") [set color one-of (list 27 28) set size 0.4]
 
+end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+to setup-movie
+  
+  create-turtles 1 [set household-size "cam" setxy 50 0 set heading 0 set hidden? true set size 20]
+  let cam one-of turtles with [household-size = "cam"]
+  follow cam
+  
+end
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+to record-movie
+  
+  let cam one-of turtles with [household-size = "cam"]
+  ;; Now move trough the landscape and record screenshots:
+  
+  ;; We start with landscape in total
+  ;; Then we zoom in at the edge 
+  let i 0
+  repeat (180)
+  [
+    ask cam
+    [
+      set size size - 0.1
+    ]
+    follow cam
+    export-view (word "output/movie/lgraf_movie_" but-first (word (10000 + i)) ".png")
+    set i (i + 1)
+  ]
+  
+  ;; Now we fly over the village:
+  repeat (720)
+  [
+    ask cam
+    [
+      rt 0.5
+    ]
+    export-view (word "output/movie/lgraf_movie_" but-first (word (10000 + i)) ".png")
+    set i (i + 1)
+  ]
+  
+  repeat (180)
+  [
+    ask cam
+    [
+      set size size + 0.1
+    ]
+    follow cam
+    export-view (word "output/movie/lgraf_movie_" but-first (word (10000 + i)) ".png")
+    set i (i + 1)
+  ]
+  
+  
 end

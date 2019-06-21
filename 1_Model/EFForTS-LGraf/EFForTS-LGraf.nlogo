@@ -393,7 +393,7 @@ INPUTBOX
 360
 375
 number-of-households
-245.0
+242.0
 1
 0
 Number
@@ -588,7 +588,7 @@ CHOOSER
 road.algorithm
 road.algorithm
 "artificial.graffe" "artificial.perlin" "real.shapefile"
-1
+2
 
 INPUTBOX
 540
@@ -596,7 +596,7 @@ INPUTBOX
 710
 585
 inaccessible-area-fraction
-0.1
+0.0
 1
 0
 Number
@@ -756,7 +756,7 @@ INPUTBOX
 130
 1090
 LUT-1-fraction
-0.5
+0.4
 1
 0
 Number
@@ -767,7 +767,7 @@ INPUTBOX
 210
 1090
 LUT-2-fraction
-0.5
+0.4
 1
 0
 Number
@@ -778,7 +778,7 @@ INPUTBOX
 290
 1090
 LUT-3-fraction
-0.0
+0.2
 1
 0
 Number
@@ -1024,7 +1024,7 @@ CHOOSER
 LUT-fill-up
 LUT-fill-up
 "LUT-1-fraction" "LUT-2-fraction" "LUT-3-fraction" "LUT-4-fraction" "LUT-5-fraction"
-3
+0
 
 TEXTBOX
 465
@@ -1119,7 +1119,7 @@ perlin-octaves
 perlin-octaves
 1
 12
-2.0
+3.0
 1
 1
 NIL
@@ -1681,7 +1681,7 @@ INPUTBOX
 357
 540
 vlg-area-mean
-50.0
+10.0
 1
 0
 Number
@@ -1703,7 +1703,7 @@ INPUTBOX
 460
 375
 number-of-villages
-16.0
+77.0
 1
 0
 Number
@@ -2208,7 +2208,7 @@ INPUTBOX
 395
 285
 road-map-id
-jambi1
+jambi3
 1
 0
 String

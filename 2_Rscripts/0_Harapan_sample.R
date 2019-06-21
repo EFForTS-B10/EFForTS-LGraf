@@ -201,3 +201,50 @@ saveRDS(lu_harapan_sample, file.path("3_Data/lu_harapan_sample_sobol.rds"))
 ## Sample landscapes for genetic algorithm validation (3 samples) from the harapan map:
 lu_harapan_sample <- sampleLandscapes(lu_harapan, 446, 3, 50, 1:3, allow.overlap = FALSE)
 saveRDS(lu_harapan_sample, file.path("3_Data/lu_harapan_sample_genalg.rds"))
+
+
+
+
+################
+## Create satellite image of Lantak Seribu
+library(raster)
+library(sf)
+library(ggplot2)
+
+## Load images:
+B02 <- raster("D:/owncloud/CRC/10_Geodata/GIS/sentinel/S2B_MSIL1C_20181117T032019_N0207_R118_T47MRT_20181117T065444.SAFE/GRANULE/L1C_T47MRT_A008867_20181117T033710/IMG_DATA/T47MRT_20181117T032019_B02.jp2")
+B03 <- raster("D:/owncloud/CRC/10_Geodata/GIS/sentinel/S2B_MSIL1C_20181117T032019_N0207_R118_T47MRT_20181117T065444.SAFE/GRANULE/L1C_T47MRT_A008867_20181117T033710/IMG_DATA/T47MRT_20181117T032019_B03.jp2")
+B04 <- raster("D:/owncloud/CRC/10_Geodata/GIS/sentinel/S2B_MSIL1C_20181117T032019_N0207_R118_T47MRT_20181117T065444.SAFE/GRANULE/L1C_T47MRT_A008867_20181117T033710/IMG_DATA/T47MRT_20181117T032019_B04.jp2")
+t <- stack(B02, B03, B04)
+
+## Original extent:
+extent(B02)
+xmin <- 799980 
+xmax <- 909780 
+ymin <- 9690220 
+ymax <- 9800020 
+
+## New extent:
+xmin_cr <- xmin + ((xmax - xmin) * 0.728)
+xmax_cr <- xmax - ((xmax - xmin) * 0.225)
+ymin_cr <- ymin + ((ymax - ymin) * 0.57)
+ymax_cr <- ymax - ((ymax - ymin) * 0.387)
+
+## Crop:
+t_cr <- crop(t, extent(xmin_cr,xmax_cr,ymin_cr,ymax_cr))
+
+## Road file:
+roads <- st_read("1_Model/EFForTS-LGraf/input/LGraf_roadmaps/jambi3_road.shp") %>% 
+  dplyr::select(geometry) %>% 
+  sf::st_transform(raster::crs(B02)@projargs)
+
+## Plot:
+tiff("4_Plots/LantakSeribu.tiff", height = 1200, width=1315, pointsize = 14)
+plotRGB(t_cr,
+        r = 3, g = 2, b = 1,
+        #scale=255,
+        stretch="lin",
+        axes=FALSE)
+
+plot(roads, add=TRUE, col="gold", lwd=2)
+dev.off()
