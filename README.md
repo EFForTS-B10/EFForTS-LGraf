@@ -10,7 +10,7 @@ Salecker et al. (in revision). EFForTS-LGraf: A Landscape Generator for Creating
 
 This repository can be referenced via zenodo:
 
-[![DOI](https://zenodo.org/badge/183651584.svg)](https://zenodo.org/badge/latestdoi/183651584)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3086342.svg)](https://doi.org/10.5281/zenodo.3086342)
 
 EFForTS-LGraf and further contents of this repository are published under the GNU General Public License v3.0. Detailed license information can be found in the LICENSE file.
 
