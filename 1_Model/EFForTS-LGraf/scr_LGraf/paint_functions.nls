@@ -25,7 +25,15 @@ to p.cells.variable
   [
     ask patches
     [
-      set pcolor scale-color-viridis runresult paint-cells-var var_min var_max
+      
+      set pcolor ifelse-value (runresult paint-cells-var = -1) 
+      [
+        grey
+      ]
+      [
+        scale-color-viridis runresult paint-cells-var var_min var_max
+      ]
+      
     ]
   ]
   
@@ -37,7 +45,7 @@ to p.cells.additions
   ask patches
   [
     ;; Paint matrix:
-    if (p_landuse = 1) [set pcolor 5]
+    if default.maps != "forestcluster" [if (p_landuse = 1) [set pcolor 5]]
     ;; Paint inaccessible area
     if (p_landuse = 1000) [set pcolor 35]
     ;; Add roads:

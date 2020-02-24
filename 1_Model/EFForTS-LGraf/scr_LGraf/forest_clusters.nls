@@ -22,11 +22,60 @@ To calculate-forest-clusters
 End  
   
   
-To-report find-forest-clusters
-  ;go ordered through all patches
-  ;if a patch is forest and does not belong to a cluster yet, start a new cluster
-  ;reports number of forest patches
-  
+;To-report find-forest-clusters
+;  ;go ordered through all patches
+;  ;if a patch is forest and does not belong to a cluster yet, start a new cluster
+;  ;reports number of forest patches
+;  
+;  ask patches
+;  [
+;   set p_forestcluster_id -1
+;  ]
+;  
+;  let counterx 0
+;  let countery 0
+;  
+;  let clustercounter 0
+;  
+;  while [counterx <= max-pxcor]
+;  [
+;    set countery 0
+;    while [countery <= max-pycor]
+;    [
+;     ask patch counterx countery
+;     [ 
+;       if p_forestcluster_id = -1 and p_landuse = 1  and p_road = 0;forest patch that does not belong to a cluster yet: start a new cluster here
+;       [
+;        set p_forestcluster_id clustercounter 
+;        grow-cluster clustercounter
+;        set clustercounter clustercounter + 1
+;       ]
+;     ]
+;     ;print (list counterx countery)
+;  
+;     set countery countery + 1 
+;    ]
+;    
+;    set counterx counterx + 1
+;  ]
+; 
+; report clustercounter  
+;
+;End 
+
+;To grow-cluster [clusternumber]  
+;  ; patch procedure
+;  
+;  ask neighbors4 with [(p_forestcluster_id = -1) and (p_landuse = 1) and (p_road = 0)]
+;  [ 
+;    set p_forestcluster_id clusternumber
+;    grow-cluster clusternumber 
+;  ]
+;  
+;End
+
+To-report find-forest-clusters                ;alternative version by Dominik
+  ;iterate over all patches, if a patch is forest give it the forestcluster id of its left or downward neighbour, if there is no neighbour with an id start a new cluster
   ask patches
   [
    set p_forestcluster_id -1
@@ -37,41 +86,63 @@ To-report find-forest-clusters
   
   let clustercounter 0
   
-  while [counterx <= max-pxcor]
+    while [counterx <= max-pxcor]
   [
     set countery 0
     while [countery <= max-pycor]
     [
      ask patch counterx countery
-     [ 
-       if p_forestcluster_id = -1 and p_landuse = 1  and p_road = 0;forest patch that does not belong to a cluster yet: start a new cluster here
-       [
-        set p_forestcluster_id clustercounter 
-        grow-cluster clustercounter
-        set clustercounter clustercounter + 1
-       ]
+     [
+      if p_forestcluster_id = -1 and p_landuse = 1  and p_road = 0  
+      [
+          ifelse all? neighbors4 [p_forestcluster_id = -1]
+          [
+            set p_forestcluster_id clustercounter
+            set clustercounter clustercounter + 1
+          ]
+          [
+            set p_forestcluster_id [p_forestcluster_id] of one-of neighbors4 with [p_forestcluster_id != -1]
+          ]
+      ]
      ]
-     ;print (list counterx countery)
-  
      set countery countery + 1 
     ]
     
     set counterx counterx + 1
   ]
- 
- report clustercounter  
-
-End 
-
-To grow-cluster [clusternumber]  
-  ; patch procedure
   
-  ask neighbors4 with [(p_forestcluster_id = -1) and (p_landuse = 1) and (p_road = 0)]
-  [ 
-    set p_forestcluster_id clusternumber
-    grow-cluster clusternumber 
+  ;problem is that there are patches without left or downward neighbours with an id that are still part of an already existing cluster
+  ;now there are clusters which are one unity but are identified as more than one cluster with more than one id
+  ;in the following as long as there are neighbouring patches with differing ids all patches with the higher forestcluster id are assigned the forestcluster id of the patch with the smaller forestcluster id
+  
+  let clusternumberbig 0
+  let clusternumbersmall 0
+    
+  while [any? patches with [any? neighbors4 with [p_forestcluster_id < [p_forestcluster_id] of myself and p_forestcluster_id != -1]]]
+  [
+    ask one-of patches with [any? neighbors4 with [p_forestcluster_id < [p_forestcluster_id] of myself and p_forestcluster_id != -1]]
+    [
+      set clusternumbersmall [p_forestcluster_id] of min-one-of neighbors4 with [p_forestcluster_id != -1] [p_forestcluster_id] 
+      set clusternumberbig p_forestcluster_id
+    ]
+    ask patches with [p_forestcluster_id = clusternumberbig]
+    [
+      set p_forestcluster_id clusternumbersmall
+    ]
+  ] 
+
+  let clusternumberlist sort remove-duplicates [p_forestcluster_id] of patches with [p_forestcluster_id != -1]
+
+  ;number clusters continuously starting at 0  
+  foreach clusternumberlist [clusternumber -> 
+    ask patches with [p_forestcluster_id = clusternumber]
+    [
+      set p_forestcluster_id position clusternumber clusternumberlist
+    ]
   ]
   
+  set clustercounter length clusternumberlist
+  report clustercounter
 End
 
 To-report calculate-forest-cluster-sizes [no-of-clusters]
@@ -99,7 +170,7 @@ End
 
 to find-forest-cluster-for-road-patches
   
-  ask patches with [p_road = 1 and item 0 p_homebase = 0]  ;  p_homebase is now list
+  ask patches with [p_road = 1 and p_landuse = 1 and item 0 p_homebase = 0]  ;  p_homebase is now list
   [
     set p_forestcluster_id [p_forestcluster_id] of min-one-of other patches with [p_forestcluster_id != -1] [distance myself]
   ]

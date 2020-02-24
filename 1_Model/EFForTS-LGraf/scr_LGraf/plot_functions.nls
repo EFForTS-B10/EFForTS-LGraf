@@ -32,7 +32,7 @@ to plot-village-size-distribution
   set-current-plot "Village size distribution"
   set-current-plot-pen "pen-1"
   set-plot-x-range 0 (max vlg-sizes + 1)
-  set-plot-y-range 0 (precision (4 / length vlg-sizes) 2)
+  set-plot-y-range 0 (precision (4 / length vlg-sizes) 4)
   
   let actual-freq-of-vlg-sizes n-values (max vlg-sizes + 1) [0]
   foreach vlg-sizes

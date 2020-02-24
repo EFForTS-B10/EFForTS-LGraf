@@ -482,6 +482,14 @@ To load.params [params]
   
   
 end
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+to screenshot [tag]
   
+  let screenshot-filename (word "screenshot_" tag ".png")
+  export-view screenshot-filename
+  
+end
   
   

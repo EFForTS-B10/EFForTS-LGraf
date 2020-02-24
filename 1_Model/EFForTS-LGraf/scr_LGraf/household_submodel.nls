@@ -13,6 +13,12 @@ To create-and-place-villages
   ;; Define the homebases, for sequential option: only on the last established road; for all other options: all road patches outside plantations
   let potential-homebases patches with [p_road = 1 and p_landuse != 1000] ;road patches outside large scale plantations
   
+  if (count potential-homebases * households-per-cell) < length household-sizes
+  [
+    print "WARNING Too many households for current number of households!"
+    stop
+  ]
+  
   let village_id 1  ; 
   
   ;; Determine proportion of transmigrants in village and report a list

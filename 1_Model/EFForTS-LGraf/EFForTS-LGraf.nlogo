@@ -175,7 +175,6 @@ To setup
   ;; Reset the tick counter
   reset-ticks
 
-  print "Setup successful"
 End
 
 ;###################################################################################
@@ -251,6 +250,7 @@ To assign-land-uses
 
   ;; Calculate forestcluster values and write the forestcluster Ids into p_id of patches:
   calculate-forest-clusters
+
   convert-forestclusterid-to-pid
 
 End
@@ -393,7 +393,7 @@ INPUTBOX
 360
 375
 number-of-households
-242.0
+300.0
 1
 0
 Number
@@ -588,7 +588,7 @@ CHOOSER
 road.algorithm
 road.algorithm
 "artificial.graffe" "artificial.perlin" "real.shapefile"
-2
+1
 
 INPUTBOX
 540
@@ -596,7 +596,7 @@ INPUTBOX
 710
 585
 inaccessible-area-fraction
-0.0
+0.05
 1
 0
 Number
@@ -683,7 +683,7 @@ households-per-cell
 households-per-cell
 1
 10
-3.0
+10.0
 1
 1
 NIL
@@ -1159,7 +1159,7 @@ CHOOSER
 paint-cells
 paint-cells
 "landuse" "landuse-type" "id" "owner" "forestcluster_id"
-1
+2
 
 SWITCH
 795
@@ -1229,7 +1229,7 @@ CHOOSER
 default.maps
 default.maps
 "forest-non-forest" "landuse" "landuse-type" "field-patches" "household-patches" "forestcluster"
-4
+3
 
 BUTTON
 795
@@ -1341,7 +1341,7 @@ proportion-agricultural-area
 proportion-agricultural-area
 0
 1
-0.3
+0.3657
 0.01
 1
 NIL
@@ -1639,7 +1639,7 @@ min-distance
 min-distance
 0
 25
-10.0
+15.0
 1
 1
 NIL
@@ -1653,7 +1653,7 @@ CHOOSER
 setup-model
 setup-model
 "number-of-households" "number-of-villages" "agricultural-area"
-2
+0
 
 TEXTBOX
 25
@@ -1703,7 +1703,7 @@ INPUTBOX
 460
 375
 number-of-villages
-77.0
+93.0
 1
 0
 Number
@@ -2660,7 +2660,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.3
+NetLogo 6.1.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
