@@ -41,7 +41,6 @@ We only include the calculated landscape metrics of the samples from this map th
 These simulations might take a long time, depending on your machine. Thus, we provide .rds files with simulation results for all aproaches. 
 
 For all three aproaches, you can skip 'Step 2: Use nlrx to run simulations' and continue with restoring the simulations results from file in 'step 3' and only execute the postprocessing code sections.
-See sections below, for general application of EFForTS-LGraf, including two more general use cases that can be adapted to your needs more easily.
 
 ## How to use EFForTS-LGraf
 
