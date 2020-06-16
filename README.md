@@ -44,7 +44,7 @@ For all three aproaches, you can skip 'Step 2: Use nlrx to run simulations' and 
 
 ## How to use EFForTS-LGraf
 
-We have created a detailed manual for EFForTS-LGraf which is hosted at [github](https://github.com/nldoc/EFForTS-LGraf.bookdown) and can be viewed via [https://nldoc.github.io/EFForTS-LGraf.bookdown/](https://nldoc.github.io/EFForTS-LGraf.bookdown/).
+We have created a detailed manual for EFForTS-LGraf which is hosted at [github](https://github.com/efforts-b10/EFForTS-LGraf.bookdown) and can be viewed via [https://nldoc.github.io/EFForTS-LGraf.bookdown/](https://efforts-b10.github.io/EFForTS-LGraf.bookdown/).
 
 The manual contains detailed descriptions of model installation, parameters and functions.
 It contains several use cases and application examples. There are also some examples which guide you trough automated map creation via the [nlrx package](https://github.com/ropensci/nlrx).
